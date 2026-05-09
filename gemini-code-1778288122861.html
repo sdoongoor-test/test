@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Feud: Pro Version</title>
+    <style>
+        :root {
+            --feud-blue: #003399;
+            --feud-gold: #ffcc00;
+            --feud-dark: #001a4d;
+            --strike-red: #ff0000;
+            --hover-blue: #1a53ff;
+        }
+
+        body {
+            font-family: 'Arial Black', sans-serif;
+            background-color: var(--feud-dark);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 15px;
+        }
+
+        .score-display {
+            text-align: left;
+            font-size: 1rem;
+            color: var(--feud-gold);
+        }
+
+        .round-score {
+            font-size: 2.5rem;
+            background: #000;
+            border: 3px solid var(--feud-gold);
+            padding: 5px 20px;
+            border-radius: 10px;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .strike-bar { display: flex; gap: 8px; align-items: center;}
+        .strike-box {
+            width: 45px; height: 45px; border: 2px solid #555;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; color: var(--strike-red); background: #111; border-radius: 5px;
+        }
+        .strike-active { border-color: var(--strike-red); box-shadow: 0 0 15px var(--strike-red); }
+
+        .question-box {
+            background: linear-gradient(to bottom, #333, #000);
+            border: 4px solid var(--feud-gold);
+            padding: 20px; border-radius: 15px; margin-bottom: 20px;
+            text-align: center; width: 90%; max-width: 600px;
+        }
+
+        .board { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 500px; margin-bottom: 20px; }
+        
+        .slot {
+            height: 60px; background-color: var(--feud-blue); border: 2px solid white;
+            display: flex; align-items: center; position: relative; border-radius: 8px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .slot.drag-over {
+            background-color: var(--hover-blue);
+            transform: scale(1.02);
+            border-color: var(--feud-gold);
+        }
+
+        .slot::before {
+            content: attr(data-rank); width: 45px; text-align: center;
+            color: var(--feud-gold); font-size: 1.5rem; border-right: 1px solid rgba(255,255,255,0.3); margin-right: 10px;
+        }
+
+        .slot::after {
+            content: attr(data-pts) " PTS"; position: absolute; right: 15px;
+            font-size: 0.8rem; color: rgba(255,255,255,0.4);
+        }
+
+        .slot.locked { background: linear-gradient(90deg, #b38f00, #ffd700); pointer-events: none; }
+        .slot.locked::after { color: #000; font-weight: bold; }
+
+        .answer-pool {
+            display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+            padding: 20px; background: rgba(255,255,255,0.05); border-radius: 15px;
+            width: 100%; max-width: 600px; min-height: 100px; margin-bottom: 20px;
+        }
+
+        .answer-tile {
+            background: linear-gradient(to bottom, #fff, #ddd); color: #000;
+            padding: 12px 18px; border-radius: 6px; cursor: grab; font-weight: bold; 
+            text-transform: uppercase; box-shadow: 0 4px #444; user-select: none;
+        }
+
+        .slot .answer-tile { flex-grow: 1; margin-right: 60px; box-shadow: none; height: 75%; display: flex; align-items: center; justify-content: center; }
+
+        .controls { display: flex; gap: 20px; }
+        button {
+            padding: 15px 40px; font-size: 1.2rem; background-color: var(--feud-gold);
+            color: var(--feud-dark); border: none; border-radius: 50px; cursor: pointer; font-weight: 900;
+        }
+        #restart-btn { background-color: #555; color: white; }
+
+        #big-strike {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 18rem; color: var(--strike-red); display: none; z-index: 100; pointer-events: none;
+            -webkit-text-stroke: 6px white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-header">
+        <div class="score-display">
+            TOTAL: <span id="game-total">0</span><br>
+            <div class="round-score" id="round-score">0</div>
+        </div>
+        <div class="strike-bar">
+            <div class="strike-box" id="s1"></div>
+            <div class="strike-box" id="s2"></div>
+            <div class="strike-box" id="s3"></div>
+        </div>
+    </div>
+
+    <div class="question-box"><h2 id="question-text">Loading...</h2></div>
+
+    <div class="board" id="game-board">
+        <div class="slot" data-rank="1" ondrop="drop(event)" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)"></div>
+        <div class="slot" data-rank="2" ondrop="drop(event)" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)"></div>
+        <div class="slot" data-rank="3" ondrop="drop(event)" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)"></div>
+        <div class="slot" data-rank="4" ondrop="drop(event)" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)"></div>
+        <div class="slot" data-rank="5" ondrop="drop(event)" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)"></div>
+    </div>
+
+    <div class="answer-pool" id="pool" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+    <div class="controls">
+        <button id="lock-btn" onclick="lockItIn()">LOCK IT IN!</button>
+        <button id="restart-btn" onclick="nextRound()">NEXT SURVEY</button>
+    </div>
+
+    <div id="big-strike">X</div>
+
+    <script>
+        const database = [
+            { q: "Name something a cat does all day.", a: ["Sleep", "Eat", "Clean Itself", "Meow", "Chase Laser"], p: [52, 18, 14, 9, 7] },
+            { q: "Name a fruit people usually buy by the bunch.", a: ["Bananas", "Grapes", "Cherries", "Spinach", "Asparagus"], p: [55, 25, 10, 6, 4] },
+            { q: "Name a place you'd hate to be stuck in an elevator with a cat.", a: ["Work", "Date", "Airport", "Apartment", "Hospital"], p: [40, 25, 15, 12, 8] },
+            { q: "Name something you'd find in a magician's hat.", a: ["Rabbit", "Wand", "Flowers", "Cards", "Coin"], p: [45, 20, 15, 12, 8] }
+        ];
+
+        let currentQuestion = {};
+        let strikes = 0;
+        let roundScore = 0;
+        let totalGameScore = 0;
+
+        function nextRound() {
+            strikes = 0;
+            roundScore = 0;
+            updateScoreDisplays();
+            
+            document.querySelectorAll('.strike-box').forEach(s => { s.innerText = ''; s.classList.remove('strike-active'); });
+            document.getElementById('lock-btn').disabled = false;
+            
+            currentQuestion = database[Math.floor(Math.random() * database.length)];
+            document.getElementById('question-text').innerText = `"${currentQuestion.q}"`;
+            
+            const slots = document.querySelectorAll('.slot');
+            slots.forEach((slot, i) => {
+                slot.classList.remove('locked', 'drag-over');
+                slot.innerHTML = '';
+                slot.setAttribute('data-pts', currentQuestion.p[i]);
+                slot.setAttribute('data-correct', currentQuestion.a[i]);
+            });
+
+            const pool = document.getElementById('pool');
+            pool.innerHTML = '';
+            let shuffled = [...currentQuestion.a].sort(() => Math.random() - 0.5);
+            shuffled.forEach((ans, i) => {
+                const div = document.createElement('div');
+                div.className = 'answer-tile';
+                div.draggable = true;
+                div.id = 'ans-' + Math.random().toString(36).substr(2, 9);
+                div.innerText = ans;
+                div.setAttribute('data-val', ans);
+                div.ondragstart = (e) => e.dataTransfer.setData("text", e.target.id);
+                pool.appendChild(div);
+            });
+        }
+
+        function updateScoreDisplays() {
+            document.getElementById('round-score').innerText = roundScore;
+            document.getElementById('game-total').innerText = totalGameScore;
+        }
+
+        function dragEnter(ev) { ev.currentTarget.classList.add('drag-over'); }
+        function dragLeave(ev) { ev.currentTarget.classList.remove('drag-over'); }
+        function allowDrop(ev) { ev.preventDefault(); }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const id = ev.dataTransfer.getData("text");
+            const draggedElement = document.getElementById(id);
+            let target = ev.currentTarget;
+            
+            if (target.classList.contains('slot')) target.classList.remove('drag-over');
+
+            if (target.classList.contains('slot') && !target.classList.contains('locked')) {
+                if (target.children.length > 0) document.getElementById('pool').appendChild(target.children[0]);
+                target.appendChild(draggedElement);
+            } else {
+                document.getElementById('pool').appendChild(draggedElement);
+            }
+        }
+
+        function lockItIn() {
+            const slots = document.querySelectorAll('.slot');
+            let mistakesFound = false;
+            let filled = 0;
+
+            slots.forEach((slot, index) => {
+                const tile = slot.children[0];
+                if (!tile) return;
+                filled++;
+
+                if (!slot.classList.contains('locked')) {
+                    if (tile.getAttribute('data-val') === slot.getAttribute('data-correct')) {
+                        slot.classList.add('locked');
+                        tile.draggable = false;
+                        
+                        let pts = parseInt(slot.getAttribute('data-pts'));
+                        roundScore += pts;
+                        totalGameScore += pts;
+                    } else {
+                        mistakesFound = true;
+                    }
+                }
+            });
+
+            updateScoreDisplays();
+
+            if (filled < 5) { alert("Survey says: Fill all 5 slots!"); return; }
+
+            if (mistakesFound) {
+                strikes++;
+                if(strikes <= 3) {
+                    const sBox = document.getElementById('s' + strikes);
+                    sBox.innerText = 'X';
+                    sBox.classList.add('strike-active');
+                }
+                document.getElementById('big-strike').style.display = 'block';
+                setTimeout(() => document.getElementById('big-strike').style.display = 'none', 800);
+
+                if (strikes >= 3) {
+                    document.getElementById('lock-btn').disabled = true;
+                    alert("STRIKE 3! Game Over. Round score: " + roundScore);
+                }
+            } else if (Array.from(slots).every(s => s.classList.contains('locked'))) {
+                alert("SURVEY SAYS: PERFECT!");
+            }
+        }
+
+        nextRound();
+    </script>
+</body>
+</html>
