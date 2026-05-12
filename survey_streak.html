@@ -77,7 +77,6 @@
             transform-style: preserve-3d;
         }
 
-        /* STAGGERED DROP ANIMATION */
         @keyframes cardDropArrival {
             0% { transform: translateY(-800px) rotateX(-90deg); opacity: 0; }
             60% { transform: translateY(30px) rotateX(10deg); opacity: 1; }
@@ -116,18 +115,16 @@
         .nuclear-active .fire-marker { animation: nuclearShake 0.1s infinite; }
         @keyframes nuclearShake { 0% { transform: translate(0, 50%) scale(1.4); } 50% { transform: translate(3px, 48%) scale(1.5); } 100% { transform: translate(-3px, 52%) scale(1.4); } }
 
-        /* NOVA Animation for 40X */
-        .nova-active .fire-marker {
-            animation: novaSpin 0.5s infinite linear;
-        }
+        /* NOVA Animation for Flame */
+        .nova-active .fire-marker { animation: novaSpin 0.5s infinite linear; }
         @keyframes novaSpin {
             0% { transform: translateY(50%) scale(2) rotate(0deg); }
             50% { transform: translateY(50%) scale(2.2) rotate(180deg); }
             100% { transform: translateY(50%) scale(2) rotate(360deg); }
         }
 
-        .milestone { position: absolute; right: 40px; transform: translateY(50%); font-family: 'Orbitron'; font-size: 14px; font-weight: 900; color: rgba(255,255,255,0.3); transition: all 0.3s; white-space: nowrap; }
-        .milestone.active { color: white; transform: translateY(50%) scale(1.6); text-shadow: 0 0 20px rgba(255,255,255,0.5); }
+        .milestone { position: absolute; right: 28px; transform: translateY(50%); font-family: 'Orbitron'; font-size: 13px; font-weight: 900; color: rgba(255,255,255,0.3); transition: all 0.3s; white-space: nowrap; transform-origin: right center; }
+        .milestone.active { color: white; transform: translateY(50%) scale(1.4); text-shadow: 0 0 20px rgba(255,255,255,0.5); }
         .milestone-safe { color: #4ade80 !important; opacity: 1; }
 
         .slot-container { height: var(--slot-h); perspective: 1000px; }
@@ -136,12 +133,14 @@
         .slot-front { background: linear-gradient(180deg, #1e4d8c 0%, #0a2344 100%); justify-content: center; font-weight: 900; color: white; font-size: 2.2rem; }
         .slot-back { background: linear-gradient(180deg, #1a5fb4 0%, #0a3d82 100%); transform: rotateX(180deg); color: white; justify-content: space-between; border: 2px solid white; padding: 0; overflow: hidden; }
         
+        @media (min-width: 640px) { .slot-front { font-size: 2.5rem; } }
+        
         .active-slot { transform: scale(1.08); z-index: 50; }
         .slot-flipped .slot-inner { transform: rotateX(180deg); }
         .dimmed { opacity: 0.3; filter: grayscale(1); transform: scale(0.92); }
         
         .slot-strike-outline .slot-face { border: 4px solid var(--red) !important; box-shadow: 0 0 30px var(--red) !important; opacity: 0.8; }
-        .strike-mark { position: absolute; right: 0; top: 0; bottom: 0; width: 70px; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; font-size: 3rem; color: var(--red); font-weight: 900; border-left: 2px solid white; }
+        .strike-mark { position: absolute; inset: 0; width: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; font-size: 2.5rem; color: var(--red); font-weight: 900; border-left: 2px solid white; }
         .slot-strike-outline .strike-mark { display: flex; }
 
         @keyframes correctPulse {
@@ -151,9 +150,12 @@
         }
         .correct-flash .slot-face { animation: correctPulse 0.8s ease-out; }
 
-        .choice-hud { background: rgba(0,0,0,0.95); padding: 15px 15px 30px 15px; border-top: 2px solid rgba(255,255,255,0.2); position: relative; z-index: 100; }
+        .choice-hud { background: rgba(0,0,0,0.95); padding: 15px 15px 30px 15px; border-top: 2px solid rgba(255,255,255,0.2); position: relative; z-index: 100; perspective: 1000px; }
         .choice-btn { background: white; color: var(--dark-blue); height: 75px; border-radius: 16px; font-weight: 900; font-size: 1.3rem; text-transform: uppercase; border: 4px solid transparent; transition: 0.2s; box-shadow: 0 6px 0 rgba(0,0,0,0.4); }
         .btn-highlight { border-color: var(--gold) !important; transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.4); }
+
+        .controls-hidden { opacity: 0; transform: translateY(50px) rotateX(-30deg) scale(0.9); transition: all 0.3s ease-in; pointer-events: none; }
+        .controls-visible { opacity: 1; transform: translateY(0) rotateX(0deg) scale(1); transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: auto; }
 
         #bank-btn { opacity: 0; pointer-events: none; transform: scale(0.5); transform-origin: center; }
         @keyframes bankPulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(34,197,94,0.5); } 50% { transform: scale(1.12); box-shadow: 0 0 40px rgba(74,222,128,1); background-color: #22c55e; } }
@@ -169,6 +171,16 @@
 
         #nuclear-hit { position: fixed; inset: 0; background: white; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.1s; }
 
+        /* NOVA EXPLOSION OVERLAY */
+        .nova-shockwave { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 50%; border: 20px solid #ff4500; opacity: 0; }
+        @keyframes shockwaveNova { 0% { width: 0; height: 0; opacity: 1; border-width: 60px; border-color: #ffffff; } 100% { width: 180vmax; height: 180vmax; opacity: 0; border-width: 0; border-color: #ff4500; } }
+        @keyframes flashNova { 0% { opacity: 1; background: #ffffff; } 50% { opacity: 0.7; background: #ff4500; } 100% { opacity: 0; background: #000000; } }
+        @keyframes textNova { 0% { transform: scale(0); opacity: 0; } 15% { transform: scale(1.1); opacity: 1; } 80% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
+        
+        .nova-flash.active { animation: flashNova 1.5s ease-out forwards; }
+        .nova-shockwave.active { animation: shockwaveNova 1.2s ease-out forwards; }
+        .nova-text.active { animation: textNova 3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
         .tally-row { display: flex; align-items: center; justify-content: center; gap: 1rem; opacity: 0; transform: translateY(20px); transition: 0.5s ease; margin: 10px 0; }
         .tally-row.show { opacity: 1; transform: translateY(0); }
 
@@ -178,7 +190,18 @@
 </head>
 <body id="game-body">
 
+    <!-- Explosion Elements -->
     <div id="nuclear-hit"></div>
+    <div id="nova-explosion" class="pointer-events-none fixed inset-0 z-[9800] flex-col items-center justify-center" style="display: none;">
+        <div class="nova-flash absolute inset-0 bg-white opacity-0"></div>
+        <div class="nova-shockwave"></div>
+        <h1 class="nova-text text-center font-black italic uppercase relative z-10 scale-0 opacity-0 leading-tight">
+            <span class="text-white text-3xl sm:text-5xl drop-shadow-[0_0_20px_#ff0000]">Max Multiplier</span><br>
+            <span id="nova-mult-val" class="text-gold text-8xl sm:text-9xl drop-shadow-[0_0_40px_#ff4500]">40X</span><br>
+            <span class="text-white text-4xl sm:text-6xl drop-shadow-[0_0_20px_#ff0000]">Achieved!</span>
+        </h1>
+    </div>
+
     <div id="heat-vignette"></div>
     <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-[9999]"></canvas>
     <div id="status-label" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[5200] text-5xl font-black italic uppercase text-gold scale-0 transition-transform duration-300 pointer-events-none drop-shadow-2xl">Survey Says...</div>
@@ -193,21 +216,21 @@
     <!-- Start Screen -->
     <div id="start-screen">
         <h3 class="text-sky-400 text-xl font-bold uppercase tracking-[0.3em] mb-4">Gauntlet Length</h3>
-        <h1 class="text-white text-7xl font-black uppercase italic mb-12 drop-shadow-[0_0_20px_rgba(79,179,255,0.4)]">Survey Streak</h1>
-        <div class="grid grid-cols-2 gap-4 w-full max-w-sm px-4">
-            <button onclick="pickLength(4)" class="bg-white/10 hover:bg-white/20 border-2 border-white/20 p-6 rounded-2xl transition-all">
+        <h1 class="text-white text-6xl sm:text-7xl font-black uppercase italic mb-12 drop-shadow-[0_0_20px_rgba(79,179,255,0.4)]">Survey Streak</h1>
+        <div class="grid grid-cols-2 gap-3 sm:gap-4 w-full max-w-sm px-4">
+            <button onclick="pickLength(4)" class="bg-white/10 hover:bg-white/20 border-2 border-white/20 p-5 sm:p-6 rounded-2xl transition-all">
                 <div class="text-4xl font-black text-white mb-1">4</div>
                 <div class="text-[10px] uppercase font-bold text-white/40">Answers</div>
             </button>
-            <button onclick="pickLength(5)" class="bg-white/10 hover:bg-white/20 border-2 border-white/20 p-6 rounded-2xl transition-all">
+            <button onclick="pickLength(5)" class="bg-white/10 hover:bg-white/20 border-2 border-white/20 p-5 sm:p-6 rounded-2xl transition-all">
                 <div class="text-4xl font-black text-white mb-1">5</div>
                 <div class="text-[10px] uppercase font-bold text-white/40">Answers</div>
             </button>
-            <button onclick="pickLength(6)" class="bg-white/10 hover:bg-white/20 border-2 border-white/20 p-6 rounded-2xl transition-all">
+            <button onclick="pickLength(6)" class="bg-white/10 hover:bg-white/20 border-2 border-white/20 p-5 sm:p-6 rounded-2xl transition-all">
                 <div class="text-4xl font-black text-white mb-1">6</div>
                 <div class="text-[10px] uppercase font-bold text-white/40">Answers</div>
             </button>
-            <button onclick="pickLength(8)" class="bg-navy border-2 border-sky-500 p-6 rounded-2xl transition-all shadow-lg scale-105">
+            <button onclick="pickLength(8)" class="bg-navy border-2 border-sky-500 p-5 sm:p-6 rounded-2xl transition-all shadow-lg scale-105">
                 <div class="text-4xl font-black text-white mb-1">8</div>
                 <div class="text-[10px] uppercase font-bold text-sky-400">Standard</div>
             </button>
@@ -217,7 +240,7 @@
     <!-- Main Game HUD -->
     <div class="top-hud">
         <div>
-            <span class="text-[8px] font-black opacity-50 block uppercase tracking-widest">Lifetime Bank</span>
+            <span class="text-[8px] font-black opacity-50 block uppercase tracking-widest">Bank</span>
             <div class="flex items-center gap-1"><i id="hud-bank-icon" class="fa-solid fa-coins text-yellow-400 text-xs"></i><span id="bank-val" class="text-lg font-black text-yellow-400">0</span></div>
         </div>
         <div class="text-center">
@@ -245,13 +268,13 @@
     </div>
 
     <div class="px-6 pb-4 relative z-50">
-        <div id="q-box" class="bg-white rounded-2xl p-6 shadow-2xl text-center border-b-8 border-gray-200">
-            <h2 id="q-text" class="text-black text-2xl font-black italic uppercase leading-tight tracking-tighter">Preparing...</h2>
+        <div id="q-box" class="bg-white rounded-2xl p-4 sm:p-6 shadow-2xl text-center border-b-8 border-gray-200">
+            <h2 id="q-text" class="text-black text-xl sm:text-2xl font-black italic uppercase leading-tight tracking-tighter">Preparing...</h2>
         </div>
     </div>
 
     <div class="choice-hud relative z-[200]">
-        <div id="controls" class="grid grid-cols-2 gap-4 opacity-0 translate-y-10 transition-all duration-500">
+        <div id="controls" class="grid grid-cols-2 gap-4 controls-hidden">
             <button id="btn-0" class="choice-btn">---</button>
             <button id="btn-1" class="choice-btn">---</button>
         </div>
@@ -269,20 +292,20 @@
 
     <!-- Victory Overlay -->
     <div id="victory-overlay">
-        <h3 id="victory-badge" class="text-yellow-400 text-2xl font-black italic mb-2 uppercase">Survey Says...</h3>
-        <h2 id="victory-title" class="text-white text-6xl font-black mb-8 uppercase">Well Done</h2>
+        <h3 id="victory-badge" class="text-yellow-400 text-2xl font-black italic mb-2 uppercase tracking-widest">Survey Says...</h3>
+        <h2 id="victory-title" class="text-white text-5xl sm:text-6xl font-black mb-8 uppercase">Well Done</h2>
         <div class="bg-white/5 p-8 rounded-[2rem] border border-white/10 mb-10 w-full max-w-md shadow-2xl">
             <div class="tally-row show flex justify-between px-4"><span class="uppercase text-xs font-black opacity-50">Points</span><span id="tally-points" class="font-bold">0</span></div>
             <div class="tally-row show flex justify-between px-4 text-yellow-400"><span class="uppercase text-xs font-black">Multiplier</span><span id="tally-mult" class="font-bold">1x</span></div>
             <div class="h-px bg-white/10 my-4"></div>
             <div class="flex flex-col items-center">
                 <div class="flex items-center gap-3 mb-2">
-                    <i id="final-coin-icon" class="fa-solid fa-coins text-6xl text-yellow-400"></i>
-                    <span id="final-win" class="text-7xl font-black text-yellow-400 drop-shadow-lg">0</span>
+                    <i id="final-coin-icon" class="fa-solid fa-coins text-5xl sm:text-6xl text-yellow-400"></i>
+                    <span id="final-win" class="text-6xl sm:text-7xl font-black text-yellow-400 drop-shadow-lg">0</span>
                 </div>
             </div>
         </div>
-        <button id="collect-btn" onclick="collectWinnings()" class="bg-yellow-400 text-navy px-20 py-6 rounded-full font-black text-3xl shadow-2xl opacity-0 scale-50 transition-all duration-500 uppercase border-b-8 border-yellow-600">Collect</button>
+        <button id="collect-btn" onclick="collectWinnings()" class="bg-yellow-400 text-navy px-20 py-6 rounded-full font-black text-3xl shadow-2xl transition-all duration-500 uppercase border-b-8 border-yellow-600 active:scale-95">Collect</button>
     </div>
 
     <div id="confirm-modal">
@@ -293,12 +316,12 @@
                 <span id="modal-bank-val" class="text-5xl font-black">0</span>
             </div>
         </div>
-        <button onclick="finishGame(true)" class="bg-green-500 text-white w-full py-5 rounded-full font-black uppercase text-xl mb-4">Bank Now</button>
+        <button onclick="finishGame(true)" class="bg-green-500 text-white w-full py-5 rounded-full font-black uppercase text-xl mb-4 shadow-lg">Bank Now</button>
         <button onclick="hideBankModal()" class="text-white/40 uppercase text-xs font-black tracking-widest">Risk It</button>
     </div>
 
     <div id="strike-overlay">
-        <i id="strike-icon" class="text-white text-[12rem] font-black italic mb-4">X</i>
+        <i id="strike-icon" class="text-white text-[10rem] sm:text-[12rem] font-black italic mb-4">X</i>
         <h2 id="strike-title" class="text-white text-5xl font-black uppercase">Strike!</h2>
     </div>
 
@@ -321,7 +344,7 @@
             { question: "Name a useful kitchen appliance", answers: [{text: "Toaster", points: 35, distractor: "Blender"}, {text: "Microwave", points: 25, distractor: "Air Fryer"}, {text: "Coffee Maker", points: 15, distractor: "Juicer"}, {text: "Oven", points: 10, distractor: "Stove"}, {text: "Mixer", points: 5, distractor: "Grater"}, {text: "Waffle Iron", points: 3, distractor: "Pan"}, {text: "Fryer", points: 1, distractor: "Canoe"}, {text: "Slow Cooker", points: 1, distractor: "Ferrari"}] }
         ];
 
-        let gameState = { bank: 0, roundBasePoints: 0, msIdx: 0, shields: 1, strikes: 0, slotIdx: 99, survey: null, processing: true, bankBtnRevealed: false, currentMilestones: [], ansCount: 8, nuclearTriggered: false };
+        let gameState = { bank: 0, roundBasePoints: 0, msIdx: 0, shields: 1, strikes: 0, slotIdx: 99, survey: null, processing: true, bankBtnRevealed: false, currentMilestones: [], ansCount: 8, nuclearTriggered: false, novaTriggered: false };
 
         function pickLength(count) {
             gameState.ansCount = count;
@@ -332,9 +355,18 @@
         function setCamera(index) {
             const track = document.getElementById('ladder-track');
             if (!track) return;
-            const offset = -(index * (80 + 12));
+            const rootStyles = getComputedStyle(document.documentElement);
+            const slotH = parseInt(rootStyles.getPropertyValue('--slot-h')) || 65;
+            const slotGap = parseInt(rootStyles.getPropertyValue('--slot-gap')) || 8;
+            const offset = -(index * (slotH + slotGap));
             track.style.transform = `translate(-50%, ${offset}px)`;
         }
+
+        window.addEventListener('resize', () => {
+            if (!gameState.processing && gameState.slotIdx >= 0) {
+                setCamera(gameState.slotIdx);
+            }
+        });
 
         function updateHeatUI() {
             const milestones = gameState.currentMilestones;
@@ -348,21 +380,18 @@
             fill.style.height = pct + "%";
             document.getElementById('fire-marker').style.bottom = pct + "%";
             
-            // Map index to requested color palette
             const colorStep = Math.min(gameState.msIdx, FIRE_COLORS.length - 1);
             const fireColor = FIRE_COLORS[colorStep];
             
             meterBox.classList.remove('nuclear-active', 'nova-active');
             
             if (gameState.msIdx === milestones.length - 1) {
-                // 40X - NOVA STATE
                 meterBox.classList.add('nova-active');
-                fire.className = "fa-solid fa-sun"; // Change to energy burst
+                fire.className = "fa-solid fa-sun";
                 fire.style.color = "#FFFFFF";
                 fire.style.filter = `drop-shadow(0 0 50px #ffffff) drop-shadow(0 0 80px #4fb3ff)`;
                 vignette.style.boxShadow = `inset 0 0 150px rgba(255, 255, 255, 0.4)`;
             } else {
-                // Pre-Nova states
                 fire.className = "fa-solid fa-fire";
                 fire.style.color = fireColor;
                 fire.style.filter = `drop-shadow(0 0 ${10 + (gameState.msIdx * 5)}px ${fireColor})`;
@@ -382,7 +411,7 @@
         async function startRound() {
             gameState.processing = true; 
             gameState.msIdx = 0; gameState.strikes = 0; gameState.roundBasePoints = 0; 
-            gameState.bankBtnRevealed = false; gameState.nuclearTriggered = false;
+            gameState.bankBtnRevealed = false; gameState.nuclearTriggered = false; gameState.novaTriggered = false;
             gameState.slotIdx = gameState.ansCount - 1;
             gameState.currentMilestones = LADDER_PACING[gameState.ansCount];
 
@@ -391,6 +420,12 @@
             document.getElementById('bank-btn').style.opacity = '0';
             document.getElementById('bank-btn').className = "bg-green-600 px-6 py-2.5 rounded-full text-[10px] font-black uppercase border-2 border-green-400 shadow-lg";
             
+            const controlsEl = document.getElementById('controls');
+            controlsEl.classList.remove('controls-visible');
+            controlsEl.classList.add('controls-hidden');
+            document.getElementById('btn-0').classList.remove('btn-highlight');
+            document.getElementById('btn-1').classList.remove('btn-highlight');
+
             updateUI(); 
             updateHeatUI();
 
@@ -418,13 +453,12 @@
                 msList.appendChild(div);
             });
 
-            // STAGGERED ARRIVAL
             survey.answers.forEach((ans, i) => {
                 const slot = document.createElement('div');
                 slot.id = `slot-${i}`; 
                 slot.className = `slot-container animate-drop dimmed`;
                 slot.style.animationDelay = `${(survey.answers.length - i) * 0.12}s`;
-                slot.innerHTML = `<div class="slot-inner"><div class="slot-face slot-front">${i+1}</div><div class="slot-face slot-back"><span class="px-8 font-black text-2xl uppercase truncate">${ans.text}</span><div class="h-full w-16 bg-navy flex items-center justify-center border-l-2 border-white relative text-2xl font-bold"><span class="pts-val">${ans.points}</span><div class="strike-mark">X</div></div></div></div>`;
+                slot.innerHTML = `<div class="slot-inner"><div class="slot-face slot-front">${i+1}</div><div class="slot-face slot-back"><span class="px-4 sm:px-8 font-black text-lg sm:text-2xl uppercase truncate">${ans.text}</span><div class="h-full w-12 sm:w-16 bg-navy flex items-center justify-center border-l-2 border-white relative text-xl sm:text-2xl font-bold"><span class="pts-val">${ans.points}</span><div class="strike-mark">X</div></div></div></div>`;
                 track.appendChild(slot);
             });
 
@@ -433,8 +467,9 @@
                 setCamera(gameState.slotIdx);
                 refreshSlots();
                 updateChoices();
-                document.getElementById('controls').style.opacity = "1";
-                document.getElementById('controls').style.transform = "translateY(0)";
+                const controlsEl = document.getElementById('controls');
+                controlsEl.classList.remove('controls-hidden');
+                controlsEl.classList.add('controls-visible');
                 gameState.processing = false;
             }, 1500); 
         }
@@ -450,7 +485,6 @@
             const curr = gameState.survey.answers[gameState.slotIdx];
             const isL = Math.random() > 0.5;
             const b0 = document.getElementById('btn-0'), b1 = document.getElementById('btn-1');
-            b0.className = 'choice-btn'; b1.className = 'choice-btn';
             b0.innerText = isL ? curr.text : curr.distractor; b1.innerText = isL ? curr.distractor : curr.text;
             b0.onclick = () => handleChoice(0, isL); b1.onclick = () => handleChoice(1, !isL);
         }
@@ -463,6 +497,11 @@
             
             const slotEl = document.getElementById(`slot-${gameState.slotIdx}`);
             let isShielded = false;
+
+            const controlsEl = document.getElementById('controls');
+            controlsEl.classList.remove('controls-visible');
+            controlsEl.classList.add('controls-hidden');
+
             if (correct) {
                 if (gameState.slotIdx === 0) triggerNuclearHit();
                 slotEl.classList.add('correct-flash');
@@ -477,8 +516,16 @@
                 await wait(600); await animateFlyingFire();
                 gameState.msIdx = Math.min(gameState.currentMilestones.length - 1, gameState.msIdx + 1);
                 updateHeatUI();
-                await wait(800);
-                if (gameState.msIdx === 1 && !gameState.bankBtnRevealed) triggerCashoutUnlock();
+                
+                // NOVA EXPLOSION TRIGGER
+                if (gameState.msIdx === gameState.currentMilestones.length - 1 && !gameState.novaTriggered) {
+                    gameState.novaTriggered = true;
+                    triggerNovaExplosion();
+                    await wait(3000); // Let the explosion breathe before moving on
+                } else {
+                    await wait(800);
+                    if (gameState.msIdx === 1 && !gameState.bankBtnRevealed) triggerCashoutUnlock();
+                }
             } else if (!isShielded) {
                 await wait(600); await animateFlyingIce();
                 gameState.msIdx = Math.max(0, gameState.msIdx - 1);
@@ -487,7 +534,11 @@
             
             gameState.slotIdx--; updateUI();
             if (gameState.slotIdx >= 0 && gameState.strikes < 3) {
-                await wait(800); setCamera(gameState.slotIdx); refreshSlots(); updateChoices();
+                await wait(400); setCamera(gameState.slotIdx); refreshSlots(); updateChoices();
+                document.getElementById('btn-0').classList.remove('btn-highlight');
+                document.getElementById('btn-1').classList.remove('btn-highlight');
+                controlsEl.classList.remove('controls-hidden');
+                controlsEl.classList.add('controls-visible');
                 gameState.processing = false;
             } else {
                 await wait(800); finishGame(false);
@@ -498,7 +549,35 @@
             const hit = document.getElementById('nuclear-hit');
             hit.style.opacity = '1';
             document.body.classList.add('screen-shake');
-            setTimeout(() => { hit.style.opacity = '0'; }, 250);
+            setTimeout(() => { hit.style.opacity = '0'; }, 200);
+        }
+
+        function triggerNovaExplosion() {
+            const exp = document.getElementById('nova-explosion');
+            document.getElementById('nova-mult-val').innerText = gameState.currentMilestones[gameState.msIdx] + "X";
+            exp.style.display = 'flex';
+            document.body.classList.add('screen-shake');
+            
+            const text = exp.querySelector('.nova-text');
+            const flash = exp.querySelector('.nova-flash');
+            const wave = exp.querySelector('.nova-shockwave');
+
+            text.classList.remove('active');
+            flash.classList.remove('active');
+            wave.classList.remove('active');
+            
+            void exp.offsetWidth; // Reflow
+
+            text.classList.add('active');
+            flash.classList.add('active');
+            wave.classList.add('active');
+
+            startConfetti(400);
+
+            setTimeout(() => {
+                document.body.classList.remove('screen-shake');
+                exp.style.display = 'none';
+            }, 3000);
         }
 
         function triggerCashoutUnlock() {
@@ -523,7 +602,7 @@
             let isShielded = false;
             ov.style.display = 'flex'; document.body.classList.add('screen-shake');
             if (gameState.shields > 0) {
-                await wait(600); ov.style.backgroundColor = "rgba(0, 132, 255, 0.95)"; icon.className = "fa-solid fa-shield-halved text-white text-[10rem] mb-4";
+                await wait(600); ov.style.backgroundColor = "rgba(0, 132, 255, 0.95)"; icon.className = "fa-solid fa-shield-halved text-white text-[10rem] sm:text-[12rem] mb-4";
                 gameState.shields--; isShielded = true;
             } else { gameState.strikes++; }
             updateUI(); await wait(1200); ov.style.display = 'none'; ov.style.backgroundColor = ""; document.body.classList.remove('screen-shake'); return isShielded;
@@ -573,7 +652,9 @@
 
         async function finishGame(isCashingOut) {
             gameState.processing = true; hideBankModal();
-            document.getElementById('controls').style.opacity = '0';
+            const controlsEl = document.getElementById('controls');
+            controlsEl.classList.remove('controls-visible');
+            controlsEl.classList.add('controls-hidden');
             
             for (let i = gameState.slotIdx; i >= 0; i--) {
                 const slot = document.getElementById(`slot-${i}`);
@@ -589,7 +670,7 @@
             const ov = document.getElementById('victory-overlay');
             const title = document.getElementById('victory-title');
             
-            if (isPerfect) { title.innerText = "Board Complete"; title.style.color = "#00f2ff"; startConfetti(300); }
+            if (isPerfect) { title.innerText = "Supreme Streak!"; title.style.color = "#00f2ff"; }
             else { title.innerText = "Well Done"; title.style.color = "white"; if (gameState.roundBasePoints > 0) startConfetti(80); }
             
             ov.style.display = 'flex';
@@ -600,10 +681,12 @@
         }
 
         async function collectWinnings() {
+            const collectBtn = document.getElementById('collect-btn');
+            collectBtn.style.pointerEvents = 'none'; 
+            collectBtn.style.opacity = '0.5';
+
             const amount = (gameState.roundBasePoints * gameState.currentMilestones[gameState.msIdx]);
             if (amount > 0) {
-                const collectBtn = document.getElementById('collect-btn');
-                collectBtn.style.pointerEvents = 'none'; collectBtn.style.opacity = '0.5';
                 const sourceRect = document.getElementById('final-coin-icon').getBoundingClientRect();
                 const targetRect = document.getElementById('hud-bank-icon').getBoundingClientRect();
                 for (let i = 0; i < 20; i++) {
