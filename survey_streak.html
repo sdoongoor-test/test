@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Survey Streak</title>
+    <title>Survey Streak: Moon Shot</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -65,9 +65,9 @@
 
         .ladder-track {
             position: absolute;
-            left: 50%;
+            left: calc(50% - 25px); 
             top: 50%;
-            width: 92%;
+            width: calc(100% - 70px); 
             max-width: 520px;
             display: flex;
             flex-direction: column;
@@ -75,6 +75,10 @@
             transform: translate(-50%, -50%);
             transition: transform 1.2s cubic-bezier(0.23, 1, 0.32, 1);
             transform-style: preserve-3d;
+        }
+
+        @media (min-width: 640px) {
+            .ladder-track { left: 50%; width: 90%; }
         }
 
         @keyframes cardDropArrival {
@@ -89,50 +93,53 @@
 
         .heat-meter-container {
             position: absolute;
-            right: 12px;
+            right: 8px;
             top: 10%;
             bottom: 10%;
-            width: 70px;
+            width: 50px;
             z-index: 20;
             display: flex;
-            justify-content: flex-end;
+            justify-content: center;
         }
 
-        .heat-track-wrapper { height: 100%; width: 22px; position: relative; }
+        .heat-track-wrapper { height: 100%; width: 36px; position: relative; }
         .heat-track-bg { height: 100%; width: 100%; background: rgba(0, 0, 0, 0.8); border: 2px solid rgba(255, 255, 255, 0.4); border-radius: 20px; position: absolute; box-shadow: 0 0 15px rgba(0,0,0,0.8); overflow: hidden; }
         .heat-fill { position: absolute; bottom: 0; width: 100%; background: linear-gradient(0deg, #ffbb00, #ff4800, #ff0000, #ffffff); background-size: 100% 400%; border-radius: 20px; transition: height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 0 30px #ff4500; }
         
-        .fire-marker { 
-            position: absolute; 
-            right: -12px; 
-            transform: translateY(50%); 
-            font-size: 44px; 
-            transition: bottom 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.4s, filter 0.4s, transform 0.3s; 
-            z-index: 35; 
-        }
+        .milestone-labels { position: absolute; inset: 0; z-index: 20; pointer-events: none; }
+        .milestone { position: absolute; left: 50%; transform: translate(-50%, 50%); font-family: 'Orbitron'; font-size: 13px; font-weight: 900; color: rgba(255,255,255,0.7); transition: opacity 0.3s; text-align: center; text-shadow: 0 1px 4px rgba(0,0,0,1); }
+        .milestone-safe { color: #4ade80 !important; }
 
-        /* Nuclear Animation triggers at 25X */
+        .fire-marker { position: absolute; left: 50%; transform: translate(-50%, 50%); display: flex; justify-content: center; align-items: center; transition: bottom 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 35; }
+        #main-fire-icon { font-size: 58px; transition: color 0.4s, filter 0.4s, transform 0.3s; }
+        #active-fire-text { position: absolute; font-family: 'Orbitron'; font-size: 16px; font-weight: 900; color: white; text-shadow: 0px 2px 3px rgba(0,0,0,1), 0px -1px 3px rgba(0,0,0,1), 0px 0px 10px rgba(0,0,0,1); margin-top: 12px; pointer-events: none; transition: opacity 0.3s; }
+
+        @keyframes pulseFlicker { from { transform: scale(1); opacity: 0.85; } to { transform: scale(1.08); opacity: 1; } }
+        @keyframes pulseBlaze { from { transform: scale(1.1); opacity: 0.85; } to { transform: scale(1.22); opacity: 1; } }
+        @keyframes pulseInferno { from { transform: scale(1.25); opacity: 0.85; } to { transform: scale(1.4); opacity: 1; } }
+        .fire-flicker { animation: pulseFlicker 1.2s infinite alternate ease-in-out; }
+        .fire-blaze { animation: pulseBlaze 0.6s infinite alternate ease-in-out; }
+        .fire-inferno { animation: pulseInferno 0.25s infinite alternate ease-in-out; }
+
         .nuclear-active .fire-marker { animation: nuclearShake 0.1s infinite; }
-        @keyframes nuclearShake { 0% { transform: translate(0, 50%) scale(1.4); } 50% { transform: translate(3px, 48%) scale(1.5); } 100% { transform: translate(-3px, 52%) scale(1.4); } }
+        @keyframes nuclearShake { 0% { transform: translate(-50%, 50%); } 50% { transform: translate(calc(-50% + 2px), calc(50% - 2px)); } 100% { transform: translate(calc(-50% - 2px), calc(50% + 2px)); } }
 
-        /* NOVA Animation for Flame */
-        .nova-active .fire-marker { animation: novaSpin 0.5s infinite linear; }
-        @keyframes novaSpin {
-            0% { transform: translateY(50%) scale(2) rotate(0deg); }
-            50% { transform: translateY(50%) scale(2.2) rotate(180deg); }
-            100% { transform: translateY(50%) scale(2) rotate(360deg); }
+        .nova-active #main-fire-icon { animation: novaSpin 0.5s infinite linear; }
+        .nova-active #active-fire-text { color: #001a35; text-shadow: none; font-size: 18px; }
+        @keyframes novaSpin { 0% { transform: scale(1.5) rotate(0deg); } 50% { transform: scale(1.7) rotate(180deg); } 100% { transform: scale(1.5) rotate(360deg); } }
+
+        /* Strike Warning Pulse */
+        @keyframes strikeWarning {
+            0%, 100% { box-shadow: 0 0 0px transparent; border-color: transparent; background-color: transparent; }
+            50% { box-shadow: 0 0 10px rgba(227, 24, 55, 0.5); background-color: rgba(227, 24, 55, 0.15); border-color: rgba(227, 24, 55, 0.3); }
         }
-
-        .milestone { position: absolute; right: 28px; transform: translateY(50%); font-family: 'Orbitron'; font-size: 13px; font-weight: 900; color: rgba(255,255,255,0.3); transition: all 0.3s; white-space: nowrap; transform-origin: right center; }
-        .milestone.active { color: white; transform: translateY(50%) scale(1.4); text-shadow: 0 0 20px rgba(255,255,255,0.5); }
-        .milestone-safe { color: #4ade80 !important; opacity: 1; }
+        .strike-warning { animation: strikeWarning 1.5s infinite ease-in-out; border-radius: 8px; padding: 4px; margin: -4px; border: 1px solid transparent; }
 
         .slot-container { height: var(--slot-h); perspective: 1000px; }
         .slot-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
         .slot-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 10px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.3); transition: all 0.3s; }
         .slot-front { background: linear-gradient(180deg, #1e4d8c 0%, #0a2344 100%); justify-content: center; font-weight: 900; color: white; font-size: 2.2rem; }
         .slot-back { background: linear-gradient(180deg, #1a5fb4 0%, #0a3d82 100%); transform: rotateX(180deg); color: white; justify-content: space-between; border: 2px solid white; padding: 0; overflow: hidden; }
-        
         @media (min-width: 640px) { .slot-front { font-size: 2.5rem; } }
         
         .active-slot { transform: scale(1.08); z-index: 50; }
@@ -140,14 +147,10 @@
         .dimmed { opacity: 0.3; filter: grayscale(1); transform: scale(0.92); }
         
         .slot-strike-outline .slot-face { border: 4px solid var(--red) !important; box-shadow: 0 0 30px var(--red) !important; opacity: 0.8; }
-        .strike-mark { position: absolute; inset: 0; width: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; font-size: 2.5rem; color: var(--red); font-weight: 900; border-left: 2px solid white; }
+        .strike-mark { position: absolute; inset: 0; width: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; font-size: 3rem; color: var(--red); font-weight: 900; border-left: 2px solid white; }
         .slot-strike-outline .strike-mark { display: flex; }
 
-        @keyframes correctPulse {
-            0% { box-shadow: 0 0 0px var(--gold); border-color: var(--gold); }
-            50% { box-shadow: 0 0 50px var(--gold); border-color: white; }
-            100% { box-shadow: 0 0 0px transparent; border-color: rgba(255,255,255,0.3); }
-        }
+        @keyframes correctPulse { 0% { box-shadow: 0 0 0px var(--gold); border-color: var(--gold); } 50% { box-shadow: 0 0 50px var(--gold); border-color: white; } 100% { box-shadow: 0 0 0px transparent; border-color: rgba(255,255,255,0.3); } }
         .correct-flash .slot-face { animation: correctPulse 0.8s ease-out; }
 
         .choice-hud { background: rgba(0,0,0,0.95); padding: 15px 15px 30px 15px; border-top: 2px solid rgba(255,255,255,0.2); position: relative; z-index: 100; perspective: 1000px; }
@@ -171,7 +174,6 @@
 
         #nuclear-hit { position: fixed; inset: 0; background: white; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.1s; }
 
-        /* NOVA EXPLOSION OVERLAY */
         .nova-shockwave { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 50%; border: 20px solid #ff4500; opacity: 0; }
         @keyframes shockwaveNova { 0% { width: 0; height: 0; opacity: 1; border-width: 60px; border-color: #ffffff; } 100% { width: 180vmax; height: 180vmax; opacity: 0; border-width: 0; border-color: #ff4500; } }
         @keyframes flashNova { 0% { opacity: 1; background: #ffffff; } 50% { opacity: 0.7; background: #ff4500; } 100% { opacity: 0; background: #000000; } }
@@ -184,13 +186,14 @@
         .tally-row { display: flex; align-items: center; justify-content: center; gap: 1rem; opacity: 0; transform: translateY(20px); transition: 0.5s ease; margin: 10px 0; }
         .tally-row.show { opacity: 1; transform: translateY(0); }
 
-        .flying-fire { position: fixed; z-index: 5500; color: #ff4500; font-size: 5rem; filter: drop-shadow(0 0 30px #ff0000); pointer-events: none; transition: 0.6s cubic-bezier(0.5, 0, 0.2, 1); }
+        /* Animation Classes for Flying Elements */
+        .flying-fire { position: fixed; z-index: 5500; color: #ff4500; font-size: 5rem; filter: drop-shadow(0 0 30px #ff0000); pointer-events: none; transition: all 0.6s cubic-bezier(0.5, 0, 0.2, 1); }
+        .flying-ice { position: fixed; z-index: 5500; color: #b3e5fc; font-size: 5rem; filter: drop-shadow(0 0 30px #4fb3ff); pointer-events: none; transition: all 0.6s cubic-bezier(0.5, 0, 0.2, 1); }
         .flying-coin { position: fixed; z-index: 10000; color: var(--gold); font-size: 2.2rem; filter: drop-shadow(0 0 8px rgba(0,0,0,0.5)); pointer-events: none; transition: all 0.7s cubic-bezier(0.5, 0, 0.2, 1); }
     </style>
 </head>
 <body id="game-body">
 
-    <!-- Explosion Elements -->
     <div id="nuclear-hit"></div>
     <div id="nova-explosion" class="pointer-events-none fixed inset-0 z-[9800] flex-col items-center justify-center" style="display: none;">
         <div class="nova-flash absolute inset-0 bg-white opacity-0"></div>
@@ -207,15 +210,14 @@
     <div id="status-label" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[5200] text-5xl font-black italic uppercase text-gold scale-0 transition-transform duration-300 pointer-events-none drop-shadow-2xl">Survey Says...</div>
 
     <div id="unlock-flare">
-        <div class="text-center px-4">
+        <div class="text-center w-full px-4">
             <h2 class="text-white text-5xl font-black italic uppercase tracking-tighter drop-shadow-lg">Cash Out Unlocked!</h2>
-            <p class="text-green-300 text-lg font-bold uppercase mt-2">Safely Bank at any time</p>
+            <p class="text-green-300 text-lg font-bold uppercase mt-2">Safely Bank Winnings</p>
         </div>
     </div>
 
-    <!-- Start Screen -->
     <div id="start-screen">
-        <h3 class="text-sky-400 text-xl font-bold uppercase tracking-[0.3em] mb-4">Gauntlet Length</h3>
+        <h3 class="text-sky-400 text-xl font-bold uppercase tracking-[0.3em] mb-4">Select Gauntlet</h3>
         <h1 class="text-white text-6xl sm:text-7xl font-black uppercase italic mb-12 drop-shadow-[0_0_20px_rgba(79,179,255,0.4)]">Survey Streak</h1>
         <div class="grid grid-cols-2 gap-3 sm:gap-4 w-full max-w-sm px-4">
             <button onclick="pickLength(4)" class="bg-white/10 hover:bg-white/20 border-2 border-white/20 p-5 sm:p-6 rounded-2xl transition-all">
@@ -237,7 +239,6 @@
         </div>
     </div>
 
-    <!-- Main Game HUD -->
     <div class="top-hud">
         <div>
             <span class="text-[8px] font-black opacity-50 block uppercase tracking-widest">Bank</span>
@@ -247,7 +248,7 @@
             <span class="text-[8px] font-black opacity-50 block uppercase tracking-widest">Points</span>
             <span id="score-val" class="text-xl font-black text-white">0</span>
         </div>
-        <div class="flex justify-end gap-1">
+        <div id="strike-container" class="flex justify-end gap-1 items-center transition-all border border-transparent">
             <div class="w-6 h-6 border border-white rounded flex items-center justify-center text-xs font-bold" data-strike="1">X</div>
             <div class="w-6 h-6 border border-white rounded flex items-center justify-center text-xs font-bold" data-strike="2">X</div>
             <div class="w-6 h-6 border border-white rounded flex items-center justify-center text-xs font-bold" data-strike="3">X</div>
@@ -262,7 +263,10 @@
                 <div class="heat-track-bg">
                     <div id="heat-fill" class="heat-fill"></div>
                 </div>
-                <div id="fire-marker" class="fire-marker" style="bottom: 0%;"><i id="main-fire-icon" class="fa-solid fa-fire"></i></div>
+                <div id="fire-marker" class="fire-marker" style="bottom: 0%;">
+                    <i id="main-fire-icon" class="fa-solid fa-fire"></i>
+                    <span id="active-fire-text">1X</span>
+                </div>
             </div>
         </div>
     </div>
@@ -274,7 +278,7 @@
     </div>
 
     <div class="choice-hud relative z-[200]">
-        <div id="controls" class="grid grid-cols-2 gap-4 controls-hidden">
+        <div id="controls" class="grid grid-cols-2 gap-3 sm:gap-4 controls-hidden">
             <button id="btn-0" class="choice-btn">---</button>
             <button id="btn-1" class="choice-btn">---</button>
         </div>
@@ -290,10 +294,9 @@
         </div>
     </div>
 
-    <!-- Victory Overlay -->
     <div id="victory-overlay">
         <h3 id="victory-badge" class="text-yellow-400 text-2xl font-black italic mb-2 uppercase tracking-widest">Survey Says...</h3>
-        <h2 id="victory-title" class="text-white text-5xl sm:text-6xl font-black mb-8 uppercase">Well Done</h2>
+        <h2 id="victory-title" class="text-white text-5xl sm:text-6xl font-black mb-8 uppercase text-center leading-none">Well Done</h2>
         <div class="bg-white/5 p-8 rounded-[2rem] border border-white/10 mb-10 w-full max-w-md shadow-2xl">
             <div class="tally-row show flex justify-between px-4"><span class="uppercase text-xs font-black opacity-50">Points</span><span id="tally-points" class="font-bold">0</span></div>
             <div class="tally-row show flex justify-between px-4 text-yellow-400"><span class="uppercase text-xs font-black">Multiplier</span><span id="tally-mult" class="font-bold">1x</span></div>
@@ -305,7 +308,7 @@
                 </div>
             </div>
         </div>
-        <button id="collect-btn" onclick="collectWinnings()" class="bg-yellow-400 text-navy px-20 py-6 rounded-full font-black text-3xl shadow-2xl transition-all duration-500 uppercase border-b-8 border-yellow-600 active:scale-95">Collect</button>
+        <button id="collect-btn" onclick="collectWinnings()" class="bg-yellow-400 text-navy px-20 py-6 rounded-full font-black text-3xl shadow-2xl opacity-0 scale-50 transition-all duration-500 uppercase border-b-8 border-yellow-600">Collect</button>
     </div>
 
     <div id="confirm-modal">
@@ -321,27 +324,28 @@
     </div>
 
     <div id="strike-overlay">
-        <i id="strike-icon" class="text-white text-[10rem] sm:text-[12rem] font-black italic mb-4">X</i>
-        <h2 id="strike-title" class="text-white text-5xl font-black uppercase">Strike!</h2>
+        <div id="strike-box" class="flex items-center justify-center border-[14px] border-red-600 rounded-3xl w-56 h-56 sm:w-72 sm:h-72 bg-black/40 shadow-[0_10px_50px_rgba(227,24,55,0.8)] mb-6">
+            <i id="strike-icon" class="fa-solid fa-xmark text-red-500 text-[9rem] sm:text-[12rem] drop-shadow-2xl"></i>
+        </div>
+        <h2 id="strike-title" class="text-white text-5xl sm:text-6xl font-black uppercase tracking-widest">Strike!</h2>
     </div>
 
     <script>
         const apiKey = "";
-        
-        const LADDER_PACING = {
-            4: [1, 5, 10, 25, 40],
-            5: [1, 3, 7, 15, 25, 40],
-            6: [1, 2, 5, 10, 15, 25, 40],
-            8: [1, 2, 3, 5, 7, 10, 15, 25, 40]
-        };
-
+        const LADDER_PACING = { 4: [1, 5, 10, 25, 40], 5: [1, 3, 7, 15, 25, 40], 6: [1, 2, 5, 10, 15, 25, 40], 8: [1, 2, 3, 5, 7, 10, 15, 25, 40] };
         const FIRE_COLORS = ["#FFF75D", "#FFC11F", "#FE650D", "#F33C04", "#DA1F05", "#A10100", "#FFFFFF"];
 
         const SURVEY_DB = [
             { question: "Name a fruit people eat for breakfast", answers: [{text: "Banana", points: 40, distractor: "Pineapple"}, {text: "Orange", points: 30, distractor: "Lemon"}, {text: "Grapefruit", points: 15, distractor: "Lime"}, {text: "Apple", points: 10, distractor: "Plum"}, {text: "Melon", points: 3, distractor: "Mango"}, {text: "Grapes", points: 2, distractor: "Cherry"}, {text: "Peach", points: 1, distractor: "A Brick"}, {text: "Pear", points: 1, distractor: "A Chainsaw"}] },
             { question: "Name something people do before bed", answers: [{text: "Brush Teeth", points: 45, distractor: "Floss"}, {text: "Read", points: 25, distractor: "Journaling"}, {text: "Shower", points: 15, distractor: "Taking a Bath"}, {text: "Set Alarm", points: 8, distractor: "Checking Weather"}, {text: "Watch TV", points: 4, distractor: "Radio"}, {text: "Drink Water", points: 2, distractor: "Drink Milk"}, {text: "Pray", points: 1, distractor: "Lawn Mower"}, {text: "Lock Doors", points: 1, distractor: "Spaceship"}] },
             { question: "What might make a baby cry?", answers: [{text: "Hunger", points: 40, distractor: "Thirst"}, {text: "Dirty Diaper", points: 30, distractor: "Wet Socks"}, {text: "Tiredness", points: 15, distractor: "Boredom"}, {text: "Teething", points: 8, distractor: "Earache"}, {text: "Loud Noise", points: 3, distractor: "Bright Light"}, {text: "Gas", points: 2, distractor: "Hiccups"}, {text: "Colic", points: 1, distractor: "Taxes"}, {text: "Strangers", points: 1, distractor: "A Mortgage"}] },
-            { question: "Name a useful kitchen appliance", answers: [{text: "Toaster", points: 35, distractor: "Blender"}, {text: "Microwave", points: 25, distractor: "Air Fryer"}, {text: "Coffee Maker", points: 15, distractor: "Juicer"}, {text: "Oven", points: 10, distractor: "Stove"}, {text: "Mixer", points: 5, distractor: "Grater"}, {text: "Waffle Iron", points: 3, distractor: "Pan"}, {text: "Fryer", points: 1, distractor: "Canoe"}, {text: "Slow Cooker", points: 1, distractor: "Ferrari"}] }
+            { question: "Name a useful kitchen appliance", answers: [{text: "Toaster", points: 35, distractor: "Blender"}, {text: "Microwave", points: 25, distractor: "Air Fryer"}, {text: "Coffee Maker", points: 15, distractor: "Juicer"}, {text: "Oven", points: 10, distractor: "Stove"}, {text: "Mixer", points: 5, distractor: "Grater"}, {text: "Waffle Iron", points: 3, distractor: "Pan"}, {text: "Fryer", points: 1, distractor: "Canoe"}, {text: "Slow Cooker", points: 1, distractor: "Ferrari"}] },
+            { question: "Name something you bring to the beach", answers: [{text: "Towel", points: 45, distractor: "Blanket"}, {text: "Sunscreen", points: 25, distractor: "Bug Spray"}, {text: "Swimsuit", points: 15, distractor: "Wetsuit"}, {text: "Umbrella", points: 8, distractor: "Tent"}, {text: "Sunglasses", points: 3, distractor: "Binoculars"}, {text: "Chair", points: 2, distractor: "Stool"}, {text: "Cooler", points: 1, distractor: "Fridge"}, {text: "Book", points: 1, distractor: "Calculator"}] },
+            { question: "Name a popular pizza topping", answers: [{text: "Pepperoni", points: 40, distractor: "Salami"}, {text: "Extra Cheese", points: 25, distractor: "Feta"}, {text: "Mushrooms", points: 15, distractor: "Truffles"}, {text: "Sausage", points: 10, distractor: "Hot Dog"}, {text: "Onions", points: 5, distractor: "Leeks"}, {text: "Black Olives", points: 3, distractor: "Capers"}, {text: "Green Peppers", points: 1, distractor: "Jalapenos"}, {text: "Bacon", points: 1, distractor: "Pancakes"}] },
+            { question: "Name something you find in a bathroom", answers: [{text: "Toilet Paper", points: 40, distractor: "Tissues"}, {text: "Toothbrush", points: 30, distractor: "Floss"}, {text: "Soap", points: 12, distractor: "Sanitizer"}, {text: "Towel", points: 10, distractor: "Bathrobe"}, {text: "Shampoo", points: 4, distractor: "Conditioner"}, {text: "Mirror", points: 2, distractor: "Window"}, {text: "Hairbrush", points: 1, distractor: "Comb"}, {text: "Plunger", points: 1, distractor: "Mop"}] },
+            { question: "Name an animal you see at the zoo", answers: [{text: "Elephant", points: 35, distractor: "Mammoth"}, {text: "Lion", points: 25, distractor: "Cheetah"}, {text: "Monkey", points: 20, distractor: "Lemur"}, {text: "Giraffe", points: 10, distractor: "Camel"}, {text: "Zebra", points: 5, distractor: "Horse"}, {text: "Tiger", points: 3, distractor: "Panther"}, {text: "Penguin", points: 1, distractor: "Puffin"}, {text: "Hippo", points: 1, distractor: "Rhino"}] },
+            { question: "Name a popular sport", answers: [{text: "Soccer", points: 40, distractor: "Rugby"}, {text: "Basketball", points: 25, distractor: "Netball"}, {text: "Baseball", points: 15, distractor: "Cricket"}, {text: "Tennis", points: 8, distractor: "Squash"}, {text: "Golf", points: 5, distractor: "Polo"}, {text: "Volleyball", points: 3, distractor: "Handball"}, {text: "Hockey", points: 2, distractor: "Lacrosse"}, {text: "Swimming", points: 2, distractor: "Diving"}] },
+            { question: "Name something people wear in winter", answers: [{text: "Coat", points: 35, distractor: "Rainjacket"}, {text: "Gloves", points: 25, distractor: "Mittens"}, {text: "Hat", points: 15, distractor: "Helmet"}, {text: "Scarf", points: 12, distractor: "Tie"}, {text: "Boots", points: 8, distractor: "Sneakers"}, {text: "Sweater", points: 3, distractor: "Cardigan"}, {text: "Earmuffs", points: 1, distractor: "Headphones"}, {text: "Thermal Wear", points: 1, distractor: "Pajamas"}] }
         ];
 
         let gameState = { bank: 0, roundBasePoints: 0, msIdx: 0, shields: 1, strikes: 0, slotIdx: 99, survey: null, processing: true, bankBtnRevealed: false, currentMilestones: [], ansCount: 8, nuclearTriggered: false, novaTriggered: false };
@@ -362,16 +366,13 @@
             track.style.transform = `translate(-50%, ${offset}px)`;
         }
 
-        window.addEventListener('resize', () => {
-            if (!gameState.processing && gameState.slotIdx >= 0) {
-                setCamera(gameState.slotIdx);
-            }
-        });
+        window.addEventListener('resize', () => { if (!gameState.processing && gameState.slotIdx >= 0) setCamera(gameState.slotIdx); });
 
         function updateHeatUI() {
             const milestones = gameState.currentMilestones;
             const fill = document.getElementById('heat-fill');
             const fire = document.getElementById('main-fire-icon');
+            const fireText = document.getElementById('active-fire-text');
             const meterBox = document.getElementById('meter-box');
             const vignette = document.getElementById('heat-vignette');
             if (!fill || !fire || !vignette) return;
@@ -384,6 +385,8 @@
             const fireColor = FIRE_COLORS[colorStep];
             
             meterBox.classList.remove('nuclear-active', 'nova-active');
+            fire.classList.remove('fire-blaze', 'fire-inferno', 'fire-flicker');
+            fireText.style.opacity = '1';
             
             if (gameState.msIdx === milestones.length - 1) {
                 meterBox.classList.add('nova-active');
@@ -402,9 +405,19 @@
                 } else {
                     vignette.style.boxShadow = `inset 0 0 ${pct * 2.5}px rgba(255, 69, 0, 0)`;
                 }
+
+                if (gameState.msIdx >= 4) fire.classList.add('fire-inferno');
+                else if (gameState.msIdx >= 2) fire.classList.add('fire-blaze');
+                else fire.classList.add('fire-flicker');
             }
 
-            document.querySelectorAll('.milestone').forEach((m, i) => m.classList.toggle('active', i === gameState.msIdx));
+            document.querySelectorAll('.milestone').forEach((m, i) => {
+                if (i === gameState.msIdx) m.style.opacity = '0';
+                else if (i < gameState.msIdx) m.style.opacity = '0.3';
+                else m.style.opacity = '1';
+            });
+            
+            fireText.innerText = milestones[gameState.msIdx] + "X";
             document.getElementById('mult-text').innerText = milestones[gameState.msIdx] + "X";
         }
 
@@ -448,10 +461,12 @@
                 div.style.bottom = (i / (gameState.currentMilestones.length - 1) * 100) + "%";
                 if (i === 1) { 
                     div.classList.add('milestone-safe'); 
-                    div.innerHTML = `<i id="lock-icon" class="fa-solid fa-lock text-[10px] mr-1"></i>${m}X`; 
+                    div.innerHTML = `<i id="lock-icon" class="fa-solid fa-lock text-[10px] block mb-0.5"></i>${m}X`; 
                 } else { div.innerText = m + "X"; }
                 msList.appendChild(div);
             });
+
+            updateHeatUI();
 
             survey.answers.forEach((ans, i) => {
                 const slot = document.createElement('div');
@@ -517,11 +532,10 @@
                 gameState.msIdx = Math.min(gameState.currentMilestones.length - 1, gameState.msIdx + 1);
                 updateHeatUI();
                 
-                // NOVA EXPLOSION TRIGGER
                 if (gameState.msIdx === gameState.currentMilestones.length - 1 && !gameState.novaTriggered) {
                     gameState.novaTriggered = true;
                     triggerNovaExplosion();
-                    await wait(3000); // Let the explosion breathe before moving on
+                    await wait(3000); 
                 } else {
                     await wait(800);
                     if (gameState.msIdx === 1 && !gameState.bankBtnRevealed) triggerCashoutUnlock();
@@ -562,22 +576,12 @@
             const flash = exp.querySelector('.nova-flash');
             const wave = exp.querySelector('.nova-shockwave');
 
-            text.classList.remove('active');
-            flash.classList.remove('active');
-            wave.classList.remove('active');
-            
-            void exp.offsetWidth; // Reflow
-
-            text.classList.add('active');
-            flash.classList.add('active');
-            wave.classList.add('active');
+            text.classList.remove('active'); flash.classList.remove('active'); wave.classList.remove('active');
+            void exp.offsetWidth; 
+            text.classList.add('active'); flash.classList.add('active'); wave.classList.add('active');
 
             startConfetti(400);
-
-            setTimeout(() => {
-                document.body.classList.remove('screen-shake');
-                exp.style.display = 'none';
-            }, 3000);
+            setTimeout(() => { document.body.classList.remove('screen-shake'); exp.style.display = 'none'; }, 3000);
         }
 
         function triggerCashoutUnlock() {
@@ -586,7 +590,7 @@
             
             const lockIcon = document.getElementById('lock-icon');
             if (lockIcon) {
-                lockIcon.className = "fa-solid fa-unlock text-[10px] mr-1 text-green-300 transform scale-150 transition-all";
+                lockIcon.className = "fa-solid fa-unlock text-[10px] block mb-0.5 text-green-300 transform scale-150 transition-all";
                 setTimeout(() => lockIcon.style.opacity = '0', 1000);
             }
 
@@ -598,23 +602,43 @@
         }
 
         async function triggerStrike() {
-            const ov = document.getElementById('strike-overlay'); const icon = document.getElementById('strike-icon');
+            const ov = document.getElementById('strike-overlay'); 
+            const box = document.getElementById('strike-box');
+            const icon = document.getElementById('strike-icon');
+            const title = document.getElementById('strike-title');
             let isShielded = false;
+            
+            // Reset to default Strike state
+            ov.style.backgroundColor = "rgba(227, 24, 55, 0.95)";
+            box.className = "flex items-center justify-center border-[14px] border-red-600 rounded-3xl w-56 h-56 sm:w-72 sm:h-72 bg-black/40 shadow-[0_10px_50px_rgba(227,24,55,0.8)] mb-6";
+            icon.className = "fa-solid fa-xmark text-red-500 text-[9rem] sm:text-[12rem] drop-shadow-2xl";
+            title.innerText = "Strike!";
+            
             ov.style.display = 'flex'; document.body.classList.add('screen-shake');
+            
             if (gameState.shields > 0) {
-                await wait(600); ov.style.backgroundColor = "rgba(0, 132, 255, 0.95)"; icon.className = "fa-solid fa-shield-halved text-white text-[10rem] sm:text-[12rem] mb-4";
-                gameState.shields--; isShielded = true;
-            } else { gameState.strikes++; }
-            updateUI(); await wait(1200); ov.style.display = 'none'; ov.style.backgroundColor = ""; document.body.classList.remove('screen-shake'); return isShielded;
+                await wait(600); 
+                ov.style.backgroundColor = "rgba(0, 132, 255, 0.95)"; 
+                box.className = "flex items-center justify-center border-[14px] border-sky-400 rounded-3xl w-56 h-56 sm:w-72 sm:h-72 bg-black/40 shadow-[0_10px_50px_rgba(0,132,255,0.8)] mb-6";
+                icon.className = "fa-solid fa-shield-halved text-sky-400 text-[8rem] sm:text-[10rem] drop-shadow-2xl";
+                title.innerText = "Blocked!";
+                gameState.shields--; 
+                isShielded = true;
+            } else { 
+                gameState.strikes++; 
+            }
+            
+            updateUI(); await wait(1200); ov.style.display = 'none'; document.body.classList.remove('screen-shake'); return isShielded;
         }
 
         async function animateFlyingFire() {
             return new Promise(resolve => {
                 const fire = document.createElement('i'); fire.className = 'fa-solid fa-fire flying-fire'; fire.style.left = '50%'; fire.style.top = '45%'; fire.style.transform = 'translate(-50%, -50%) scale(0)'; document.body.appendChild(fire);
                 const target = document.getElementById('main-fire-icon');
-                const rect = target.getBoundingClientRect();
                 requestAnimationFrame(() => { fire.style.transform = 'translate(-50%, -50%) scale(1.5)';
-                    setTimeout(() => { fire.style.left = (rect.left + rect.width / 2) + 'px'; fire.style.top = (rect.top + rect.height / 2) + 'px'; fire.style.transform = 'translate(-50%, -50%) scale(0.5)'; fire.style.opacity = '0'; 
+                    setTimeout(() => { 
+                        const rect = target.getBoundingClientRect();
+                        fire.style.left = (rect.left + rect.width / 2) + 'px'; fire.style.top = (rect.top + rect.height / 2) + 'px'; fire.style.transform = 'translate(-50%, -50%) scale(0.5)'; fire.style.opacity = '0'; 
                     setTimeout(() => { fire.remove(); resolve(); }, 600); }, 400);
                 });
             });
@@ -624,10 +648,19 @@
             return new Promise(resolve => {
                 const ice = document.createElement('i'); ice.className = 'fa-solid fa-snowflake flying-ice'; ice.style.left = '50%'; ice.style.top = '45%'; ice.style.transform = 'translate(-50%, -50%) scale(0)'; document.body.appendChild(ice);
                 const target = document.getElementById('main-fire-icon');
-                const rect = target.getBoundingClientRect();
                 requestAnimationFrame(() => { ice.style.transform = 'translate(-50%, -50%) scale(1.5)';
-                    setTimeout(() => { ice.style.left = (rect.left + rect.width / 2) + 'px'; ice.style.top = (rect.top + rect.height / 2) + 'px'; ice.style.transform = 'translate(-50%, -50%) scale(0.5)'; ice.style.opacity = '0'; 
-                    setTimeout(() => { ice.remove(); resolve(); }, 600); }, 400);
+                    setTimeout(() => { 
+                        const rect = target.getBoundingClientRect();
+                        ice.style.left = (rect.left + rect.width / 2) + 'px'; ice.style.top = (rect.top + rect.height / 2) + 'px'; ice.style.transform = 'translate(-50%, -50%) scale(0.5)'; ice.style.opacity = '0'; 
+                    setTimeout(() => { 
+                        ice.remove();
+                        // Add freeze flash effect to fire
+                        const origFilter = target.style.filter;
+                        const origColor = target.style.color;
+                        target.style.filter = 'brightness(2) drop-shadow(0 0 20px #4fb3ff)';
+                        target.style.color = '#b3e5fc';
+                        setTimeout(() => { target.style.filter = origFilter; target.style.color = origColor; resolve(); }, 300);
+                    }, 600); }, 400);
                 });
             });
         }
@@ -636,6 +669,11 @@
             document.getElementById('score-val').innerText = gameState.roundBasePoints;
             document.getElementById('bank-val').innerText = gameState.bank.toLocaleString();
             document.getElementById('shield-val').innerText = gameState.shields;
+            
+            const strikeCont = document.getElementById('strike-container');
+            if (gameState.strikes === 2) strikeCont.classList.add('strike-warning');
+            else strikeCont.classList.remove('strike-warning');
+
             for (let i = 1; i <= 3; i++) {
                 const el = document.querySelector(`[data-strike="${i}"]`);
                 if (el) el.style.backgroundColor = gameState.strikes >= i ? "var(--red)" : "transparent";
@@ -669,15 +707,45 @@
             const isPerfect = gameState.slotIdx < 0 && topSlot && topSlot.classList.contains('correct-flash') && !isLoss && !isCashingOut;
             const ov = document.getElementById('victory-overlay');
             const title = document.getElementById('victory-title');
-            
-            if (isPerfect) { title.innerText = "Supreme Streak!"; title.style.color = "#00f2ff"; }
-            else { title.innerText = "Well Done"; title.style.color = "white"; if (gameState.roundBasePoints > 0) startConfetti(80); }
+            const badge = document.getElementById('victory-badge');
+            const btn = document.getElementById('collect-btn');
+            const coinIcon = document.getElementById('final-coin-icon');
+
+            if (isLoss) {
+                gameState.roundBasePoints = 0;
+                badge.innerText = "3 Strikes!";
+                badge.className = "text-red-500 text-3xl font-black italic mb-2 uppercase tracking-widest";
+                title.innerText = "Game Over";
+                title.style.color = "#e31837";
+                
+                document.getElementById('tally-points').innerText = "0";
+                document.getElementById('tally-mult').innerText = "0X";
+                document.getElementById('final-win').innerText = "0";
+                
+                coinIcon.className = "fa-solid fa-skull text-5xl sm:text-6xl text-red-500";
+                document.getElementById('final-win').className = "text-6xl sm:text-7xl font-black text-red-500 drop-shadow-lg";
+                
+                btn.innerText = "Continue";
+                btn.className = "bg-gray-200 text-gray-800 px-20 py-6 rounded-full font-black text-3xl shadow-2xl opacity-0 scale-50 transition-all duration-500 uppercase border-b-8 border-gray-400 active:scale-95";
+            } else {
+                badge.innerText = "Survey Says...";
+                badge.className = "text-yellow-400 text-2xl font-black italic mb-2 uppercase tracking-widest";
+                coinIcon.className = "fa-solid fa-coins text-5xl sm:text-6xl text-yellow-400";
+                document.getElementById('final-win').className = "text-6xl sm:text-7xl font-black text-yellow-400 drop-shadow-lg";
+                
+                btn.innerText = "Collect";
+                btn.className = "bg-yellow-400 text-navy px-20 py-6 rounded-full font-black text-3xl shadow-2xl opacity-0 scale-50 transition-all duration-500 uppercase border-b-8 border-yellow-600 active:scale-95";
+
+                if (isPerfect) { title.innerText = "Supreme Streak!"; title.style.color = "#00f2ff"; startConfetti(300); }
+                else { title.innerText = "Well Done"; title.style.color = "white"; if (gameState.roundBasePoints > 0) startConfetti(80); }
+                
+                document.getElementById('tally-points').innerText = gameState.roundBasePoints;
+                document.getElementById('tally-mult').innerText = gameState.currentMilestones[gameState.msIdx] + "x";
+                document.getElementById('final-win').innerText = (gameState.roundBasePoints * gameState.currentMilestones[gameState.msIdx]).toLocaleString();
+            }
             
             ov.style.display = 'flex';
-            document.getElementById('tally-points').innerText = gameState.roundBasePoints;
-            document.getElementById('tally-mult').innerText = gameState.currentMilestones[gameState.msIdx] + "x";
-            document.getElementById('final-win').innerText = (gameState.roundBasePoints * gameState.currentMilestones[gameState.msIdx]).toLocaleString();
-            const btn = document.getElementById('collect-btn'); btn.style.opacity = '1'; btn.style.transform = 'scale(1)'; btn.style.pointerEvents = 'auto';
+            btn.style.opacity = '1'; btn.style.transform = 'scale(1)'; btn.style.pointerEvents = 'auto';
         }
 
         async function collectWinnings() {
@@ -685,7 +753,9 @@
             collectBtn.style.pointerEvents = 'none'; 
             collectBtn.style.opacity = '0.5';
 
-            const amount = (gameState.roundBasePoints * gameState.currentMilestones[gameState.msIdx]);
+            const isLoss = gameState.strikes >= 3;
+            const amount = isLoss ? 0 : (gameState.roundBasePoints * gameState.currentMilestones[gameState.msIdx]);
+            
             if (amount > 0) {
                 const sourceRect = document.getElementById('final-coin-icon').getBoundingClientRect();
                 const targetRect = document.getElementById('hud-bank-icon').getBoundingClientRect();
@@ -704,6 +774,8 @@
                 await wait(1500);
                 gameState.bank += amount;
                 updateUI();
+            } else {
+                await wait(300); 
             }
             document.getElementById('victory-overlay').style.display = 'none';
             document.getElementById('start-screen').style.display = 'flex';
