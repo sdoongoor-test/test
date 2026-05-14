@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Feud: Bullseye A/B Test - Ultimate Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;700;900&display=swap');
+
+        body { font-family: 'Inter', sans-serif; background: #000; color: #fff; overflow: hidden; user-select: none; touch-action: manipulation; }
+        .ff-font { font-family: 'Bungee', cursive; }
+
+        /* A/B START SCREEN */
+        #abOverlay {
+            position: absolute; inset: 0; z-index: 200; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
+            display: flex; flex-direction: column; items: center; justify-content: center; padding: 2rem;
+            text-align: center;
+        }
+
+        .start-title {
+            font-size: 6rem;
+            line-height: 0.9;
+            background: linear-gradient(to bottom, #fff 0%, #fbbf24 40%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.6));
+            margin-bottom: 1rem;
+            transform: skewX(-5deg) scale(1.1);
+        }
+
+        /* --- THE BIG BOARD --- */
+        .board-frame {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 50%, #172554 100%);
+            border: 4px solid #fbbf24;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.4), inset 0 0 40px rgba(0,0,0,0.6);
+            border-top-left-radius: 40px;
+            border-top-right-radius: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* --- JUICE: METALLIC SHEEN --- */
+        .board-frame::after {
+            content: "";
+            position: absolute;
+            top: -100%; left: -100%;
+            width: 50%; height: 300%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: sheen 4s infinite;
+            pointer-events: none;
+        }
+        @keyframes sheen {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            20%, 100% { transform: translateX(400%) rotate(45deg); }
+        }
+
+        .answer-card { perspective: 1000px; height: 64px; cursor: pointer; width: 100%; }
+        .answer-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1.2); transform-style: preserve-3d; }
+        .answer-card.revealed .answer-inner { transform: rotateX(180deg); }
+        .answer-card.dimmed { opacity: 0.5; filter: grayscale(0.5); }
+        
+        .answer-front, .answer-back { 
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 0 24px; border-radius: 8px; border: 2px solid rgba(251, 191, 36, 0.3);
+        }
+        .answer-front { background: linear-gradient(#1e3a8a, #172554); box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+        .answer-back { background: linear-gradient(#fbbf24, #d97706); color: #000; transform: rotateX(180deg); border: 3px solid #fff; box-shadow: 0 0 15px rgba(251, 191, 36, 0.8); font-weight: 900; }
+
+        @keyframes multiplier-pop {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .multiplier-badge { animation: multiplier-pop 0.4s 0.3s both cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        /* IP SPLASHES */
+        @keyframes survey-splash {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            30% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            70% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+        }
+        .survey-splash-text {
+            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 100; font-size: 3rem; color: #fbbf24; text-shadow: 0 0 20px rgba(0,0,0,1);
+            pointer-events: none; opacity: 0; white-space: nowrap; text-align: center;
+        }
+        .animate-splash { animation: survey-splash 1s ease-in-out forwards; }
+
+        /* BULLSEYE TARGET */
+        .bullseye-target {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: repeating-radial-gradient(circle, #ff3b3b 0, #ff3b3b 10px, #fbbf24 10px, #fbbf24 20px, #2563eb 20px, #2563eb 30px, #000 30px, #000 40px);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.6); border: 3px solid white;
+            animation: pulse-target 1.5s infinite ease-in-out; cursor: pointer;
+        }
+        @keyframes pulse-target { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+        /* WORLD & VFX */
+        .room-wall { background-color: #064e3b; background-image: repeating-linear-gradient(0deg, transparent, transparent 20px, rgba(0,0,0,0.1) 20px, rgba(0,0,0,0.1) 40px); }
+        .prop-visual.is-damaged { filter: grayscale(1) brightness(0.1) contrast(1.5); transition: filter 0.8s ease-in-out; }
+        .camera-zoom { transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1); }
+
+        .damage-vfx-container { position: absolute; inset: -20px; pointer-events: none; z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .strike-orbit { position: absolute; width: 110%; height: 110%; animation: orbit-spin var(--duration) linear infinite; }
+        .orbit-item {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 32px; height: 32px; background: #ef4444; border: 2px solid white; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center; font-family: 'Bungee'; color: white; font-weight: 900;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 1); font-size: 18px;
+        }
+        @keyframes orbit-spin { from { transform: rotate(0deg) scaleX(1.3) rotate(0deg); } to { transform: rotate(360deg) scaleX(1.3) rotate(-360deg); } }
+
+        /* --- JUICE: 3D DEBRIS FLY-BY --- */
+        @keyframes debris-fly-by {
+            0% { transform: translate(-50%, -50%) scale(0.2) rotate(0deg); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(4) rotate(var(--tr)); opacity: 0; }
+        }
+        .debris-strike {
+            position: absolute; left: 50%; top: 35%;
+            width: 30px; height: 30px; background: #ef4444; border: 2px solid #fff;
+            border-radius: 4px; display: flex; align-items: center; justify-content: center;
+            font-family: 'Bungee'; color: white; z-index: 150; pointer-events: none;
+            animation: debris-fly-by 0.6s ease-out forwards;
+        }
+
+        @keyframes bomb-fly { 0% { transform: scale(1.5) translate(-50%, 0); } 100% { transform: translate(-50%, var(--end-y)) scale(0.4); } }
+        .coin-rain { position: absolute; background: #fbbf24; border-radius: 50%; animation: rain 1s linear forwards; z-index: 90; }
+        @keyframes rain { 0% { transform: translateY(-100px); } 100% { transform: translateY(100vh) rotate(360deg); opacity: 0; } }
+
+        .console-slide { transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1); }
+        .console-slide.show { transform: translateY(0); }
+        .banner-slide { transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .banner-slide.show { transform: translateY(0); }
+
+        .strike-x-big { -webkit-text-stroke: 4px white; text-shadow: 0 0 20px rgba(0,0,0,0.5); }
+
+        .persistent-smoke {
+            position: absolute; top: 20%; left: 50%; width: 40px; height: 40px;
+            background: radial-gradient(circle, rgba(200,200,200,0.2) 0%, transparent 70%);
+            animation: rise-smoke 3s infinite ease-in;
+            border-radius: 50%; pointer-events: none; z-index: 10;
+        }
+        @keyframes rise-smoke { 0% { transform: translate(-50%, 0) scale(1); opacity: 0; } 20% { opacity: 0.2; } 100% { transform: translate(-50%, -100px) scale(3); opacity: 0; } }
+    </style>
+</head>
+<body class="h-screen w-screen flex items-center justify-center">
+
+    <!-- START SCREEN -->
+    <div id="abOverlay">
+        <div class="flex flex-col items-center">
+            <div class="ff-font start-title">BULLSEYE</div>
+            <p class="text-blue-300 font-bold mb-12 tracking-[0.2em] text-xs uppercase opacity-80">A/B TEST LABORATORY</p>
+            <div class="flex flex-col gap-6 w-full max-w-[320px]">
+                <button onclick="startTest('strikes')" class="w-full bg-red-600 hover:bg-red-500 py-6 rounded-[32px] ff-font text-2xl shadow-[0_8px_0_#991b1b] active:shadow-none active:translate-y-2 transition-all border-2 border-white/20">STRIKES</button>
+                <button onclick="startTest('no-strikes')" class="w-full bg-blue-600 hover:bg-blue-500 py-6 rounded-[32px] ff-font text-2xl shadow-[0_8px_0_#1e3a8a] active:shadow-none active:translate-y-2 transition-all border-2 border-white/20">NO STRIKES</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="app" class="relative w-full max-w-[430px] h-full bg-black overflow-hidden shadow-2xl flex flex-col">
+        <!-- Header -->
+        <div class="z-50 bg-white/5 backdrop-blur-lg p-4 pt-10 flex justify-between items-center border-b border-white/10">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full border-2 border-yellow-500 overflow-hidden shadow-[0_0_10px_rgba(251,191,36,0.5)]">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Andy" alt="Andy">
+                </div>
+                <div>
+                    <div id="modeLabel" class="text-[10px] text-yellow-500 font-bold uppercase tracking-widest leading-none">Variant: A</div>
+                    <div class="text-sm font-black uppercase">Andy's Home</div>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="ff-font text-blue-400 text-xl tracking-tighter">x50</div>
+                <button onclick="exitToStart()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="gameWorld" class="relative flex-grow bg-emerald-950 overflow-hidden">
+            <div id="camera" class="absolute inset-0 camera-zoom">
+                <div class="absolute inset-0 h-[65%] room-wall border-b-8 border-amber-900 shadow-2xl"></div>
+                <div class="absolute inset-x-0 bottom-0 h-[35%] bg-[#3d1f0a]"></div>
+
+                <!-- Prop: Arcade -->
+                <div id="prop-arcade" class="absolute top-[20%] left-[15%] w-24 h-40 z-10">
+                    <div class="prop-visual absolute inset-0 bg-indigo-900 border-4 border-indigo-950 rounded-t-xl shadow-2xl transition-all"></div>
+                    <div class="absolute inset-0 flex items-center justify-center target-container transition-opacity">
+                        <div onclick="selectTarget('prop-arcade', event)" class="bullseye-target"></div>
+                    </div>
+                </div>
+
+                <!-- Prop: Pool Table -->
+                <div id="prop-pool" class="absolute bottom-[25%] left-1/2 -translate-x-1/2 w-64 h-32 z-20">
+                    <div class="prop-visual absolute inset-0 bg-amber-900 border-8 border-amber-950 rounded-xl shadow-2xl transition-all">
+                         <div class="w-full h-full bg-emerald-700 m-1 border-4 border-emerald-900"></div>
+                    </div>
+                    <div class="absolute inset-0 flex items-center justify-center target-container transition-opacity">
+                        <div onclick="selectTarget('prop-pool', event)" class="bullseye-target" style="width: 100px; height: 100px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overlays -->
+            <div id="sceneDimmer" class="absolute inset-0 z-30 bg-black/60 opacity-0 pointer-events-none transition-opacity"></div>
+            <div id="effectLayer" class="absolute inset-0 z-[60] pointer-events-none"></div>
+            
+            <div id="surveySplash" class="ff-font survey-splash-text">SURVEY SAYS!</div>
+            <div id="hitSplash" class="ff-font survey-splash-text text-white" style="-webkit-text-stroke: 3px #2563eb;">HIT!</div>
+            <div id="bullseyeSplash" class="ff-font survey-splash-text text-red-500" style="-webkit-text-stroke: 3px white;">BULLSEYE!</div>
+            <div id="multiplierSplash" class="ff-font survey-splash-text text-yellow-400 mt-16" style="font-size: 2rem;">X40</div>
+
+            <!-- Console -->
+            <div id="armingConsole" class="absolute inset-x-0 bottom-0 z-[55] console-slide pointer-events-none transition-transform">
+                <div id="consoleBomb" class="relative z-20 flex justify-center -mb-8 pointer-events-auto">
+                    <div class="relative w-20 h-20 bg-zinc-800 rounded-full border-4 border-zinc-700 shadow-2xl">
+                        <div id="spark" class="absolute -top-1 right-3 w-6 h-6 bg-yellow-400 rounded-full opacity-0"></div>
+                    </div>
+                </div>
+                <div class="board-frame p-6 pt-12 pointer-events-auto">
+                    <div id="question" class="text-center mb-6 px-4 ff-font text-lg leading-tight text-white drop-shadow-md">...</div>
+                    <div id="options" class="grid gap-3"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultBanner" class="absolute bottom-0 left-0 right-0 z-[70] bg-white text-black p-8 rounded-t-[40px] banner-slide flex flex-col items-center shadow-2xl">
+            <div class="ff-font text-5xl text-emerald-600 tracking-tighter" id="tickCounter">0</div>
+            <button onclick="reset()" class="w-full bg-blue-600 text-white ff-font mt-6 py-5 rounded-2xl">COLLECT</button>
+        </div>
+    </div>
+
+    <script>
+        let abMode = 'strikes';
+        const triviaData = {
+            strikes: [
+                { q: "Name a place you have to be quiet.", a: [{t: "LIBRARY", m: 50, bull: true}, {t: "GYM", m: 0, bull: false}] },
+                { q: "Name something with a remote.", a: [{t: "TELEVISION", m: 50, bull: true}, {t: "A DOG", m: 0, bull: false}] }
+            ],
+            noStrikes: [
+                { q: "Name a fruit you eat in one bite.", a: [{t: "GRAPE", m: 40, bull: true}, {t: "CHERRY", m: 25, bull: false}, {t: "ORANGE", m: 10, bull: false}] },
+                { q: "Name something people bring to a party.", a: [{t: "CHIPS", m: 40, bull: true}, {t: "DRINKS", m: 25, bull: false}, {t: "LUGGAGE", m: 10, bull: false}] }
+            ]
+        };
+
+        let state = { busy: false, target: null, currentQuestionOptions: [], activeTag: null };
+
+        function startTest(mode) {
+            abMode = mode;
+            document.getElementById('abOverlay').style.display = 'none';
+            document.getElementById('modeLabel').innerText = mode === 'strikes' ? 'Variant: Strikes' : 'Variant: No-Fail';
+        }
+
+        function exitToStart() {
+            document.getElementById('abOverlay').style.display = 'flex';
+            reset();
+            document.querySelectorAll('.prop-visual').forEach(v => v.classList.remove('is-damaged'));
+            document.querySelectorAll('.damage-vfx-container').forEach(v => v.remove());
+        }
+
+        function selectTarget(id, e) {
+            if (state.busy) return;
+            state.busy = true;
+            const world = document.getElementById('gameWorld').getBoundingClientRect();
+            const prop = document.getElementById(id);
+            const rect = prop.getBoundingClientRect();
+            const x = rect.left + rect.width/2 - world.left;
+            const y = rect.top + rect.height/2 - world.top;
+            state.target = { id, x, y };
+
+            document.getElementById('camera').style.transformOrigin = `${x}px ${y}px`;
+            document.getElementById('camera').style.transform = `translate(${world.width/2 - x}px, ${world.height*0.35 - y}px) scale(1.8)`;
+
+            document.getElementById('sceneDimmer').style.opacity = '1';
+            document.getElementById('armingConsole').classList.add('show');
+
+            const pool = abMode === 'strikes' ? triviaData.strikes : triviaData.noStrikes;
+            const data = pool[Math.floor(Math.random()*pool.length)];
+            state.currentQuestionOptions = data.a.sort(() => Math.random() - 0.5);
+            document.getElementById('question').innerText = data.q;
+            document.getElementById('options').innerHTML = state.currentQuestionOptions.map((opt, i) => {
+                const backBadge = abMode === 'strikes' ? '' : `<span class="multiplier-badge ff-font text-xl">x${opt.m}</span>`;
+                return `<div class="answer-card" id="card-${i}" onclick="handleSelect(${i}, this)">
+                    <div class="answer-inner">
+                        <div class="answer-front"><span>${opt.t}</span> <div class="w-5 h-5 border-2 border-white/20 rounded-full"></div></div>
+                        <div class="answer-back"><span>${opt.t}</span> ${backBadge}</div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function handleSelect(idx, el) {
+            if (el.dataset.clicked) return;
+            el.dataset.clicked = "true";
+            
+            // JUICE: Lock-In
+            document.getElementById('armingConsole').style.transform = 'translateY(0) scale(0.98)';
+            setTimeout(() => {
+                const console = document.getElementById('armingConsole');
+                if (console.classList.contains('show')) console.style.transform = 'translateY(0) scale(1)';
+            }, 100);
+
+            el.classList.add('revealed');
+            document.getElementById('spark').classList.add('opacity-100', 'animate-ping');
+            
+            state.currentQuestionOptions.forEach((_, i) => {
+                if(i !== idx) setTimeout(() => {
+                    const card = document.getElementById(`card-${i}`);
+                    if (card) card.classList.add('revealed', 'dimmed');
+                }, (i+1)*200);
+            });
+
+            setTimeout(() => {
+                document.getElementById('surveySplash').classList.add('animate-splash');
+                setTimeout(() => {
+                    const worldRect = document.getElementById('gameWorld').getBoundingClientRect();
+                    const bombRect = document.getElementById('consoleBomb').getBoundingClientRect();
+                    document.getElementById('armingConsole').classList.remove('show');
+                    document.getElementById('armingConsole').style.transform = '';
+                    document.getElementById('sceneDimmer').style.opacity = '0';
+                    launch(state.currentQuestionOptions[idx], worldRect.width/2, bombRect.top - worldRect.top);
+                }, 1000);
+            }, 1000);
+        }
+
+        function launch(data, sx, sy) {
+            const world = document.getElementById('gameWorld').getBoundingClientRect();
+            const bomb = document.createElement('div');
+            bomb.className = 'absolute z-[65] w-20 h-20 pointer-events-none';
+            bomb.style.left = '50%'; bomb.style.top = sy + 'px';
+            bomb.innerHTML = document.getElementById('consoleBomb').innerHTML;
+            document.getElementById('effectLayer').appendChild(bomb);
+
+            const dy = (world.height*0.35) - sy;
+            bomb.style.setProperty('--end-y', `${dy}px`);
+            bomb.style.animation = 'bomb-fly 0.5s cubic-bezier(0.3, 0, 0.2, 1) forwards';
+
+            setTimeout(() => {
+                bomb.remove();
+                document.querySelectorAll('.target-container').forEach(t => t.style.opacity = '0');
+                if (data.m > 0) executeHit(data); else executeMiss();
+            }, 500);
+        }
+
+        function executeHit(data) {
+            const flash = document.createElement('div');
+            flash.className = 'absolute inset-0 bg-white z-[100] animate-[flash-out_0.2s_ease-out_forwards]';
+            document.getElementById('app').appendChild(flash);
+            setTimeout(() => flash.remove(), 200);
+
+            // JUICE: Camera Kick
+            const cam = document.getElementById('camera');
+            const oldT = cam.style.transform;
+            cam.style.transition = 'none'; cam.style.transform = oldT + ' scale(1.1)';
+            setTimeout(() => { cam.style.transition = 'transform 0.5s cubic-bezier(0.2, 1, 0.3, 1)'; cam.style.transform = oldT; }, 50);
+
+            // JUICE: 3D Debris
+            for(let i=0; i<4; i++) {
+                const d = document.createElement('div'); debrisHtml(d);
+                document.getElementById('effectLayer').appendChild(d);
+                setTimeout(() => d.remove(), 600);
+            }
+
+            const prop = document.getElementById(state.target.id);
+            prop.querySelector('.prop-visual').classList.add('is-damaged');
+            
+            let count = (data.m >= 40) ? 3 : (data.m >= 25 ? 2 : 1);
+            const vfx = document.createElement('div');
+            vfx.className = 'damage-vfx-container';
+            let h = `<div class="energy-ring"></div>`;
+            for(let i=0; i<count; i++) h += `<div class="strike-orbit" style="--duration: ${4+i*0.5}s; transform: rotateX(${i*20}deg)"><div class="orbit-item">X</div></div>`;
+            vfx.innerHTML = h; prop.appendChild(vfx);
+
+            // RE-INTRODUCE SOCIAL TAG
+            spawnSocialTag(data.m * 2000);
+
+            document.getElementById('multiplierSplash').innerText = `X${data.m}`;
+            document.getElementById('multiplierSplash').classList.add('animate-splash');
+            const splashId = data.m >= 40 ? 'bullseyeSplash' : 'hitSplash';
+            document.getElementById(splashId).classList.add('animate-splash');
+
+            rainCoins(); showResult(data.m * 2000);
+        }
+
+        function spawnSocialTag(val) {
+            const t = document.createElement('div');
+            t.className = 'absolute z-[80] -translate-x-1/2 flex items-center gap-3 bg-white p-2 pr-6 rounded-full shadow-2xl transition-all duration-700 opacity-0';
+            t.style.left = '50%'; t.style.top = '35%';
+            t.innerHTML = `
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Me" class="w-10 h-10 rounded-full border-2 border-blue-400">
+                <div>
+                    <div class="text-[10px] font-black text-blue-600 uppercase tracking-tighter">LOOTED!</div>
+                    <div class="text-xl ff-font text-green-600">+${val.toLocaleString()}</div>
+                </div>
+            `;
+            document.getElementById('effectLayer').appendChild(t);
+            requestAnimationFrame(() => { 
+                t.style.top = '12%'; 
+                t.style.opacity = '1'; 
+            });
+            state.activeTag = t;
+        }
+
+        function debrisHtml(d) {
+            d.className = 'debris-strike'; d.innerText = 'X';
+            d.style.setProperty('--tx', `${(Math.random()-0.5)*800}px`);
+            d.style.setProperty('--ty', `${(Math.random()-0.5)*800}px`);
+            d.style.setProperty('--tr', `${(Math.random()-0.5)*500}deg`);
+        }
+
+        function executeMiss() {
+            const x = document.createElement('div');
+            x.className = 'absolute z-[70] ff-font text-9xl text-red-600 -translate-x-1/2 -translate-y-1/2 strike-x-big';
+            x.style.left = '50%'; x.style.top = '35%'; x.innerText = 'X';
+            document.getElementById('effectLayer').appendChild(x);
+            setTimeout(() => x.remove(), 1000);
+            showResult(5000);
+        }
+
+        function rainCoins() {
+            for(let i=0; i<30; i++) {
+                setTimeout(() => {
+                    const c = document.createElement('div'); c.className = 'coin-rain shadow-lg';
+                    c.style.width = '24px'; c.style.height = '24px'; c.style.left = Math.random()*100+'%';
+                    document.getElementById('app').appendChild(c);
+                    setTimeout(() => c.remove(), 1000);
+                }, i*25);
+            }
+        }
+
+        function showResult(total) {
+            document.getElementById('resultBanner').classList.add('show');
+            let curr = 0; const step = total/20;
+            const t = setInterval(() => { curr += step; if(curr >= total) { curr = total; clearInterval(t); } document.getElementById('tickCounter').innerText = Math.floor(curr).toLocaleString(); }, 30);
+        }
+
+        function reset() {
+            document.getElementById('resultBanner').classList.remove('show');
+            document.getElementById('camera').style.transform = '';
+            document.querySelectorAll('.target-container').forEach(t => t.style.opacity = '1');
+            ['surveySplash', 'bullseyeSplash', 'hitSplash', 'multiplierSplash'].forEach(id => document.getElementById(id).classList.remove('animate-splash'));
+            document.getElementById('spark').classList.remove('opacity-100', 'animate-ping');
+            
+            document.getElementById('armingConsole').classList.remove('show');
+            document.getElementById('armingConsole').style.transform = '';
+            document.getElementById('sceneDimmer').style.opacity = '0';
+            
+            if (state.activeTag) {
+                state.activeTag.remove();
+                state.activeTag = null;
+            }
+
+            state.busy = false;
+        }
+    </script>
+</body>
+</html>
