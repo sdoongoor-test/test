@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keep or Pass - Final Polished Edition</title>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg: #121212; --accent: #fbc531; --strike-red: #ff3f34; --pass-green: #2ecc71;
+            --feud-blue: #003399; --card-w: 260px; --card-h: 120px;
+        }
+
+        body { margin: 0; background: #000; font-family: 'Arial Black', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; overflow: hidden; }
+
+        #game-container {
+            width: 375px; height: 667px; background: var(--bg); border-radius: 40px; position: relative;
+            display: flex; flex-direction: column; border: 4px solid #333; overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        /* STRIKE OVERLAY */
+        .full-overlay {
+            position: absolute; inset: 0; z-index: 2000; display: none;
+            justify-content: center; align-items: center; pointer-events: none;
+            flex-direction: column; font-size: 80px; font-weight: 900; text-align: center;
+            line-height: 0.9;
+        }
+        #strike-overlay { background: rgba(255, 0, 0, 0.5); color: white; -webkit-text-stroke: 3px var(--strike-red); }
+        .overlay-sub { font-size: 22px; -webkit-text-stroke: 0; margin-top: 12px; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* HEADER */
+        .header { width: 100%; padding: 20px 0 5px; display: flex; flex-direction: column; align-items: center; }
+        #score-display { color: var(--accent); font-size: 48px; font-weight: 900; margin: 0; text-shadow: 0 0 20px rgba(251, 197, 49, 0.3); }
+        #score-label { font-size: 11px; color: #fff; opacity: 0.5; letter-spacing: 2px; text-transform: uppercase; }
+
+        #strike-icons { display: flex; gap: 8px; margin-top: 5px; }
+        .strike-x { color: #222; font-size: 24px; font-weight: 900; }
+        .strike-x.active { color: var(--strike-red); text-shadow: 0 0 10px var(--strike-red); }
+
+        #question-text { text-align: center; color: #fff; font-size: 14px; margin: 5px 25px 10px; text-transform: uppercase; min-height: 40px; display: flex; align-items: center; justify-content: center; font-weight: 900; line-height: 1.2; }
+
+        /* BOARD SLOTS */
+        .board { width: 88%; margin: 0 auto; display: flex; flex-direction: column; gap: 6px; z-index: 10; border-radius: 10px; transition: box-shadow 0.3s; padding: 5px; }
+        .board.on-fire { box-shadow: 0 0 25px var(--accent); }
+
+        .slot { height: 40px; perspective: 1000px; cursor: default; }
+        .slot-inner { position: relative; width: 100%; height: 100%; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-style: preserve-3d; }
+        .slot.flipped .slot-inner { transform: rotateX(180deg); }
+        .slot-front, .slot-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; align-items: center; padding: 0 12px; box-sizing: border-box; border-radius: 4px; }
+        .slot-front { background: #1a1a1a; border: 1px solid #333; color: #555; justify-content: flex-start; }
+        .slot-back { background: white; color: #000; transform: rotateX(180deg); justify-content: space-between; }
+        .slot.missed .slot-back { background: #2a2a2a; color: #555; border: 1px solid #333; }
+
+        .slot-rank { width: 20px; font-size: 11px; font-weight: 900; }
+        .slot-text { text-transform: uppercase; font-size: 12px; font-weight: 900; flex-grow: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .slot-val { font-size: 13px; font-weight: 900; color: var(--feud-blue); }
+
+        /* DECK AREA */
+        #deck-area { position: absolute; bottom: 60px; width: 100%; height: 140px; display: flex; justify-content: center; }
+        .stack-item { position: absolute; width: var(--card-w); height: var(--card-h); border-radius: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-transform: uppercase; top: 0; box-shadow: 0 15px 35px rgba(0,0,0,0.6); z-index: 100; border: 2px solid rgba(255,255,255,0.1); }
+        .card.active { background: white; color: #121212; cursor: grab; touch-action: none; }
+        
+        #instruction-footer { position: absolute; bottom: 15px; width: 100%; text-align: center; font-size: 9px; color: #555; letter-spacing: 1.2px; font-weight: 900; text-transform: uppercase; pointer-events: none; }
+
+        /* END SCREEN */
+        #end-screen { position: absolute; inset: 0; background: rgba(0,0,0,0.96); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; padding: 20px; text-align: center; }
+        .final-score-hero { font-size: 64px; color: var(--accent); margin: 10px 0; text-shadow: 0 0 30px rgba(251, 197, 49, 0.4); }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 85%; margin: 20px 0; border-top: 1px solid #333; padding-top: 20px; }
+        .stat-box { display: flex; flex-direction: column; font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-val-small { font-size: 18px; color: #fff; font-weight: 900; margin-top: 4px; }
+
+        @keyframes pulseFire { 0% { transform: scale(1); } 100% { transform: scale(1.03); } }
+        .on-fire .slot.flipped:not(.missed) .slot-inner { box-shadow: 0 0 15px var(--accent); }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="strike-overlay" class="full-overlay">X<div class="overlay-sub">INCORRECT</div></div>
+    
+    <div class="header">
+        <div id="score-label">Points Banked</div>
+        <div id="score-display">0</div>
+        <div id="strike-icons"><span class="strike-x">X</span><span class="strike-x">X</span><span class="strike-x">X</span></div>
+    </div>
+
+    <div id="question-text">LOADING...</div>
+    
+    <div class="board" id="board">
+        <div class="slot" id="s1"><div class="slot-inner"><div class="slot-front"><span class="slot-rank">1</span></div><div class="slot-back"><span class="slot-text"></span><span class="slot-val">40</span></div></div></div>
+        <div class="slot" id="s2"><div class="slot-inner"><div class="slot-front"><span class="slot-rank">2</span></div><div class="slot-back"><span class="slot-text"></span><span class="slot-val">25</span></div></div></div>
+        <div class="slot" id="s3"><div class="slot-inner"><div class="slot-front"><span class="slot-rank">3</span></div><div class="slot-back"><span class="slot-text"></span><span class="slot-val">15</span></div></div></div>
+        <div class="slot" id="s4"><div class="slot-inner"><div class="slot-front"><span class="slot-rank">4</span></div><div class="slot-back"><span class="slot-text"></span><span class="slot-val">10</span></div></div></div>
+        <div class="slot" id="s5"><div class="slot-inner"><div class="slot-front"><span class="slot-rank">5</span></div><div class="slot-back"><span class="slot-text"></span><span class="slot-val">5</span></div></div></div>
+    </div>
+
+    <div id="deck-area"></div>
+    <div id="instruction-footer">Swipe Up to Play • Swipe Down to Pass</div>
+
+    <div id="end-screen">
+        <h1 id="completion-msg" style="letter-spacing: 4px; color: #fff; margin: 0;">SURVEY ENDED</h1>
+        <div class="final-score-hero" id="final-points">0</div>
+        
+        <div class="stats-grid">
+            <div class="stat-box"><span>Answers Found</span><span class="stat-val-small" id="stat-found">0/5</span></div>
+            <div class="stat-box"><span>Decoys Dodged</span><span class="stat-val-small" id="stat-dodged">0/4</span></div>
+            <div class="stat-box"><span>Points Missed</span><span class="stat-val-small" id="stat-missed">0</span></div>
+            <div class="stat-box"><span>Best Streak</span><span class="stat-val-small" id="stat-streak">0</span></div>
+        </div>
+
+        <button onclick="initGame()" style="padding: 15px 40px; background: var(--accent); border: none; font-weight: bold; border-radius: 15px; cursor:pointer;">TRY ANOTHER</button>
+    </div>
+</div>
+
+<script>
+    const database = [
+        { q: "Name a reason someone skips a party.", answers: { "SICK": 1, "TIRED": 2, "WORK": 3, "NO BABYSITTER": 4, "NO OUTFIT": 5 }, decoys: ["TRAFFIC", "WEATHER", "FORGOT", "LATE"] },
+        { q: "Name something expensive at the store.", answers: { "JEWELRY": 1, "ELECTRONICS": 2, "MEAT": 3, "FURNITURE": 4, "APPLIANCES": 5 }, decoys: ["SHOES", "CLOTHES", "TOOLS", "SPORTS GEAR"] },
+        { q: "Name something in a glove compartment.", answers: { "MANUAL": 1, "INSURANCE": 2, "REGISTRATION": 3, "NAPKINS": 4, "FLASHLIGHT": 5 }, decoys: ["MAPS", "COINS", "TOOLS", "TIRE GAUGE"] },
+        { q: "Name a place where people must be quiet.", answers: { "LIBRARY": 1, "CHURCH": 2, "THEATER": 3, "HOSPITAL": 4, "CLASSROOM": 5 }, decoys: ["COURTROOM", "SPA", "FUNERAL", "MUSEUM"] },
+        { q: "Name something found in a desk drawer.", answers: { "PENS": 1, "PAPER": 2, "STAPLER": 3, "TAPE": 4, "PAPERCLIPS": 5 }, decoys: ["SCISSORS", "CALCULATOR", "SNACK", "CHARGER"] },
+        { q: "Name a job that requires a uniform.", answers: { "POLICE": 1, "NURSE": 2, "SOLDIER": 3, "CHEF": 4, "PILOT": 5 }, decoys: ["FIREFIGHTER", "WAITER", "MECHANIC", "SECURITY"] },
+        { q: "Name a common wedding gift.", answers: { "CASH": 1, "TOWELS": 2, "TOASTER": 3, "DISHES": 4, "BLENDER": 5 }, decoys: ["VACUUM", "LINENS", "KNIVES", "FRAME"] },
+        { q: "Name something people do when bored.", answers: { "WATCH TV": 1, "SLEEP": 2, "EAT": 3, "READ": 4, "PHONE": 5 }, decoys: ["CLEAN", "WALK", "GAMING", "MUSIC"] },
+        { q: "Name something found in a bakery.", answers: { "BREAD": 1, "CAKE": 2, "COOKIES": 3, "PASTRIES": 4, "DONUTS": 5 }, decoys: ["MUFFINS", "PIE", "FLOUR", "COFFEE"] },
+        { q: "Name a reason people wake up early.", answers: { "WORK": 1, "SCHOOL": 2, "EXERCISE": 3, "TRAVEL": 4, "ALARM": 5 }, decoys: ["BABY", "PET", "HUNGER", "LIGHT"] },
+        { q: "Name something you take to the beach.", answers: { "TOWEL": 1, "SUNSCREEN": 2, "CHAIR": 3, "COOLER": 4, "UMBRELLA": 5 }, decoys: ["TOYS", "SANDALS", "BOOK", "RADIO"] },
+        { q: "Name something people carry in pockets.", answers: { "KEYS": 1, "WALLET": 2, "PHONE": 3, "MONEY": 4, "CHANGE": 5 }, decoys: ["ID", "TISSUE", "GUM", "RECEIPT"] },
+        { q: "Name a reason for changing hair.", answers: { "NEW STYLE": 1, "GRAY HAIR": 2, "BREAKUP": 3, "WEDDING": 4, "JOB": 5 }, decoys: ["DAMAGED", "SEASON", "TREND", "AGE"] },
+        { q: "Name something seen in the sky.", answers: { "SUN": 1, "MOON": 2, "STARS": 3, "CLOUDS": 4, "BIRDS": 5 }, decoys: ["PLANE", "RAINBOW", "HELICOPTER", "KITE"] },
+        { q: "Name something found in a bathroom.", answers: { "TOILET": 1, "SHOWER": 2, "SINK": 3, "TOWEL": 4, "SOAP": 5 }, decoys: ["MIRROR", "TOOTHBRUSH", "MAT", "BIN"] },
+        { q: "Name a reason for a doctor visit.", answers: { "CHECKUP": 1, "SICK": 2, "INJURY": 3, "PAIN": 4, "VACCINE": 5 }, decoys: ["SURGERY", "MEDICINE", "REFERRAL", "TEST"] },
+        { q: "Name something people do while on TV.", answers: { "TALK": 1, "LAUGH": 2, "SMILE": 3, "DANCE": 4, "CRY": 5 }, decoys: ["ACT", "COOK", "SING", "FIGHT"] },
+        { q: "Name something you buy second-hand.", answers: { "CAR": 1, "CLOTHES": 2, "BOOKS": 3, "FURNITURE": 4, "HOUSE": 5 }, decoys: ["SHOES", "COMPUTER", "PHONE", "TOOLS"] },
+        { q: "Name a reason people get home late.", answers: { "TRAFFIC": 1, "WORK": 2, "PARTY": 3, "ACCIDENT": 4, "CAR TROUBLE": 5 }, decoys: ["SHOPPING", "GYM", "DINNER", "WEATHER"] },
+        { q: "Name something you do before bed.", answers: { "BRUSH TEETH": 1, "READ": 2, "SET ALARM": 3, "PRAY": 4, "WASH FACE": 5 }, decoys: ["EAT", "SHOWER", "EXERCISE", "DRINK WATER"] }
+    ];
+
+    let currentQuestion, deck, strikes, currentIdx, found, currentScore, streak, maxStreak, dodgedCount, missedPoints;
+    const pointValues = [40, 25, 15, 10, 5];
+
+    function initGame() {
+        document.getElementById('end-screen').style.display = 'none';
+        document.getElementById('board').classList.remove('on-fire');
+        document.querySelectorAll('.strike-x').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.slot').forEach(s => { s.classList.remove('flipped', 'missed'); s.querySelector('.slot-text').innerText = ''; });
+        
+        currentQuestion = database[Math.floor(Math.random() * database.length)];
+        document.getElementById('question-text').innerText = `"${currentQuestion.q}"`;
+        
+        const allDecoys = currentQuestion.decoys.slice(0, 4);
+        deck = [...Object.keys(currentQuestion.answers), ...allDecoys].sort(() => Math.random() - 0.5);
+        
+        strikes = 0; currentIdx = 0; found = 0; currentScore = 0; streak = 0; maxStreak = 0; dodgedCount = 0; missedPoints = 0;
+        updateUI(); renderStack();
+    }
+
+    function triggerStrike(cardEl) {
+        strikes++; streak = 0;
+        document.getElementById('board').classList.remove('on-fire');
+        
+        // Fly card off top for wrong choice
+        cardEl.style.transition = 'all 0.4s ease-in';
+        cardEl.style.transform = 'translateY(-500px) rotate(15deg)';
+        cardEl.style.opacity = '0';
+
+        shakeScreen(true);
+        document.getElementById('strike-overlay').style.display = 'flex';
+        setTimeout(() => { document.getElementById('strike-overlay').style.display = 'none'; }, 800);
+        updateStrikeIcons();
+        nextCard();
+    }
+
+    function shakeScreen(intense = false) {
+        const container = document.getElementById('game-container');
+        const power = intense ? 15 : 5;
+        container.style.transform = `translateX(${power}px)`;
+        setTimeout(() => { container.style.transform = `translateX(-${power}px)`; }, 50);
+        setTimeout(() => { container.style.transform = `translateX(0)`; }, 100);
+    }
+
+    function renderStack() {
+        const deckArea = document.getElementById('deck-area');
+        deckArea.innerHTML = '';
+        if (currentIdx + 1 < deck.length) {
+            const p = createCard(deck[currentIdx + 1], 'peek', currentIdx + 2);
+            p.style.transform = `translateY(8px) scale(0.96)`; 
+            deckArea.appendChild(p);
+        }
+        if (currentIdx < deck.length) {
+            const a = createCard(deck[currentIdx], 'active', currentIdx + 1);
+            deckArea.appendChild(a);
+            initDrag(a);
+        }
+    }
+
+    function createCard(text, type, num) {
+        const d = document.createElement('div'); d.className = `stack-item card ${type}`;
+        d.innerHTML = `<div style="font-size:18px; font-weight:900; text-align:center; padding:0 15px;">${text}</div><div style="font-size:9px; opacity:0.4; margin-top:4px;">${num} / 9</div>`;
+        return d;
+    }
+
+    function initDrag(el) {
+        let x = 0, y = 0;
+        interact(el).draggable({
+            listeners: {
+                move(e) { x += e.dx; y += e.dy; e.target.style.transform = `translate(${x}px, ${y}px) rotate(${x/15}deg)`; },
+                end(e) {
+                    if (y < -100) resolve(true, e.target);
+                    else if (y > 100) resolve(false, e.target);
+                    else { e.target.style.transition = 'transform 0.2s'; e.target.style.transform = `translate(0,0)`; x = 0; y = 0; }
+                }
+            }
+        });
+    }
+
+    function resolve(isKeep, cardEl) {
+        const val = cardEl.querySelector('div').innerText;
+        const rank = currentQuestion.answers[val];
+
+        if (isKeep) {
+            if (rank) {
+                const points = pointValues[rank-1];
+                const slot = document.getElementById(`s${rank}`);
+                slot.querySelector('.slot-text').innerText = val;
+                
+                const slotRect = slot.getBoundingClientRect();
+                const cardRect = cardEl.getBoundingClientRect();
+                const deckAreaRect = document.getElementById('deck-area').getBoundingClientRect();
+                const targetX = (slotRect.left + slotRect.width / 2) - (deckAreaRect.left + cardRect.width / 2);
+                const targetY = (slotRect.top + slotRect.height / 2) - (deckAreaRect.top + cardRect.height / 2);
+                
+                cardEl.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                cardEl.style.transform = `translate(${targetX}px, ${targetY}px) scale(0.1) rotate(0deg)`;
+                cardEl.style.opacity = '0';
+                
+                setTimeout(() => {
+                    slot.classList.add('flipped');
+                    confetti({ particleCount: points * 2, spread: 70, origin: { y: slotRect.top / window.innerHeight, x: slotRect.left / window.innerWidth }, colors: ['#ffffff', '#fbc531'] });
+                }, 200);
+                
+                currentScore += points; found++; streak++;
+                if (streak > maxStreak) maxStreak = streak;
+                if (streak >= 3) document.getElementById('board').classList.add('on-fire');
+
+                updateUI();
+                if (found === 5) { setTimeout(endGame, 500); } else { setTimeout(nextCard, 450); }
+            } else {
+                triggerStrike(cardEl);
+            }
+        } else {
+            // Pass logic: animate off bottom
+            cardEl.style.transition = 'all 0.3s ease-in';
+            cardEl.style.transform = 'translateY(500px) rotate(-10deg)';
+            cardEl.style.opacity = '0';
+
+            if (!rank) { dodgedCount++; } else { missedPoints += pointValues[rank-1]; streak = 0; document.getElementById('board').classList.remove('on-fire'); }
+            nextCard();
+        }
+    }
+
+    function updateUI() { document.getElementById('score-display').innerText = currentScore; }
+    function updateStrikeIcons() { const icons = document.querySelectorAll('.strike-x'); if (strikes > 0 && strikes <= 3) icons[strikes - 1].classList.add('active'); }
+    
+    function nextCard() {
+        currentIdx++;
+        if (found === 5 || strikes >= 3 || currentIdx >= deck.length) { setTimeout(endGame, 1000); } else { renderStack(); }
+    }
+
+    function endGame() {
+        // Bug fix: Explicitly clear deck area so no cards linger
+        document.getElementById('deck-area').innerHTML = '';
+
+        Object.keys(currentQuestion.answers).forEach((ans, index) => {
+            const rank = currentQuestion.answers[ans];
+            const slot = document.getElementById(`s${rank}`);
+            if (!slot.classList.contains('flipped')) {
+                slot.querySelector('.slot-text').innerText = ans;
+                slot.classList.add('missed');
+                setTimeout(() => { slot.classList.add('flipped'); }, index * 100);
+            }
+        });
+
+        if (found === 5) { confetti({ particleCount: 150, spread: 180, origin: { y: 0.6 } }); }
+
+        setTimeout(() => {
+            const endScreen = document.getElementById('end-screen');
+            const compMsg = document.getElementById('completion-msg');
+            endScreen.style.display = 'flex';
+            
+            if (strikes >= 3) compMsg.innerText = "STRIKE OUT!";
+            else if (found === 5) compMsg.innerText = "PERFECT CLEAR!";
+            else compMsg.innerText = "SURVEY ENDED";
+
+            document.getElementById('final-points').innerText = currentScore;
+            document.getElementById('stat-found').innerText = `${found}/5`;
+            document.getElementById('stat-dodged').innerText = `${dodgedCount}/4`;
+            document.getElementById('stat-missed').innerText = missedPoints;
+            document.getElementById('stat-streak').innerText = maxStreak;
+        }, 1500);
+    }
+
+    initGame();
+</script>
+</body>
+</html>
