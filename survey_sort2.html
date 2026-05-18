@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Sort: A/B Prototype</title>
+    <style>
+        :root {
+            --feud-blue: #003399;
+            --feud-gold: #ffcc00;
+            --feud-dark: #001a4d;
+            --strike-red: #ff0000;
+            --hover-blue: #1a53ff;
+            --locked-gold: #b38f00;
+            --pot-green: #00ffcc;
+            --coin-gold: #ffd700;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: var(--feud-dark);
+            font-family: 'Arial Black', sans-serif;
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            user-select: none;
+        }
+
+        /* SCREEN SWITCHING */
+        .screen {
+            display: none;
+            flex-direction: column;
+            width: 95%;
+            max-width: 600px;
+            height: 95vh;
+            justify-content: space-between;
+            padding: 15px;
+            box-sizing: border-box;
+            position: relative;
+        }
+        .screen.active {
+            display: flex;
+        }
+
+        /* --- START SCREEN STYLES --- */
+        #start-screen {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            gap: 25px;
+        }
+        .logo-area {
+            background: linear-gradient(135deg, #051e58, #001133);
+            border: 4px solid var(--feud-gold);
+            padding: 25px 35px;
+            border-radius: 25px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6);
+            transform: rotate(-1deg);
+        }
+        .logo-title {
+            font-size: 2.8rem;
+            color: white;
+            margin: 0;
+            line-height: 1;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .logo-sub {
+            color: var(--feud-gold);
+            font-size: 1.3rem;
+            margin-top: 10px;
+            letter-spacing: 2px;
+        }
+        .start-description {
+            font-size: 0.95rem;
+            color: #b0c4de;
+            line-height: 1.5;
+            max-width: 85%;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+        }
+        .test-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 420px;
+        }
+        .test-btn {
+            padding: 16px 20px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+            cursor: pointer;
+        }
+        .test-btn-a {
+            background: linear-gradient(135deg, #ff8c00, #e06c00);
+            border: 3px solid #ffcc80;
+        }
+        .test-btn-b {
+            background: linear-gradient(135deg, #aa00ff, #7a00cc);
+            border: 3px solid #e1b3ff;
+        }
+        .test-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .test-btn-label {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+        }
+        .test-btn-title {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: white;
+        }
+        .test-btn-desc {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 4px;
+            font-family: 'Arial', sans-serif;
+        }
+        .test-btn-badge {
+            background: white;
+            color: black;
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 900;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* --- GAME HEADER --- */
+        .game-header { 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            padding-bottom: 10px; 
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            margin-bottom: 10px;
+            gap: 12px;
+            width: 100%;
+        }
+
+        /* Giant Centered Loot Pot Progress Meter */
+        .pot-wrapper {
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            width: 100%;
+        }
+        .pot-label {
+            font-size: 0.9rem; 
+            color: var(--pot-green); 
+            margin-bottom: 6px; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pot-meter-container {
+            width: 310px; /* Made bigger to feel premium */
+            height: 52px; /* Made bigger to feel premium */
+            background: #111; 
+            border: 4px solid #444; 
+            border-radius: 26px; 
+            position: relative; 
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0,0,0,0.6) inset;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        .pot-meter-fill {
+            width: 100%; 
+            height: 100%; 
+            background: linear-gradient(90deg, #00997a, var(--pot-green));
+            transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1), background 0.4s;
+            box-shadow: 0 0 20px var(--pot-green);
+        }
+        .pot-text-wrapper {
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .pot-text {
+            font-size: 1.65rem; /* Bigger text */
+            font-weight: 900; 
+            color: white; 
+            text-shadow: 1px 2px 4px rgba(0,0,0,0.8);
+        }
+        
+        .pot-flash-red { border-color: var(--strike-red) !important; transform: scale(1.06); }
+
+        /* Strike Tracker centered directly under Loot Pot */
+        .strike-bar { 
+            display: flex; 
+            gap: 10px; 
+            align-items: center;
+            justify-content: center;
+            margin-top: 2px;
+        }
+        .strike-box {
+            width: 36px; 
+            height: 36px; 
+            border: 2px solid #555; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 1.6rem; 
+            color: var(--strike-red); 
+            background: #111; 
+            border-radius: 5px;
+            transition: all 0.2s ease;
+        }
+        .strike-active { border-color: var(--strike-red); box-shadow: 0 0 12px var(--strike-red); }
+
+        /* Sequential Loading Classes */
+        .seq-hidden { opacity: 0; transform: translateY(15px); pointer-events: none; }
+        .seq-visible { opacity: 1; transform: translateY(0); pointer-events: auto; transition: opacity 0.5s ease-out, transform 0.5s ease-out; }
+
+        .question-box {
+            background: linear-gradient(to bottom, #333, #000); border: 4px solid var(--feud-gold);
+            padding: 16px; border-radius: 15px; text-align: center; margin: 10px 0;
+            font-size: 1.1rem;
+        }
+
+        .board { flex-grow: 1; display: flex; flex-direction: column; gap: 12px; justify-content: center; width: 100%; }
+        
+        .slot {
+            height: 65px; background-color: var(--feud-blue); border: 2px solid white;
+            display: flex; align-items: center; position: relative; border-radius: 8px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .slot.drag-over { background-color: var(--hover-blue); transform: scale(1.02); border-color: var(--feud-gold); }
+
+        .slot::before {
+            content: attr(data-rank); width: 50px; text-align: center;
+            color: var(--feud-gold); font-size: 1.6rem; border-right: 2px solid rgba(255,255,255,0.3); margin-right: 15px;
+        }
+
+        .slot::after {
+            content: attr(data-pts) " PTS"; position: absolute; right: 20px;
+            font-size: 0.9rem; color: rgba(255,255,255,0.5); font-weight: bold;
+        }
+
+        .slot.locked { background: linear-gradient(90deg, var(--locked-gold), #ffd700); pointer-events: none; border-color: white;}
+        .slot.locked::after { color: #000; font-weight: bold; }
+
+        /* Wrong Slot Styling */
+        .slot.wrong { background: linear-gradient(90deg, #990000, #cc0000); border-color: var(--strike-red); }
+        .slot.wrong::after { color: #fff; font-weight: bold; }
+
+        .answer-pool {
+            display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;
+            padding: 15px; background: rgba(255,255,255,0.05); border-radius: 15px;
+            min-height: 100px; margin-bottom: 10px; align-content: center;
+            width: 100%;
+        }
+
+        .answer-tile {
+            background: linear-gradient(to bottom, #fff, #ddd); color: #000;
+            padding: 12px 18px; border-radius: 8px; cursor: grab; font-weight: bold; 
+            text-transform: uppercase; box-shadow: 0 4px #444; user-select: none;
+            display: flex; align-items: center; justify-content: center; font-size: 1.05rem;
+        }
+        
+        .slot .answer-tile { flex-grow: 1; margin-right: 20px; box-shadow: none; height: 80%; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) scale(1.05); }
+            25% { transform: translateX(-8px) scale(1.05); }
+            50% { transform: translateX(8px) scale(1.05); }
+            75% { transform: translateX(-8px) scale(1.05); }
+        }
+        .shake-error { animation: shake 0.4s ease-in-out; background-color: var(--strike-red) !important; border-color: white !important;}
+
+        .controls { display: flex; gap: 20px; justify-content: center; padding-bottom: 10px; width: 100%; }
+        button {
+            padding: 18px 40px; font-size: 1.4rem; background-color: var(--feud-gold);
+            color: var(--feud-dark); border: none; border-radius: 50px; cursor: pointer; font-weight: 900;
+            width: 100%; max-width: 400px; box-shadow: 0 4px #b38f00; transition: transform 0.1s, opacity 0.2s, background-color 0.2s;
+        }
+        button:active { transform: translateY(4px); box-shadow: 0 0 #b38f00; }
+        
+        /* Disabled Button Styling */
+        button:disabled { 
+            background-color: #444; 
+            color: #888; 
+            box-shadow: 0 4px #222; 
+            pointer-events: none; 
+        }
+        
+        /* Animations */
+        #big-strike {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1);
+            font-size: 18rem; color: var(--strike-red); display: none; z-index: 200; pointer-events: none;
+            -webkit-text-stroke: 6px white; text-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+        
+        .flying-strike {
+            transition: top 0.4s ease-in, left 0.4s ease-in, transform 0.4s ease-in, opacity 0.4s ease-in;
+        }
+
+        .floating-penalty {
+            position: fixed; color: #ff4444; font-size: 2.8rem; font-weight: 900;
+            text-shadow: 0 2px 5px black, 0 0 12px #ff0000; pointer-events: none; z-index: 1000;
+            animation: floatDownFade 1.2s forwards cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        @keyframes floatDownFade {
+            0% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, 100px) scale(0.8); }
+        }
+
+        /* Overlay Styles */
+        #completion-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 15, 40, 0.95); z-index: 3000;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        #completion-overlay.active { display: flex; opacity: 1; }
+        
+        .overlay-card {
+            background: linear-gradient(to bottom, #111, #000); border: 4px solid var(--feud-gold);
+            padding: 30px; border-radius: 20px; text-align: center;
+            transform: scale(0.8); transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8); width: 85%; max-width: 420px;
+            position: relative;
+            overflow: hidden;
+        }
+        #completion-overlay.active .overlay-card { transform: scale(1); }
+        
+        .overlay-title { font-size: 2.2rem; margin: 0 0 10px 0; color: var(--feud-gold); }
+        .overlay-message { font-size: 1.1rem; color: white; margin-bottom: 25px; line-height: 1.4; font-family: 'Arial', sans-serif;}
+        .overlay-reward { 
+            font-size: 3.6rem; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 15px; 
+            font-family: 'Arial Black', sans-serif;
+        }
+        
+        .perfect-clear { border-color: var(--pot-green) !important; box-shadow: 0 0 45px rgba(0, 255, 204, 0.5); }
+        .perfect-clear .overlay-title { color: var(--pot-green); text-shadow: 0 0 15px var(--pot-green); }
+        .perfect-clear .overlay-reward { color: var(--pot-green); text-shadow: 0 0 15px var(--pot-green); animation: pulse 1.5s infinite; }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Coin SVG Icons & Mini-Visuals */
+        .coin-icon {
+            width: 28px;
+            height: 28px;
+            animation: rotateCoin 3s linear infinite;
+        }
+        @keyframes rotateCoin {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        /* Coins Scatter Decoration on Overlay */
+        .overlay-coins-art {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .scatter-coin {
+            width: 45px;
+            height: 45px;
+            filter: drop-shadow(0 4px 10px rgba(255, 215, 0, 0.4));
+        }
+        .scatter-coin:nth-child(2) {
+            transform: translateY(-10px) scale(1.2);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- --- START SCREEN --- -->
+    <div id="start-screen" class="screen active">
+        <div class="logo-area">
+            <h1 class="logo-title">SURVEY SORT</h1>
+            <div class="logo-sub">LOOTER EDITION</div>
+        </div>
+        <p class="start-description">
+            Drag and sort popular answers to match the consensus! Guard your Loot Pot before strikes drain your bounty!
+        </p>
+        <div class="test-buttons">
+            <button class="test-btn test-btn-a" onclick="startGame(3)">
+                <div class="test-btn-label">
+                    <span class="test-btn-title">TEST A: 3 ANSWERS</span>
+                    <span class="test-btn-desc">$3,000 Starting Pot • -$1,000 per strike</span>
+                </div>
+                <span class="test-btn-badge">6 Combos</span>
+            </button>
+            <button class="test-btn test-btn-b" onclick="startGame(4)">
+                <div class="test-btn-label">
+                    <span class="test-btn-title">TEST B: 4 ANSWERS</span>
+                    <span class="test-btn-desc">$5,000 Starting Pot • -$1,500 per strike</span>
+                </div>
+                <span class="test-btn-badge">24 Combos</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- --- GAME SCREEN --- -->
+    <div id="game-screen" class="screen">
+        <div class="game-header">
+            <div class="pot-wrapper">
+                <div class="pot-label">
+                    <!-- Gold Coin SVG Icon inside Pot Header -->
+                    <svg class="coin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" fill="var(--coin-gold)" stroke="#b38f00"/>
+                        <circle cx="12" cy="12" r="7" fill="none" stroke="#ffe680"/>
+                        <path d="M12 8v8M10 10h4M10 14h4" stroke="#b38f00" stroke-linecap="round"/>
+                    </svg>
+                    Loot Pot
+                </div>
+                <div class="pot-meter-container" id="pot-meter">
+                    <div class="pot-meter-fill" id="pot-fill"></div>
+                    <div class="pot-text-wrapper">
+                        <!-- Pulsing Gold Coin SVG Icon -->
+                        <svg class="coin-icon" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" fill="var(--coin-gold)" stroke="#b38f00" stroke-width="2"/>
+                            <circle cx="12" cy="12" r="6" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+                            <path d="M11 8v8h2M9 10h5M9 14h5" stroke="#8a6d00" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <div class="pot-text" id="pot-text">5,000</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="strike-bar">
+                <div class="strike-box" id="s1"></div>
+                <div class="strike-box" id="s2"></div>
+                <div class="strike-box" id="s3"></div>
+            </div>
+        </div>
+
+        <!-- Dynamically Populated Board Slots -->
+        <div class="board" id="game-board"></div>
+
+        <div class="question-box seq-hidden" id="q-box"><h2 id="question-text" style="margin:0;">Loading...</h2></div>
+
+        <div class="answer-pool seq-hidden" id="pool" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+        <div class="controls">
+            <button id="lock-btn" onclick="lockItIn()">LOCK IT IN!</button>
+        </div>
+    </div>
+
+    <div id="big-strike">X</div>
+
+    <!-- COMPLETION OVERLAY WITH CLAIM INTERACTION -->
+    <div id="completion-overlay">
+        <div class="overlay-card" id="overlay-card" style="position: relative; z-index: 2;">
+            <div class="overlay-coins-art">
+                <!-- Coin Visual Decors -->
+                <svg class="scatter-coin" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" fill="var(--coin-gold)" stroke="#b38f00" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="6" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+                </svg>
+                <svg class="scatter-coin" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" fill="var(--coin-gold)" stroke="#b38f00" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="6" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+                </svg>
+                <svg class="scatter-coin" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" fill="var(--coin-gold)" stroke="#b38f00" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="6" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+                </svg>
+            </div>
+            <h2 class="overlay-title" id="overlay-title">CLEARED!</h2>
+            <div class="overlay-message" id="overlay-message">
+                Message goes here
+            </div>
+            <button onclick="backToMenu()" style="width: 100%;" id="claim-btn">CLAIM COINS</button>
+        </div>
+    </div>
+
+    <!-- Self-contained, High-Performance Confetti Canvas (Fixed to window viewport to celebrate instantly) -->
+    <canvas id="confetti-canvas" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 4000;"></canvas>
+
+    <script>
+        // Self-contained Vector Confetti System (Fires instantly on the game screen and persists over overlay)
+        class ConfettiSystem {
+            constructor() {
+                this.canvas = document.getElementById('confetti-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.animationFrame = null;
+                this.colors = ['#00ffcc', '#ffd700', '#ffffff', '#ff8c00', '#ff0055', '#44aaff'];
+                
+                window.addEventListener('resize', () => {
+                    if (this.particles.length > 0) {
+                        this.resize();
+                    }
+                });
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            burst(isPerfect) {
+                this.resize();
+                cancelAnimationFrame(this.animationFrame);
+                this.particles = [];
+                
+                const count = isPerfect ? 160 : 70;
+                
+                // Spawn vector particles shooting from left & right base corners of the viewport
+                for (let i = 0; i < count; i++) {
+                    const side = i % 2 === 0 ? 'left' : 'right';
+                    this.particles.push({
+                        x: side === 'left' ? 0 : this.canvas.width,
+                        y: this.canvas.height * 0.85,
+                        vx: (side === 'left' ? 1 : -1) * (Math.random() * 12 + 6),
+                        vy: -(Math.random() * 18 + 12),
+                        gravity: 0.38,
+                        drag: 0.965,
+                        rotation: Math.random() * 360,
+                        rotationSpeed: (Math.random() * 10 - 5),
+                        width: Math.random() * 7 + 6,
+                        height: Math.random() * 13 + 9,
+                        color: this.colors[Math.floor(Math.random() * this.colors.length)],
+                        opacity: 1
+                    });
+                }
+                
+                this.animate();
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                let active = false;
+
+                for (let i = 0; i < this.particles.length; i++) {
+                    const p = this.particles[i];
+                    
+                    p.vx *= p.drag;
+                    p.vy += p.gravity;
+                    p.vy *= p.drag;
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.rotation += p.rotationSpeed;
+                    
+                    if (p.y > this.canvas.height * 0.5) {
+                        p.opacity -= 0.008;
+                    } else {
+                        p.opacity -= 0.002;
+                    }
+                    
+                    if (p.opacity > 0 && p.y < this.canvas.height && p.x >= 0 && p.x <= this.canvas.width) {
+                        active = true;
+                        
+                        this.ctx.save();
+                        this.ctx.translate(p.x, p.y);
+                        this.ctx.rotate(p.rotation * Math.PI / 180);
+                        this.ctx.fillStyle = p.color;
+                        this.ctx.globalAlpha = p.opacity;
+                        this.ctx.fillRect(-p.width / 2, -p.height / 2, p.width, p.height);
+                        this.ctx.restore();
+                    }
+                }
+
+                if (active) {
+                    this.animationFrame = requestAnimationFrame(() => this.animate());
+                } else {
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                }
+            }
+            
+            clear() {
+                cancelAnimationFrame(this.animationFrame);
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.particles = [];
+            }
+        }
+
+        const confettiSystem = new ConfettiSystem();
+
+        // Database structured for 4 answers max. Slice for 3 answers depending on selection.
+        const database = [
+            { q: "Name something a cat does all day.", a: ["Sleep", "Eat", "Clean Itself", "Meow"], p: [52, 18, 14, 9] },
+            { q: "Name a fruit people usually buy by the bunch.", a: ["Bananas", "Grapes", "Cherries", "Plantains"], p: [55, 25, 10, 6] },
+            { q: "Name a place you'd hate to be stuck in an elevator with a cat.", a: ["Work", "Date", "Airport", "Hospital"], p: [40, 25, 15, 10] },
+            { q: "Name something you'd find in a magician's hat.", a: ["Rabbit", "Wand", "Flowers", "Cards"], p: [45, 20, 15, 12] }
+        ];
+
+        let answerCount = 4; // Managed via start screen selection
+        let currentQuestion = {};
+        let strikes = 0;
+        let isGameOver = false;
+        let isAnimating = false;
+        
+        // Scaled Coin Values depending on dynamic start parameters
+        let currentPot = 5000;
+        let maxPot = 5000;
+        let potTiers = [5000, 3500, 2000, 500]; 
+
+        let seqTimeout1, seqTimeout2;
+
+        function formatCoins(num) {
+            return num.toLocaleString() + " COINS";
+        }
+
+        // Start page choice handler
+        function startGame(mode) {
+            answerCount = mode;
+            
+            // Set up A/B Scaled balancing metrics dynamically
+            if (answerCount === 3) {
+                maxPot = 3000;
+                potTiers = [3000, 2000, 1000, 0];
+            } else {
+                maxPot = 5000;
+                potTiers = [5000, 3500, 2000, 500];
+            }
+            
+            document.getElementById('start-screen').classList.remove('active');
+            document.getElementById('game-screen').classList.add('active');
+            
+            buildBoardSlots();
+            nextRound();
+        }
+
+        function backToMenu() {
+            confettiSystem.clear();
+            document.getElementById('completion-overlay').classList.remove('active');
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('start-screen').classList.add('active');
+        }
+
+        // Dynamically build slots depending on 3 vs 4 choice
+        function buildBoardSlots() {
+            const board = document.getElementById('game-board');
+            board.innerHTML = '';
+            for (let i = 1; i <= answerCount; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'slot';
+                slot.setAttribute('data-rank', i);
+                slot.ondrop = drop;
+                slot.ondragover = allowDrop;
+                slot.ondragenter = dragEnter;
+                slot.ondragleave = dragLeave;
+                board.appendChild(slot);
+            }
+        }
+
+        function checkBoardFull() {
+            const slots = document.querySelectorAll('.slot');
+            let filledCount = 0;
+            slots.forEach(slot => {
+                if (slot.children.length > 0) filledCount++;
+            });
+            const lockBtn = document.getElementById('lock-btn');
+            lockBtn.disabled = (filledCount < slots.length);
+        }
+
+        function nextRound() {
+            strikes = 0;
+            isGameOver = false;
+            isAnimating = false;
+            currentPot = potTiers[0];
+            
+            clearTimeout(seqTimeout1);
+            clearTimeout(seqTimeout2);
+            confettiSystem.clear();
+            
+            const qBox = document.getElementById('q-box');
+            const poolBox = document.getElementById('pool');
+            
+            qBox.classList.remove('seq-visible');
+            qBox.classList.add('seq-hidden');
+            poolBox.classList.remove('seq-visible');
+            poolBox.classList.add('seq-hidden');
+            
+            document.getElementById('completion-overlay').classList.remove('active');
+            
+            document.getElementById('pot-fill').style.width = '100%';
+            document.getElementById('pot-fill').style.background = 'linear-gradient(90deg, #00997a, var(--pot-green))';
+            document.getElementById('pot-text').innerText = formatCoins(currentPot);
+            
+            document.querySelectorAll('.strike-box').forEach(s => { s.innerText = ''; s.classList.remove('strike-active'); });
+            
+            const lockBtn = document.getElementById('lock-btn');
+            lockBtn.style.display = 'block';
+            
+            currentQuestion = database[Math.floor(Math.random() * database.length)];
+            document.getElementById('question-text').innerText = `"${currentQuestion.q}"`;
+            
+            const slots = document.querySelectorAll('.slot');
+            slots.forEach((slot, i) => {
+                slot.classList.remove('locked', 'drag-over', 'shake-error', 'wrong');
+                slot.innerHTML = '';
+                slot.setAttribute('data-correct-rank', i + 1);
+                slot.setAttribute('data-pts', currentQuestion.p[i]);
+            });
+
+            const pool = document.getElementById('pool');
+            pool.innerHTML = '';
+            
+            // Slice the question pool to only match the selected answerCount
+            let slicedAnswers = currentQuestion.a.slice(0, answerCount);
+            let shuffled = slicedAnswers.map((ans, index) => ({ text: ans, rank: index + 1 }));
+            shuffled.sort(() => Math.random() - 0.5);
+            
+            shuffled.forEach((item) => {
+                const div = document.createElement('div');
+                div.className = 'answer-tile';
+                div.draggable = true;
+                div.id = 'ans-' + Math.random().toString(36).substr(2, 9);
+                div.innerText = item.text;
+                div.setAttribute('data-target-rank', item.rank); 
+                
+                div.ondragstart = (e) => {
+                    if (isGameOver || isAnimating) { e.preventDefault(); return; }
+                    e.dataTransfer.setData("text", e.target.id);
+                    
+                    if (e.target.parentElement.classList.contains('slot')) {
+                        e.target.parentElement.classList.remove('wrong');
+                    }
+                };
+                
+                pool.appendChild(div);
+            });
+
+            checkBoardFull();
+            
+            // Sequential reveal steps: 1. Board renders empty (with points) -> 2. Question loads -> 3. Answers load
+            seqTimeout1 = setTimeout(() => {
+                qBox.classList.remove('seq-hidden');
+                qBox.classList.add('seq-visible');
+            }, 400);
+            
+            seqTimeout2 = setTimeout(() => {
+                poolBox.classList.remove('seq-hidden');
+                poolBox.classList.add('seq-visible');
+            }, 800);
+        }
+
+        function dragEnter(ev) { if(!isGameOver && !isAnimating) ev.currentTarget.classList.add('drag-over'); }
+        function dragLeave(ev) { ev.currentTarget.classList.remove('drag-over'); }
+        function allowDrop(ev) { if(!isGameOver && !isAnimating) ev.preventDefault(); }
+
+        function drop(ev) {
+            if (isGameOver || isAnimating) return;
+            ev.preventDefault();
+            const id = ev.dataTransfer.getData("text");
+            const draggedElement = document.getElementById(id);
+            if (!draggedElement) return;
+
+            let target = ev.currentTarget;
+            
+            if (target.classList.contains('slot')) {
+                target.classList.remove('drag-over');
+                target.classList.remove('wrong'); 
+                
+                if (!target.classList.contains('locked')) {
+                    if (target.children.length > 0) {
+                        document.getElementById('pool').appendChild(target.children[0]);
+                    }
+                    target.appendChild(draggedElement);
+                }
+            } else if (target.id === 'pool') {
+                target.appendChild(draggedElement);
+            }
+
+            checkBoardFull();
+        }
+
+        function lockItIn() {
+            if (isGameOver || isAnimating) return;
+            
+            const slots = document.querySelectorAll('.slot');
+            let tilesToCheck = [];
+
+            slots.forEach((slot) => {
+                if (!slot.classList.contains('locked') && slot.children.length > 0) {
+                    tilesToCheck.push({
+                        slot: slot,
+                        tile: slot.children[0],
+                        slotRank: parseInt(slot.getAttribute('data-rank')),
+                        tileRank: parseInt(slot.children[0].getAttribute('data-target-rank'))
+                    });
+                }
+            });
+
+            let mistakesMadeThisTurn = false;
+
+            tilesToCheck.forEach(item => {
+                item.slot.classList.remove('wrong', 'shake-error');
+
+                if (item.slotRank === item.tileRank) {
+                    item.slot.classList.add('locked');
+                    item.tile.draggable = false;
+                } else {
+                    mistakesMadeThisTurn = true;
+                    item.slot.classList.add('wrong', 'shake-error');
+                    
+                    setTimeout(() => {
+                        item.slot.classList.remove('shake-error');
+                    }, 400);
+                }
+            });
+
+            if (mistakesMadeThisTurn) {
+                isAnimating = true;
+                document.getElementById('lock-btn').disabled = true;
+                
+                strikes++;
+                const newPot = potTiers[Math.min(strikes, 3)];
+                const penaltyAmount = currentPot - newPot;
+                
+                const bigStrike = document.getElementById('big-strike');
+                const potMeter = document.getElementById('pot-meter');
+                const potFill = document.getElementById('pot-fill');
+                const potText = document.getElementById('pot-text');
+                
+                bigStrike.className = ''; 
+                bigStrike.style.display = 'block';
+                bigStrike.style.top = '50%';
+                bigStrike.style.left = '50%';
+                bigStrike.style.transform = 'translate(-50%, -50%) scale(1)';
+                bigStrike.style.opacity = '1';
+
+                setTimeout(() => {
+                    const potRect = potMeter.getBoundingClientRect();
+                    const targetX = potRect.left + potRect.width / 2;
+                    const targetY = potRect.top + potRect.height / 2;
+
+                    bigStrike.classList.add('flying-strike');
+                    bigStrike.style.top = targetY + 'px';
+                    bigStrike.style.left = targetX + 'px';
+                    bigStrike.style.transform = 'translate(-50%, -50%) scale(0.2)';
+                    bigStrike.style.opacity = '0';
+
+                    setTimeout(() => {
+                        bigStrike.style.display = 'none';
+                        
+                        potMeter.classList.add('shake-error', 'pot-flash-red');
+                        setTimeout(() => potMeter.classList.remove('shake-error', 'pot-flash-red'), 400);
+
+                        currentPot = newPot;
+                        potFill.style.width = (currentPot / maxPot) * 100 + '%';
+                        potText.innerText = formatCoins(currentPot);
+                        
+                        // Dynamically update pot fill colors based on strike stage
+                        if (strikes === 1) potFill.style.background = '#ffcc00'; // Yellow
+                        if (strikes === 2) potFill.style.background = '#ff6600'; // Orange
+                        if (strikes === 3) {
+                            if (currentPot === 0) {
+                                potFill.style.background = '#ff0000'; // Red
+                            } else {
+                                potFill.style.background = '#b30000'; // Deep Red
+                            }
+                        }
+
+                        if (penaltyAmount > 0) {
+                            const minusText = document.createElement('div');
+                            minusText.className = 'floating-penalty';
+                            minusText.innerText = `-$${penaltyAmount.toLocaleString()}`;
+                            minusText.style.top = potRect.bottom + 'px';
+                            minusText.style.left = targetX + 'px';
+                            document.body.appendChild(minusText);
+                            setTimeout(() => minusText.remove(), 1200);
+                        }
+
+                        if(strikes <= 3) {
+                            const sBox = document.getElementById('s' + strikes);
+                            sBox.innerText = 'X';
+                            sBox.classList.add('strike-active');
+                        }
+
+                        isAnimating = false;
+                        checkBoardFull(); 
+                        checkBoardClear();
+
+                    }, 400); 
+                }, 600); 
+            } else {
+                checkBoardClear();
+            }
+        }
+
+        function checkBoardClear() {
+            const slots = document.querySelectorAll('.slot');
+            if (Array.from(slots).every(s => s.classList.contains('locked'))) {
+                isGameOver = true;
+                document.getElementById('lock-btn').style.display = 'none';
+                
+                // INSTANT high-dopamine feedback celebration on the game board!
+                if (currentPot > 0) {
+                    confettiSystem.burst(strikes === 0);
+                }
+                
+                // Delayed slide-in overlay transition to let the board-cleared state breathe (1000ms)
+                setTimeout(() => showEndGameOverlay(), 1000);
+            }
+        }
+
+        function showEndGameOverlay() {
+            const overlay = document.getElementById('completion-overlay');
+            const card = document.getElementById('overlay-card');
+            const title = document.getElementById('overlay-title');
+            const message = document.getElementById('overlay-message');
+
+            // SVG Gold Coin Markup
+            const coinSvg = `
+                <svg class="coin-icon" style="width: 38px; height: 38px;" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" fill="var(--coin-gold)" stroke="#b38f00" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="6" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+                    <path d="M11 8v8h2M9 10h5M9 14h5" stroke="#8a6d00" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            `;
+
+            if (strikes === 0) {
+                card.className = 'overlay-card perfect-clear';
+                title.innerText = '⭐⭐ PERFECT! ⭐⭐';
+                message.innerHTML = `Flawless sort! You protected the maximum Loot Pot!<br><span class="overlay-reward">${coinSvg} $${currentPot.toLocaleString()}</span>`;
+            } else if (currentPot > 0) {
+                card.className = 'overlay-card';
+                title.innerText = 'SURVEY CLEARED!';
+                message.innerHTML = `Good job! You successfully salvaged the loot!<br><span class="overlay-reward" style="color: var(--feud-gold);">${coinSvg} $${currentPot.toLocaleString()}</span>`;
+            } else {
+                card.className = 'overlay-card';
+                title.innerText = 'BOARD FINISHED';
+                message.innerHTML = `You solved the puzzle, but the pot ran completely dry!<br><span class="overlay-reward" style="color: #777;">$0</span>`;
+            }
+
+            overlay.classList.add('active');
+        }
+    </script>
+</body>
+</html>
