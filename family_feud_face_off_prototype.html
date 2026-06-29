@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Family Feud Go - Face Off Prototype</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap');
+
+    body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #111;
+        font-family: 'Oswald', sans-serif;
+        overflow: hidden;
+    }
+
+    /* The main "Canvas" simulating a mobile screen */
+    #game-canvas {
+        position: relative;
+        width: 100%;
+        max-width: 400px;
+        height: 100vh;
+        max-height: 850px;
+        background-color: #0066e6; /* Slightly deeper blue for contrast */
+        box-shadow: 0 0 30px rgba(0,0,0,0.9);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Screen Shake Animation */
+    @keyframes heavyShake {
+        0% { transform: translate(1px, 1px) rotate(0deg); }
+        10% { transform: translate(-3px, -2px) rotate(-1deg); }
+        20% { transform: translate(-3px, 0px) rotate(1deg); }
+        30% { transform: translate(3px, 2px) rotate(0deg); }
+        40% { transform: translate(1px, -1px) rotate(1deg); }
+        50% { transform: translate(-1px, 2px) rotate(-1deg); }
+        60% { transform: translate(-3px, 1px) rotate(0deg); }
+        70% { transform: translate(3px, 1px) rotate(-1deg); }
+        80% { transform: translate(-1px, -1px) rotate(1deg); }
+        90% { transform: translate(1px, 2px) rotate(0deg); }
+        100% { transform: translate(0px, 0px) rotate(0deg); }
+    }
+    .shake { animation: heavyShake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+
+    /* --- Top Section (Split Background + Studio Lights) --- */
+    .top-section {
+        background: linear-gradient(to right, transparent 50%, #ff0055 50%);
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 15px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Studio Lights */
+    .searchlight {
+        position: absolute;
+        top: -10%;
+        width: 150px;
+        height: 150%;
+        background: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, transparent 80%);
+        transform-origin: top center;
+        pointer-events: none;
+        z-index: 0;
+    }
+    .light-left { left: 10%; animation: sweep 6s infinite alternate ease-in-out; }
+    .light-right { right: 10%; animation: sweep 7s infinite alternate-reverse ease-in-out; }
+    
+    @keyframes sweep {
+        0% { transform: rotate(-30deg); }
+        100% { transform: rotate(30deg); }
+    }
+
+    /* --- Game Title --- */
+    .game-title {
+        width: 100%;
+        text-align: center;
+        font-size: 36px;
+        font-weight: 700;
+        color: #fffb00;
+        -webkit-text-stroke: 1.5px #222;
+        text-shadow: 3px 3px 0 #000, 0 4px 10px rgba(0,0,0,0.5);
+        margin-top: 25px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        z-index: 10;
+        font-style: italic;
+    }
+
+    /* --- Avatars & Header --- */
+    .header-area {
+        margin-top: 15px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 0 15px;
+        box-sizing: border-box;
+        height: 160px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .player-profile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        opacity: 0;
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .player-profile.left { transform: translateX(-50px); }
+    .player-profile.right { transform: translateX(50px); }
+    .player-profile.visible { opacity: 1; transform: translateX(0); }
+
+    /* Dynamic Avatar Frames */
+    .avatar-frame {
+        width: 90px;
+        height: 90px;
+        border-radius: 20px;
+        background: radial-gradient(circle, #555, #222);
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 50px;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .frame-silver { border: 4px solid #e0e0e0; box-shadow: 0 0 10px #fff; }
+    .frame-gold { border: 4px solid #ffcc00; box-shadow: 0 0 15px #ffaa00; }
+    .frame-platinum { border: 4px solid #00eeff; box-shadow: 0 0 20px #00aaff; }
+
+    .player-name {
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        margin-top: 8px;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .trophies {
+        background: linear-gradient(to bottom, #444, #111);
+        color: white;
+        padding: 2px 12px;
+        border-radius: 15px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        border: 2px solid #000;
+        box-shadow: inset 0 1px 2px rgba(255,255,255,0.3);
+        margin-top: 4px;
+        white-space: nowrap;
+    }
+
+    .vs-badge {
+        position: absolute;
+        left: 50%;
+        top: 25%;
+        margin-left: -35px;
+        font-size: 50px;
+        font-weight: 700;
+        color: #fffb00;
+        -webkit-text-stroke: 2px #222;
+        text-shadow: 4px 4px 0 #000;
+        opacity: 0;
+        transform: scale(0);
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 3;
+        font-style: italic;
+    }
+
+    .vs-badge.visible {
+        opacity: 1;
+        transform: scale(1) rotate(-10deg);
+    }
+
+    /* --- Top Guesses (Locked In) --- */
+    .locked-guesses {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 10px;
+        box-sizing: border-box;
+        margin-top: 5px;
+        margin-bottom: 0;
+        z-index: 2;
+    }
+
+    .guess-container {
+        width: 48%;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.4s ease;
+    }
+    .guess-container.visible { opacity: 1; transform: translateY(0); }
+    
+    .locked-board {
+        display: flex;
+        background: linear-gradient(to bottom, #e6e6e6 0%, #ffffff 50%, #cccccc 51%, #f2f2f2 100%);
+        border: 2px solid #333;
+        border-radius: 4px;
+        box-shadow: inset 0 0 5px rgba(0,0,0,0.3), 0 4px 6px rgba(0,0,0,0.5);
+        color: black;
+        height: 60px;
+        overflow: hidden;
+    }
+
+    .locked-text {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 5px;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        text-align: center;
+        line-height: 1.1;
+        border-right: 2px solid #333;
+    }
+
+    /* Thinking Dots Animation */
+    .thinking-dots:after {
+        content: '.';
+        animation: dots 1.5s steps(5, end) infinite;
+    }
+    @keyframes dots {
+        0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);}
+        40% { color: black; text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);}
+        60% { text-shadow: .25em 0 0 black, .5em 0 0 rgba(0,0,0,0);}
+        80%, 100% { text-shadow: .25em 0 0 black, .5em 0 0 black;}
+    }
+
+    .locked-score {
+        width: 45px;
+        flex-shrink: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(to bottom, #ffd700, #ffaa00);
+        font-size: 32px;
+        font-weight: 700;
+        color: #fff;
+        -webkit-text-stroke: 1px #000;
+        text-shadow: 2px 2px 0 #000;
+        box-shadow: inset 2px 0 5px rgba(0,0,0,0.3);
+    }
+
+    /* --- Question Area --- */
+    .question-area {
+        background: rgba(0, 15, 40, 0.85);
+        border-top: 2px solid #4a90e2;
+        border-bottom: 2px solid #4a90e2;
+        width: 100%;
+        text-align: center;
+        padding: 15px 20px;
+        box-sizing: border-box;
+        color: white;
+        font-size: 18px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,1);
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        margin-bottom: 15px;
+        z-index: 2;
+    }
+    .question-area.visible { opacity: 1; }
+
+    /* --- Timer Bar --- */
+    .timer-container {
+        width: 90%;
+        margin: 0 auto 10px auto;
+        height: 10px;
+        background: #111;
+        border-radius: 5px;
+        overflow: hidden;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .timer-container.visible { opacity: 1; }
+    
+    .timer-fill {
+        width: 100%;
+        height: 100%;
+        background: #00ff00;
+        transform-origin: left center;
+        transition: background 0.3s, width 0.1s linear;
+    }
+    .timer-fill.warning { background: #ffcc00; }
+    .timer-fill.danger { background: #ff0033; }
+
+    /* --- Action Area (Multiple Choice / Anti Cheat) --- */
+    .action-area {
+        flex-grow: 1;
+        width: 100%;
+        padding: 0 15px;
+        box-sizing: border-box;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        display: flex;
+        flex-direction: column;
+        z-index: 2;
+    }
+    .action-area.visible { opacity: 1; }
+
+    .action-prompt {
+        text-align: center;
+        color: white;
+        font-size: 18px;
+        margin-bottom: 5px;
+        text-shadow: 2px 2px 2px black;
+    }
+
+    #choices-container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .feud-board {
+        display: flex;
+        background: linear-gradient(to bottom, #1e5799 0%, #2989d8 50%, #207cca 51%, #7db9e8 100%);
+        border: 2px solid #fff;
+        border-radius: 4px;
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 4px 6px rgba(0,0,0,0.6);
+        color: white;
+        height: 55px;
+        overflow: hidden;
+        cursor: pointer;
+        position: relative;
+        transition: transform 0.1s;
+    }
+    .feud-board.disabled { cursor: default; }
+    .feud-board:active:not(.disabled) { transform: scale(0.97); }
+
+    .feud-text {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        padding-left: 15px;
+        font-size: 20px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-right: 2px solid #fff;
+        text-shadow: 2px 2px 2px black;
+    }
+
+    .feud-score {
+        width: 60px;
+        flex-shrink: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(to bottom, #2b6cb0, #2c5282);
+        font-size: 28px;
+        font-weight: 700;
+        text-shadow: 2px 2px 2px black;
+        box-shadow: inset 3px 0 5px rgba(0,0,0,0.4);
+    }
+
+    /* --- Overlays & Particles --- */
+    .overlay-container {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        pointer-events: none;
+        display: flex; align-items: center; justify-content: center;
+        z-index: 20;
+    }
+
+    .overlay-banner {
+        width: 100%;
+        text-align: center;
+        background: #ffcc00;
+        color: black;
+        font-size: 40px;
+        font-weight: 700;
+        padding: 20px 0;
+        border-top: 6px solid white;
+        border-bottom: 6px solid white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        transform: scaleY(0);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .overlay-banner.visible { transform: scaleY(1); }
+
+    .flip-reveal { animation: flipIn 0.5s ease-out forwards; }
+    @keyframes flipIn {
+        0% { transform: rotateX(-90deg); color: transparent; text-shadow: none;}
+        50% { color: transparent; text-shadow: none;}
+        100% { transform: rotateX(0deg); color: #fff;}
+    }
+
+    /* Confetti */
+    .confetti-piece {
+        position: absolute;
+        width: 10px; height: 20px;
+        background: #ffd700;
+        opacity: 0;
+        z-index: 15;
+    }
+    @keyframes fallAndSpin {
+        0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* Start / Reset Screen */
+    #start-screen {
+        position: absolute; top:0; left:0; right:0; bottom:0;
+        background: rgba(0,0,0,0.9);
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        z-index: 50;
+    }
+    
+    .btn {
+        background: linear-gradient(to bottom, #ff0066, #cc0052);
+        color: white; border: 3px solid white;
+        padding: 15px 40px; font-size: 24px; font-family: 'Oswald', sans-serif;
+        border-radius: 40px; cursor: pointer; font-weight: bold;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+        text-transform: uppercase; letter-spacing: 1px;
+    }
+    .btn:active { transform: scale(0.95); }
+
+    #reset-btn { margin-top: 15px; align-self: center; display: none; z-index: 30; pointer-events: auto; }
+
+</style>
+</head>
+<body>
+
+<div id="game-canvas">
+    
+    <div id="start-screen">
+        <button class="btn" onclick="startGame()">Tap to Start</button>
+    </div>
+
+    <div class="top-section">
+        <div class="searchlight light-left"></div>
+        <div class="searchlight light-right"></div>
+
+        <div class="game-title">Face-Off!</div>
+
+        <div class="header-area">
+            <div class="player-profile left" id="profile-you">
+                <div class="avatar-frame frame-gold">👩🏻</div>
+                <div class="player-name">YOU</div>
+                <div class="trophies">🏆 221,895</div>
+            </div>
+            
+            <div class="vs-badge" id="vs-badge">VS</div>
+            
+            <div class="player-profile right" id="profile-opp">
+                <div class="avatar-frame" id="opp-avatar-frame">
+                    <span id="opp-avatar">🧔🏻‍♂️</span>
+                </div>
+                <div class="player-name" id="opp-name">GAMERMIKE</div>
+                <div class="trophies" id="opp-trophies">🏆 88,820</div>
+            </div>
+        </div>
+
+        <div class="locked-guesses">
+            <div class="guess-container" id="locked-you">
+                <div class="locked-board">
+                    <div class="locked-text" id="you-guess-text">...</div>
+                    <div class="locked-score" id="you-guess-score">?</div>
+                </div>
+            </div>
+            <div class="guess-container" id="locked-opp">
+                <div class="locked-board">
+                    <div class="locked-text" id="opp-guess-text">LOST TV REMOTE</div>
+                    <div class="locked-score" id="opp-guess-score">?</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="question-area" id="question">
+        Survey of 100 people:<br><span style="font-size: 22px; font-weight: bold; display: block; margin-top: 5px;" id="question-text">Name something people might find under their couch.</span>
+    </div>
+
+    <div class="timer-container" id="timer-container">
+        <div class="timer-fill" id="timer-fill"></div>
+    </div>
+
+    <div class="action-area" id="action-area">
+        <div class="action-prompt" id="action-prompt">Guess the higher answer to win the Face Off!</div>
+        <div id="choices-container"></div>
+        <button class="btn" id="reset-btn" onclick="resetGame()">PLAY AGAIN</button>
+    </div>
+
+    <div class="overlay-container">
+        <div class="overlay-banner" id="survey-says">SURVEY SAYS...</div>
+    </div>
+    <div class="overlay-container">
+        <div class="overlay-banner" id="result-banner" style="background: #00ff00;">YOU WIN!</div>
+    </div>
+
+</div>
+
+<script>
+    // --- Data Rotation Banks ---
+    const opponentsData = [
+        { name: "GAMERMIKE", emoji: "🧔🏻‍♂️", trophies: 88820, frame: "frame-silver" },
+        { name: "SASSYSALLY", emoji: "👩🏽‍🦱", trophies: 142050, frame: "frame-gold" },
+        { name: "TRIVIABOT", emoji: "🤖", trophies: 999999, frame: "frame-platinum" },
+        { name: "GRANDPAJOE", emoji: "👴🏼", trophies: 12400, frame: "frame-silver" },
+        { name: "NINJAKID", emoji: "🥷", trophies: 45600, frame: "frame-silver" }
+    ];
+
+    const questionsData = [
+        {
+            question: "Name something people might find under their couch.",
+            opponentGuess: { text: "LOST TV REMOTE", value: 25 },
+            options: [
+                { text: "SPARE CHANGE", value: 45 },
+                { text: "DUST RABBITS", value: 15 },
+                { text: "OLD TOYS", value: 10 }
+            ]
+        },
+        {
+            question: "Name a place you wouldn't want to fall asleep.",
+            opponentGuess: { text: "IN CHURCH", value: 22 },
+            options: [
+                { text: "AT WORK", value: 35 },
+                { text: "ON THE BUS", value: 18 },
+                { text: "AT THE WHEEL", value: 15 }
+            ]
+        },
+        {
+            question: "Name a food you usually eat with your hands.",
+            opponentGuess: { text: "FRENCH FRIES", value: 18 },
+            options: [
+                { text: "HAMBURGER", value: 28 },
+                { text: "PIZZA", value: 42 },
+                { text: "TACOS", value: 10 }
+            ]
+        },
+        {
+            question: "Name something associated with a vampire.",
+            opponentGuess: { text: "DRACULA", value: 25 },
+            options: [
+                { text: "BLOOD", value: 38 },
+                { text: "GARLIC", value: 18 },
+                { text: "FANGS", value: 12 }
+            ]
+        },
+        {
+            question: "Name a reason you might be late for work.",
+            opponentGuess: { text: "CAR TROUBLE", value: 24 },
+            options: [
+                { text: "OVERSLEPT", value: 41 },
+                { text: "TRAFFIC", value: 26 },
+                { text: "FEELING SICK", value: 7 }
+            ]
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let gameState = {};
+    let timerInterval;
+
+    // DOM Elements
+    const elProfileYou = document.getElementById('profile-you');
+    const elProfileOpp = document.getElementById('profile-opp');
+    const elVsBadge = document.getElementById('vs-badge');
+    const elQuestionArea = document.getElementById('question');
+    const elQuestionText = document.getElementById('question-text');
+    const elLockedYou = document.getElementById('locked-you');
+    const elLockedOpp = document.getElementById('locked-opp');
+    const elActionArea = document.getElementById('action-area');
+    const elChoicesContainer = document.getElementById('choices-container');
+    const elActionPrompt = document.getElementById('action-prompt');
+    const elSurveySays = document.getElementById('survey-says');
+    const elResultBanner = document.getElementById('result-banner');
+    const elTimerContainer = document.getElementById('timer-container');
+    const elTimerFill = document.getElementById('timer-fill');
+    
+    // Dynamic Text Elements
+    const elYouGuessText = document.getElementById('you-guess-text');
+    const elYouGuessScore = document.getElementById('you-guess-score');
+    const elOppGuessText = document.getElementById('opp-guess-text');
+    const elOppGuessScore = document.getElementById('opp-guess-score');
+    
+    const elOppAvatar = document.getElementById('opp-avatar');
+    const elOppAvatarFrame = document.getElementById('opp-avatar-frame');
+    const elOppName = document.getElementById('opp-name');
+    const elOppTrophies = document.getElementById('opp-trophies');
+    const elResetBtn = document.getElementById('reset-btn');
+
+    const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    function startGame() {
+        document.getElementById('start-screen').style.display = 'none';
+        initGameFlow();
+    }
+
+    function setupNewGameData() {
+        const randomOpp = opponentsData[Math.floor(Math.random() * opponentsData.length)];
+        const qData = questionsData[currentQuestionIndex % questionsData.length];
+        currentQuestionIndex++;
+
+        gameState = {
+            opponent: randomOpp,
+            questionData: qData,
+            playerGuess: null
+        };
+
+        // Update DOM
+        elOppAvatar.innerText = gameState.opponent.emoji;
+        elOppAvatarFrame.className = `avatar-frame ${gameState.opponent.frame}`;
+        elOppName.innerText = gameState.opponent.name;
+        elOppTrophies.innerText = `🏆 ${gameState.opponent.trophies.toLocaleString()}`;
+        
+        elQuestionText.innerText = gameState.questionData.question;
+        
+        // Remove old confetti
+        document.querySelectorAll('.confetti-piece').forEach(el => el.remove());
+    }
+
+    async function initGameFlow() {
+        // Reset Visuals
+        elProfileYou.classList.remove('visible');
+        elProfileOpp.classList.remove('visible');
+        elVsBadge.classList.remove('visible');
+        elQuestionArea.classList.remove('visible');
+        elLockedYou.classList.remove('visible');
+        elLockedOpp.classList.remove('visible');
+        elActionArea.classList.remove('visible');
+        elTimerContainer.classList.remove('visible');
+        elYouGuessScore.classList.remove('flip-reveal');
+        elOppGuessScore.classList.remove('flip-reveal');
+        elResetBtn.style.display = 'none';
+        
+        elYouGuessText.innerText = "...";
+        elYouGuessScore.innerText = "?";
+        elOppGuessScore.innerText = "?";
+        
+        setupNewGameData();
+
+        // 1. Setup Phase
+        await wait(300);
+        elProfileYou.classList.add('visible');
+        
+        await wait(600);
+        elProfileOpp.classList.add('visible');
+        elVsBadge.classList.add('visible');
+
+        // 2. Show Question
+        await wait(1000);
+        elQuestionArea.classList.add('visible');
+
+        // 3. Opponent "Thinks" then locks in
+        elOppGuessText.innerText = "";
+        elOppGuessText.classList.add('thinking-dots');
+        elLockedOpp.classList.add('visible');
+        
+        await wait(1500);
+        elOppGuessText.classList.remove('thinking-dots');
+        elOppGuessText.innerText = gameState.questionData.opponentGuess.text;
+
+        // 4. Player Choices Appear & Timer Starts
+        await wait(600);
+        renderChoices();
+        elActionPrompt.innerText = "Guess the higher answer to win the Face Off!";
+        elActionArea.classList.add('visible');
+        
+        startTimer();
+    }
+
+    function renderChoices() {
+        elChoicesContainer.innerHTML = '';
+        const shuffledOptions = [...gameState.questionData.options].sort(() => Math.random() - 0.5);
+
+        shuffledOptions.forEach((opt, index) => {
+            const board = document.createElement('div');
+            board.className = 'feud-board';
+            board.onclick = () => handleChoiceSelection(opt, index);
+            
+            board.innerHTML = `
+                <div class="feud-text">${opt.text}</div>
+                <div class="feud-score">?</div>
+            `;
+            elChoicesContainer.appendChild(board);
+        });
+    }
+
+    function startTimer() {
+        let timeLeft = 100;
+        elTimerContainer.classList.add('visible');
+        elTimerFill.style.width = '100%';
+        elTimerFill.className = 'timer-fill';
+
+        timerInterval = setInterval(() => {
+            timeLeft -= 1;
+            elTimerFill.style.width = timeLeft + '%';
+
+            if (timeLeft <= 50 && timeLeft > 25) {
+                elTimerFill.className = 'timer-fill warning';
+            } else if (timeLeft <= 25) {
+                elTimerFill.className = 'timer-fill danger';
+            }
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                // Time up! Auto-pick the first listed valid answer
+                handleChoiceSelection(gameState.questionData.options[0]);
+            }
+        }, 100); // 100 * 100 = 10,000ms (10 seconds)
+    }
+
+    async function handleChoiceSelection(selectedOption) {
+        clearInterval(timerInterval);
+        elTimerContainer.classList.remove('visible');
+
+        const boards = document.querySelectorAll('.feud-board');
+        boards.forEach(b => b.onclick = null);
+
+        gameState.playerGuess = selectedOption;
+        elActionArea.classList.remove('visible');
+        
+        await wait(400);
+
+        elYouGuessText.innerText = selectedOption.text;
+        elLockedYou.classList.add('visible');
+
+        await wait(800);
+        triggerRevealSequence();
+    }
+
+    // Number Roll Animation
+    async function animateScore(element, targetValue) {
+        element.classList.add('flip-reveal');
+        await wait(150); // wait for initial flip rotation
+        
+        let current = 0;
+        const duration = 800;
+        const interval = 30;
+        const steps = duration / interval;
+        const increment = targetValue / steps;
+
+        return new Promise(resolve => {
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= targetValue) {
+                    current = targetValue;
+                    element.innerText = Math.round(current);
+                    clearInterval(timer);
+                    resolve();
+                } else {
+                    element.innerText = Math.round(current);
+                }
+            }, interval);
+        });
+    }
+
+    async function triggerRevealSequence() {
+        elSurveySays.classList.add('visible');
+        await wait(1500);
+        elSurveySays.classList.remove('visible');
+        
+        await wait(600);
+
+        // Reveal Opponent
+        await animateScore(elOppGuessScore, gameState.questionData.opponentGuess.value);
+        await wait(1000);
+
+        // Reveal Player
+        await animateScore(elYouGuessScore, gameState.playerGuess.value);
+        await wait(800);
+
+        // Big hit screen shake
+        document.getElementById('game-canvas').classList.add('shake');
+        setTimeout(() => document.getElementById('game-canvas').classList.remove('shake'), 400);
+
+        if (gameState.playerGuess.value > gameState.questionData.opponentGuess.value) {
+            elResultBanner.innerText = "YOU WIN!";
+            elResultBanner.style.background = "#00e676";
+            elResultBanner.style.color = "#000";
+            fireConfetti();
+        } else {
+            elResultBanner.innerText = "YOU LOSE!";
+            elResultBanner.style.background = "#ff1744";
+            elResultBanner.style.color = "#fff";
+        }
+        elResultBanner.classList.add('visible');
+
+        await wait(2000);
+        elResultBanner.classList.remove('visible');
+
+        await wait(500);
+        showAntiCheatBoard();
+    }
+
+    function fireConfetti() {
+        const container = document.getElementById('game-canvas');
+        for (let i = 0; i < 40; i++) {
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti-piece');
+            confetti.style.left = Math.random() * 100 + '%';
+            confetti.style.backgroundColor = ['#ffd700', '#ff0066', '#0077ff', '#00ff00', '#fff'][Math.floor(Math.random()*5)];
+            confetti.style.animation = `fallAndSpin ${1 + Math.random() * 2}s linear forwards`;
+            container.appendChild(confetti);
+        }
+    }
+
+    function showAntiCheatBoard() {
+        elActionPrompt.innerText = "Points of Remaining Answers";
+        elChoicesContainer.innerHTML = '';
+        
+        const remaining = gameState.questionData.options.filter(opt => opt.text !== gameState.playerGuess.text);
+        remaining.sort((a, b) => b.value - a.value);
+        
+        remaining.forEach(opt => {
+            const board = document.createElement('div');
+            board.className = 'feud-board disabled';
+            board.style.filter = "grayscale(30%)"; 
+            board.innerHTML = `
+                <div class="feud-text">${opt.text}</div>
+                <div class="feud-score">${opt.value}</div>
+            `;
+            elChoicesContainer.appendChild(board);
+        });
+
+        elActionArea.classList.add('visible');
+        
+        setTimeout(() => {
+            elResetBtn.style.display = 'block';
+        }, 1000);
+    }
+
+    function resetGame() {
+        initGameFlow();
+    }
+
+</script>
+</body>
+</html>
