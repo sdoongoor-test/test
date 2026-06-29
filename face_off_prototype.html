@@ -232,18 +232,6 @@
         border-right: 2px solid #333;
     }
 
-    /* Thinking Dots Animation */
-    .thinking-dots:after {
-        content: '.';
-        animation: dots 1.5s steps(5, end) infinite;
-    }
-    @keyframes dots {
-        0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);}
-        40% { color: black; text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);}
-        60% { text-shadow: .25em 0 0 black, .5em 0 0 rgba(0,0,0,0);}
-        80%, 100% { text-shadow: .25em 0 0 black, .5em 0 0 black;}
-    }
-
     .locked-score {
         width: 45px;
         flex-shrink: 0;
@@ -257,6 +245,16 @@
         -webkit-text-stroke: 1px #000;
         text-shadow: 2px 2px 0 #000;
         box-shadow: inset 2px 0 5px rgba(0,0,0,0.3);
+    }
+
+    /* Glow Animation for Locked Answer */
+    @keyframes pulseGlow {
+        0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0), inset 0 0 5px rgba(0,0,0,0.3); border-color: #333; }
+        50% { box-shadow: 0 0 20px 10px rgba(255, 255, 0, 0.8), inset 0 0 5px rgba(0,0,0,0.3); border-color: #fffb00; }
+        100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0), inset 0 0 5px rgba(0,0,0,0.3); border-color: #333; }
+    }
+    .locked-board.glow-active {
+        animation: pulseGlow 0.8s ease-out;
     }
 
     /* --- Question Area --- */
@@ -277,31 +275,6 @@
         z-index: 2;
     }
     .question-area.visible { opacity: 1; }
-
-    /* --- Timer Bar --- */
-    .timer-container {
-        width: 90%;
-        margin: 0 auto 10px auto;
-        height: 10px;
-        background: #111;
-        border-radius: 5px;
-        overflow: hidden;
-        border: 2px solid #fff;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-        opacity: 0;
-        transition: opacity 0.3s;
-    }
-    .timer-container.visible { opacity: 1; }
-    
-    .timer-fill {
-        width: 100%;
-        height: 100%;
-        background: #00ff00;
-        transform-origin: left center;
-        transition: background 0.3s, width 0.1s linear;
-    }
-    .timer-fill.warning { background: #ffcc00; }
-    .timer-fill.danger { background: #ff0033; }
 
     /* --- Action Area (Multiple Choice / Anti Cheat) --- */
     .action-area {
@@ -346,6 +319,15 @@
     }
     .feud-board.disabled { cursor: default; }
     .feud-board:active:not(.disabled) { transform: scale(0.97); }
+
+    /* Animation for staggered choice entry */
+    .feud-board.animate-in {
+        animation: popIn 0.25s ease-out both;
+    }
+    @keyframes popIn {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
 
     .feud-text {
         flex-grow: 1;
@@ -452,7 +434,7 @@
         <div class="searchlight light-left"></div>
         <div class="searchlight light-right"></div>
 
-        <div class="game-title">Face-Off!</div>
+        <div class="game-title">Face Off!</div>
 
         <div class="header-area">
             <div class="player-profile left" id="profile-you">
@@ -492,12 +474,8 @@
         Survey of 100 people:<br><span style="font-size: 22px; font-weight: bold; display: block; margin-top: 5px;" id="question-text">Name something people might find under their couch.</span>
     </div>
 
-    <div class="timer-container" id="timer-container">
-        <div class="timer-fill" id="timer-fill"></div>
-    </div>
-
     <div class="action-area" id="action-area">
-        <div class="action-prompt" id="action-prompt">Guess the higher answer to win the Face Off!</div>
+        <div class="action-prompt" id="action-prompt">Pick the answer you think ranks higher.</div>
         <div id="choices-container"></div>
         <button class="btn" id="reset-btn" onclick="resetGame()">PLAY AGAIN</button>
     </div>
@@ -571,7 +549,6 @@
 
     let currentQuestionIndex = 0;
     let gameState = {};
-    let timerInterval;
 
     // DOM Elements
     const elProfileYou = document.getElementById('profile-you');
@@ -586,8 +563,6 @@
     const elActionPrompt = document.getElementById('action-prompt');
     const elSurveySays = document.getElementById('survey-says');
     const elResultBanner = document.getElementById('result-banner');
-    const elTimerContainer = document.getElementById('timer-container');
-    const elTimerFill = document.getElementById('timer-fill');
     
     // Dynamic Text Elements
     const elYouGuessText = document.getElementById('you-guess-text');
@@ -640,9 +615,10 @@
         elLockedYou.classList.remove('visible');
         elLockedOpp.classList.remove('visible');
         elActionArea.classList.remove('visible');
-        elTimerContainer.classList.remove('visible');
         elYouGuessScore.classList.remove('flip-reveal');
         elOppGuessScore.classList.remove('flip-reveal');
+        elLockedYou.querySelector('.locked-board').classList.remove('glow-active');
+        elLockedOpp.querySelector('.locked-board').classList.remove('glow-active');
         elResetBtn.style.display = 'none';
         
         elYouGuessText.innerText = "...";
@@ -663,22 +639,18 @@
         await wait(1000);
         elQuestionArea.classList.add('visible');
 
-        // 3. Opponent "Thinks" then locks in
-        elOppGuessText.innerText = "";
-        elOppGuessText.classList.add('thinking-dots');
-        elLockedOpp.classList.add('visible');
-        
-        await wait(1500);
-        elOppGuessText.classList.remove('thinking-dots');
-        elOppGuessText.innerText = gameState.questionData.opponentGuess.text;
-
-        // 4. Player Choices Appear & Timer Starts
+        // 3. Opponent locks in with a glow (After question loads)
         await wait(600);
-        renderChoices();
-        elActionPrompt.innerText = "Guess the higher answer to win the Face Off!";
-        elActionArea.classList.add('visible');
+        elOppGuessText.innerText = gameState.questionData.opponentGuess.text;
+        elLockedOpp.classList.add('visible');
+        elLockedOpp.querySelector('.locked-board').classList.add('glow-active');
         
-        startTimer();
+        await wait(800); // Wait for the glow pulse to finish
+
+        // 4. Player Choices Appear (staggered)
+        renderChoices();
+        elActionPrompt.innerText = "Pick the answer you think ranks higher.";
+        elActionArea.classList.add('visible');
     }
 
     function renderChoices() {
@@ -687,7 +659,8 @@
 
         shuffledOptions.forEach((opt, index) => {
             const board = document.createElement('div');
-            board.className = 'feud-board';
+            board.className = 'feud-board animate-in';
+            board.style.animationDelay = `${index * 0.15}s`; // Stagger each option by 150ms
             board.onclick = () => handleChoiceSelection(opt, index);
             
             board.innerHTML = `
@@ -698,34 +671,7 @@
         });
     }
 
-    function startTimer() {
-        let timeLeft = 100;
-        elTimerContainer.classList.add('visible');
-        elTimerFill.style.width = '100%';
-        elTimerFill.className = 'timer-fill';
-
-        timerInterval = setInterval(() => {
-            timeLeft -= 1;
-            elTimerFill.style.width = timeLeft + '%';
-
-            if (timeLeft <= 50 && timeLeft > 25) {
-                elTimerFill.className = 'timer-fill warning';
-            } else if (timeLeft <= 25) {
-                elTimerFill.className = 'timer-fill danger';
-            }
-
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                // Time up! Auto-pick the first listed valid answer
-                handleChoiceSelection(gameState.questionData.options[0]);
-            }
-        }, 100); // 100 * 100 = 10,000ms (10 seconds)
-    }
-
-    async function handleChoiceSelection(selectedOption) {
-        clearInterval(timerInterval);
-        elTimerContainer.classList.remove('visible');
-
+    async function handleChoiceSelection(selectedOption, index) {
         const boards = document.querySelectorAll('.feud-board');
         boards.forEach(b => b.onclick = null);
 
@@ -736,6 +682,7 @@
 
         elYouGuessText.innerText = selectedOption.text;
         elLockedYou.classList.add('visible');
+        elLockedYou.querySelector('.locked-board').classList.add('glow-active');
 
         await wait(800);
         triggerRevealSequence();
@@ -768,19 +715,19 @@
     }
 
     async function triggerRevealSequence() {
+        // Survey Says Flash (Shortened)
         elSurveySays.classList.add('visible');
-        await wait(1500);
+        await wait(600);
         elSurveySays.classList.remove('visible');
         
-        await wait(600);
+        await wait(300);
 
-        // Reveal Opponent
-        await animateScore(elOppGuessScore, gameState.questionData.opponentGuess.value);
-        await wait(1000);
-
-        // Reveal Player
+        // Reveal Scores Close Together
+        animateScore(elOppGuessScore, gameState.questionData.opponentGuess.value);
+        await wait(250); 
         await animateScore(elYouGuessScore, gameState.playerGuess.value);
-        await wait(800);
+        
+        await wait(200);
 
         // Big hit screen shake
         document.getElementById('game-canvas').classList.add('shake');
@@ -792,7 +739,7 @@
             elResultBanner.style.color = "#000";
             fireConfetti();
         } else {
-            elResultBanner.innerText = "YOU LOSE!";
+            elResultBanner.innerText = "RIVAL WINS THE FACE OFF!";
             elResultBanner.style.background = "#ff1744";
             elResultBanner.style.color = "#fff";
         }
@@ -818,7 +765,7 @@
     }
 
     function showAntiCheatBoard() {
-        elActionPrompt.innerText = "Points of Remaining Answers";
+        elActionPrompt.innerText = "Other Answers";
         elChoicesContainer.innerHTML = '';
         
         const remaining = gameState.questionData.options.filter(opt => opt.text !== gameState.playerGuess.text);
