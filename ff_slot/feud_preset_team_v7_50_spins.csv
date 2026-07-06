@@ -1,0 +1,51 @@
+spin,intent,pure_reel_1,pure_reel_2,pure_reel_3,pure_result,category_reel_1,category_reel_2,category_reel_3,category_result,overlay,coins,score,full_content,tease
+1,Relief,Coin,Shield,Feud,1x Coin payout,Reward,Coins,10K,+10K Coins,,10000,0,False,False
+2,Full Survey,Survey,Survey,Survey,Survey mode trigger,Survey,Survey Says,Standard,Survey Says - Standard,Survey Says,0,55,True,False
+3,Full Chance,Chance,Chance,Chance,Chance Card trigger,Chance,Arcade,Match & Win,Match & Win,Match & Win Card,0,0,True,False
+4,Utility,Spin,Spin,Spin,+1 Spin,Reward,Spins,+1,+1 Spin,,0,0,False,False
+5,Full Survey,Survey,Survey,Survey,Survey mode trigger,Survey,Keep or Pass,Double,Keep or Pass - Double,Keep or Pass,0,85,True,False
+6,Full Chance,Chance,Chance,Chance,Chance Card trigger,Chance,Modifier,Double Survey,Double Survey,Double Survey Card,0,0,True,False
+7,Relief,Bag,Coin,Shield,1x Bag + 1x Coin payout,Reward,Coins,25K,+25K Coins,,25000,0,False,False
+8,Full Feud,Feud,Feud,Feud,Feud showdown trigger,Showdown,Survey Steal,Double,Survey Steal - Double,Survey Steal,0,80,True,False
+9,Full Survey,Survey,Survey,Survey,Survey mode trigger,Survey,Sudden Death,Standard,Sudden Death - Standard,Sudden Death,0,60,True,False
+10,Utility,Shield,Shield,Shield,+1 Shield,Reward,Shields,+1,+1 Shield,,0,0,False,False
+11,Full Survey,Survey,Survey,Survey,Survey mode trigger,Survey,Survey Says,Triple,Survey Says - Triple,Survey Says,0,135,True,False
+12,Full Chance,Chance,Chance,Chance,Chance Card trigger,Chance,Arcade,Coin Frenzy,Coin Frenzy,Coin Frenzy Card,0,0,True,False
+13,Relief,Bag,Bag,Bag,3x Bag payout,Reward,Coins,100K,+100K Coins,,100000,0,False,False
+14,Full Feud,Feud,Feud,Feud,Feud showdown trigger,Showdown,Bullseye,Triple,Bullseye - Triple,Bullseye,0,105,True,False
+15,Utility,Spin,Spin,Spin,+5 Spins,Reward,Spins,+5,+5 Spins,,0,0,False,False
+16,Full Chance,Chance,Chance,Chance,Chance Card trigger,Chance,Modifier,Survey Head Start,Survey Head Start,Survey Head Start Card,0,0,True,False
+17,Utility,Shield,Shield,Shield,+2 Shields,Reward,Shields,+2,+2 Shields,,0,0,False,False
+18,Full Chance,Chance,Chance,Chance,Chance Card trigger,Chance,Arcade,Podium Shuffle,Podium Shuffle,Podium Shuffle Card,0,0,True,False
+19,Relief,Coin,Shield,Feud,1x Coin payout,Reward,Coins,10K,+10K Coins,,10000,0,False,False
+20,Full Survey,Survey,Survey,Survey,Survey mode trigger,Survey,Survey Says,Standard,Survey Says - Standard,Survey Says,0,55,True,False
+21,Full Chance,Chance,Chance,Chance,Chance Card trigger,Chance,Arcade,Match & Win,Match & Win,Match & Win Card,0,0,True,False
+22,Utility,Spin,Spin,Spin,+1 Spin,Reward,Spins,+1,+1 Spin,,0,0,False,False
+23,Full Survey,Survey,Survey,Survey,Survey mode trigger,Survey,Keep or Pass,Double,Keep or Pass - Double,Keep or Pass,0,85,True,False
+24,Full Chance,Chance,Chance,Chance,Chance Card trigger,Chance,Modifier,Double Survey,Double Survey,Double Survey Card,0,0,True,False
+25,Relief,Bag,Coin,Shield,1x Bag + 1x Coin payout,Reward,Coins,25K,+25K Coins,,25000,0,False,False
+26,Full Feud,Feud,Feud,Feud,Feud showdown trigger,Showdown,Survey Steal,Double,Survey Steal - Double,Survey Steal,0,80,True,False
+27,Full Survey,Survey,Survey,Survey,Survey mode trigger,Survey,Sudden Death,Standard,Sudden Death - Standard,Sudden Death,0,60,True,False
+28,Utility,Shield,Shield,Shield,+1 Shield,Reward,Shields,+1,+1 Shield,,0,0,False,False
+29,Full Survey,Survey,Survey,Survey,Survey mode trigger,Survey,Survey Says,Triple,Survey Says - Triple,Survey Says,0,135,True,False
+30,Full Chance,Chance,Chance,Chance,Chance Card trigger,Chance,Arcade,Coin Frenzy,Coin Frenzy,Coin Frenzy Card,0,0,True,False
+31,Relief,Bag,Bag,Bag,3x Bag payout,Reward,Coins,100K,+100K Coins,,100000,0,False,False
+32,Full Feud,Feud,Feud,Feud,Feud showdown trigger,Showdown,Bullseye,Triple,Bullseye - Triple,Bullseye,0,105,True,False
+33,Utility,Spin,Spin,Spin,+5 Spins,Reward,Spins,+5,+5 Spins,,0,0,False,False
+34,Full Chance,Chance,Chance,Chance,Chance Card trigger,Chance,Modifier,Survey Head Start,Survey Head Start,Survey Head Start Card,0,0,True,False
+35,Utility,Shield,Shield,Shield,+2 Shields,Reward,Shields,+2,+2 Shields,,0,0,False,False
+36,Full Chance,Chance,Chance,Chance,Chance Card trigger,Chance,Arcade,Podium Shuffle,Podium Shuffle,Podium Shuffle Card,0,0,True,False
+37,Relief,Coin,Shield,Feud,1x Coin payout,Reward,Coins,10K,+10K Coins,,10000,0,False,False
+38,Full Survey,Survey,Survey,Survey,Survey mode trigger,Survey,Survey Says,Standard,Survey Says - Standard,Survey Says,0,55,True,False
+39,Full Chance,Chance,Chance,Chance,Chance Card trigger,Chance,Arcade,Match & Win,Match & Win,Match & Win Card,0,0,True,False
+40,Utility,Spin,Spin,Spin,+1 Spin,Reward,Spins,+1,+1 Spin,,0,0,False,False
+41,Full Survey,Survey,Survey,Survey,Survey mode trigger,Survey,Keep or Pass,Double,Keep or Pass - Double,Keep or Pass,0,85,True,False
+42,Full Chance,Chance,Chance,Chance,Chance Card trigger,Chance,Modifier,Double Survey,Double Survey,Double Survey Card,0,0,True,False
+43,Relief,Bag,Coin,Shield,1x Bag + 1x Coin payout,Reward,Coins,25K,+25K Coins,,25000,0,False,False
+44,Full Feud,Feud,Feud,Feud,Feud showdown trigger,Showdown,Survey Steal,Double,Survey Steal - Double,Survey Steal,0,80,True,False
+45,Full Survey,Survey,Survey,Survey,Survey mode trigger,Survey,Sudden Death,Standard,Sudden Death - Standard,Sudden Death,0,60,True,False
+46,Utility,Shield,Shield,Shield,+1 Shield,Reward,Shields,+1,+1 Shield,,0,0,False,False
+47,Full Survey,Survey,Survey,Survey,Survey mode trigger,Survey,Survey Says,Triple,Survey Says - Triple,Survey Says,0,135,True,False
+48,Full Chance,Chance,Chance,Chance,Chance Card trigger,Chance,Arcade,Coin Frenzy,Coin Frenzy,Coin Frenzy Card,0,0,True,False
+49,Relief,Bag,Bag,Bag,3x Bag payout,Reward,Coins,100K,+100K Coins,,100000,0,False,False
+50,Full Feud,Feud,Feud,Feud,Feud showdown trigger,Showdown,Bullseye,Triple,Bullseye - Triple,Bullseye,0,105,True,False

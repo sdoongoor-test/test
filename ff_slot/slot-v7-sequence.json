@@ -1,0 +1,377 @@
+{
+  "app": "ffgo-spinner-sandbox",
+  "kind": "slot-seq",
+  "version": "v7",
+  "steps": [
+    {
+      "left": "reward",
+      "middle": "coins",
+      "right": 10000
+    },
+    {
+      "left": "survey",
+      "middle": "SurveySays",
+      "right": "Standard"
+    },
+    {
+      "left": "chance",
+      "middle": "arcade",
+      "right": "MatchAndWin"
+    },
+    {
+      "left": "reward",
+      "middle": "spins",
+      "right": 1
+    },
+    {
+      "left": "survey",
+      "middle": "KeepOrPass",
+      "right": "Double"
+    },
+    {
+      "left": "chance",
+      "middle": "modifier",
+      "right": "DoubleSurvey"
+    },
+    {
+      "left": "reward",
+      "middle": "coins",
+      "right": 25000
+    },
+    {
+      "left": "showdown",
+      "middle": "SurveySteal",
+      "right": "Double"
+    },
+    {
+      "left": "survey",
+      "middle": "SuddenDeath",
+      "right": "Standard"
+    },
+    {
+      "left": "reward",
+      "middle": "shields",
+      "right": 1
+    },
+    {
+      "left": "survey",
+      "middle": "SurveySays",
+      "right": "Triple"
+    },
+    {
+      "left": "chance",
+      "middle": "arcade",
+      "right": "CoinsFrenzy"
+    },
+    {
+      "left": "reward",
+      "middle": "coins",
+      "right": 100000
+    },
+    {
+      "left": "showdown",
+      "middle": "Bulleyes",
+      "right": "Triple"
+    },
+    {
+      "left": "reward",
+      "middle": "spins",
+      "right": 5
+    },
+    {
+      "left": "chance",
+      "middle": "modifier",
+      "right": "SurveyHeadStart"
+    },
+    {
+      "left": "reward",
+      "middle": "shields",
+      "right": 2
+    },
+    {
+      "left": "chance",
+      "middle": "arcade",
+      "right": "PodiumShuffle"
+    },
+    {
+      "left": "reward",
+      "middle": "coins",
+      "right": 10000
+    },
+    {
+      "left": "survey",
+      "middle": "SurveySays",
+      "right": "Standard"
+    },
+    {
+      "left": "chance",
+      "middle": "arcade",
+      "right": "MatchAndWin"
+    },
+    {
+      "left": "reward",
+      "middle": "spins",
+      "right": 1
+    },
+    {
+      "left": "survey",
+      "middle": "KeepOrPass",
+      "right": "Double"
+    },
+    {
+      "left": "chance",
+      "middle": "modifier",
+      "right": "DoubleSurvey"
+    },
+    {
+      "left": "reward",
+      "middle": "coins",
+      "right": 25000
+    },
+    {
+      "left": "showdown",
+      "middle": "SurveySteal",
+      "right": "Double"
+    },
+    {
+      "left": "survey",
+      "middle": "SuddenDeath",
+      "right": "Standard"
+    },
+    {
+      "left": "reward",
+      "middle": "shields",
+      "right": 1
+    },
+    {
+      "left": "survey",
+      "middle": "SurveySays",
+      "right": "Triple"
+    },
+    {
+      "left": "chance",
+      "middle": "arcade",
+      "right": "CoinsFrenzy"
+    },
+    {
+      "left": "reward",
+      "middle": "coins",
+      "right": 100000
+    },
+    {
+      "left": "showdown",
+      "middle": "Bulleyes",
+      "right": "Triple"
+    },
+    {
+      "left": "reward",
+      "middle": "spins",
+      "right": 5
+    },
+    {
+      "left": "chance",
+      "middle": "modifier",
+      "right": "SurveyHeadStart"
+    },
+    {
+      "left": "reward",
+      "middle": "shields",
+      "right": 2
+    },
+    {
+      "left": "chance",
+      "middle": "arcade",
+      "right": "PodiumShuffle"
+    },
+    {
+      "left": "reward",
+      "middle": "coins",
+      "right": 10000
+    },
+    {
+      "left": "survey",
+      "middle": "SurveySays",
+      "right": "Standard"
+    },
+    {
+      "left": "chance",
+      "middle": "arcade",
+      "right": "MatchAndWin"
+    },
+    {
+      "left": "reward",
+      "middle": "spins",
+      "right": 1
+    },
+    {
+      "left": "survey",
+      "middle": "KeepOrPass",
+      "right": "Double"
+    },
+    {
+      "left": "chance",
+      "middle": "modifier",
+      "right": "DoubleSurvey"
+    },
+    {
+      "left": "reward",
+      "middle": "coins",
+      "right": 25000
+    },
+    {
+      "left": "showdown",
+      "middle": "SurveySteal",
+      "right": "Double"
+    },
+    {
+      "left": "survey",
+      "middle": "SuddenDeath",
+      "right": "Standard"
+    },
+    {
+      "left": "reward",
+      "middle": "shields",
+      "right": 1
+    },
+    {
+      "left": "survey",
+      "middle": "SurveySays",
+      "right": "Triple"
+    },
+    {
+      "left": "chance",
+      "middle": "arcade",
+      "right": "CoinsFrenzy"
+    },
+    {
+      "left": "reward",
+      "middle": "coins",
+      "right": 100000
+    },
+    {
+      "left": "showdown",
+      "middle": "Bulleyes",
+      "right": "Triple"
+    },
+    {
+      "left": "reward",
+      "middle": "spins",
+      "right": 5
+    },
+    {
+      "left": "chance",
+      "middle": "modifier",
+      "right": "SurveyHeadStart"
+    },
+    {
+      "left": "reward",
+      "middle": "shields",
+      "right": 2
+    },
+    {
+      "left": "chance",
+      "middle": "arcade",
+      "right": "PodiumShuffle"
+    },
+    {
+      "left": "reward",
+      "middle": "coins",
+      "right": 10000
+    },
+    {
+      "left": "survey",
+      "middle": "SurveySays",
+      "right": "Standard"
+    },
+    {
+      "left": "chance",
+      "middle": "arcade",
+      "right": "MatchAndWin"
+    },
+    {
+      "left": "reward",
+      "middle": "spins",
+      "right": 1
+    },
+    {
+      "left": "survey",
+      "middle": "KeepOrPass",
+      "right": "Double"
+    },
+    {
+      "left": "chance",
+      "middle": "modifier",
+      "right": "DoubleSurvey"
+    },
+    {
+      "left": "reward",
+      "middle": "coins",
+      "right": 25000
+    },
+    {
+      "left": "showdown",
+      "middle": "SurveySteal",
+      "right": "Double"
+    },
+    {
+      "left": "survey",
+      "middle": "SuddenDeath",
+      "right": "Standard"
+    },
+    {
+      "left": "reward",
+      "middle": "shields",
+      "right": 1
+    },
+    {
+      "left": "survey",
+      "middle": "SurveySays",
+      "right": "Triple"
+    },
+    {
+      "left": "chance",
+      "middle": "arcade",
+      "right": "CoinsFrenzy"
+    },
+    {
+      "left": "reward",
+      "middle": "coins",
+      "right": 100000
+    },
+    {
+      "left": "showdown",
+      "middle": "Bulleyes",
+      "right": "Triple"
+    },
+    {
+      "left": "reward",
+      "middle": "spins",
+      "right": 5
+    },
+    {
+      "left": "chance",
+      "middle": "modifier",
+      "right": "SurveyHeadStart"
+    },
+    {
+      "left": "reward",
+      "middle": "shields",
+      "right": 2
+    },
+    {
+      "left": "chance",
+      "middle": "arcade",
+      "right": "PodiumShuffle"
+    },
+    {
+      "left": "reward",
+      "middle": "coins",
+      "right": 10000
+    },
+    {
+      "left": "survey",
+      "middle": "SurveySays",
+      "right": "Standard"
+    }
+  ]
+}
