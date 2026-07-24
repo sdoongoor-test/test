@@ -514,10 +514,86 @@
     box-shadow:0 0 0 3px #777,0 3px 0 #aaa;
   }
 
+
+  .phone.prelaunch-hidden{
+    display:none !important;
+  }
+
+  .start-screen{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background:#f1f1f1;
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:opacity .18s ease;
+  }
+  .start-screen.show{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+  }
+  .start-card{
+    width:min(88vw, 420px);
+    border:4px solid #444;
+    border-radius:24px;
+    background:#ffffff;
+    box-shadow:0 14px 34px rgba(0,0,0,.14), inset 0 0 0 4px #fff;
+    padding:30px 22px 24px;
+    text-align:center;
+  }
+  .start-kicker{
+    font-size:14px;
+    font-weight:800;
+    letter-spacing:.08em;
+    color:#666;
+    margin-bottom:8px;
+  }
+  .start-title{
+    font-size:46px;
+    line-height:1;
+    font-weight:1000;
+    margin:0 0 24px;
+  }
+  .start-play{
+    min-width:190px;
+    min-height:64px;
+    border:4px solid #444;
+    border-radius:16px;
+    background:#fff;
+    box-shadow:0 4px 0 #aaa;
+    font-size:28px;
+    font-weight:1000;
+    cursor:pointer;
+  }
+  .start-play:active{
+    transform:translateY(3px);
+    box-shadow:0 1px 0 #aaa;
+  }
+
+
+  .phone.stage-primed #playerProfile,
+  .phone.stage-primed #opponentProfile,
+  .phone.stage-primed #playerPodium,
+  .phone.stage-primed #opponentPodium,
+  .phone.stage-primed #playerAnswerCard,
+  .phone.stage-primed #opponentAnswerCard,
+  .phone.stage-primed #questionGroup,
+  .phone.stage-primed .choice{
+    opacity:0 !important;
+    visibility:hidden !important;
+    pointer-events:none !important;
+  }
+
 </style>
 </head>
 <body>
-  <main class="phone" aria-label="Face Off prototype">
+  <main id="phoneRoot" class="phone prelaunch-hidden stage-primed" aria-label="Face Off prototype">
     <header class="topbar">
       <button class="icon-btn" aria-label="Back">←</button>
       <div class="currency-row">
@@ -590,6 +666,14 @@
     </section>
   </main>
 
+<div id="startScreen" class="start-screen show" aria-modal="true" role="dialog" aria-label="Face Off start screen">
+  <div class="start-card">
+    <div class="start-kicker">FEUD MODE</div>
+    <h2 class="start-title">FACE-OFF</h2>
+    <button id="startPlay" class="start-play" type="button">PLAY</button>
+  </div>
+</div>
+
 <script>
 (function () {
   "use strict";
@@ -629,6 +713,9 @@
     var ribbon = document.getElementById("ribbon");
     var resultActions = document.getElementById("resultActions");
     var playAgain = document.getElementById("playAgain");
+    var startScreen = document.getElementById("startScreen");
+    var startPlay = document.getElementById("startPlay");
+    var phoneRoot = document.getElementById("phoneRoot");
     var opponentCallout = document.getElementById("opponentCallout");
     var flyingAnswer = document.getElementById("flyingAnswer");
 
@@ -847,6 +934,10 @@ var locked = false;
       // Keep the opponent answer hidden until the flip beat.
       opponentAnswerText.classList.add("answer-content-hidden");
 
+      // All elements are now safely reset and positioned for entry.
+      // Release the empty-stage gate only at this point.
+      phone.classList.remove("stage-primed");
+
       // 1) Question animates in first.
       questionGroup.classList.add("show");
       await wait(1350);
@@ -1014,8 +1105,24 @@ var locked = false;
       playIntro();
     });
 
-    // Start after the browser has painted the normal screen once.
-    setTimeout(playIntro, 120);
+    // Prepare the first round, but keep the game fully hidden behind the start modal.
+    loadQuestion(currentQuestionIndex);
+    clearIntro();
+    startScreen.classList.add("show");
+    phoneRoot.classList.add("prelaunch-hidden");
+
+    startPlay.addEventListener("click", async function () {
+      startScreen.classList.remove("show");
+
+      // Reveal only the empty stage. The hard gate keeps all gameplay
+      // characters and UI hidden until playIntro has primed their entrances.
+      clearIntro();
+      phoneRoot.classList.add("stage-primed");
+      phoneRoot.classList.remove("prelaunch-hidden");
+
+      await wait(120);
+      playIntro();
+    });
   });
 })();
 </script>
