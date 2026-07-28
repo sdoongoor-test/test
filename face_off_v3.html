@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Feud Go – Face Off Prototype</title>
+<title>Face Off Prototype — Compact Mobile Hierarchy + VS</title>
 <style>
   :root{
     --bg:#ececec;
@@ -760,6 +760,298 @@
     visibility:hidden;
   }
 
+
+  /* Compact portrait hierarchy:
+     HUD -> compact Face-Off stage with integrated answer tiles
+     -> turn banner -> question -> answer choices. */
+  .topbar{
+    height:54px;
+    grid-template-columns:42px 1fr 42px;
+    padding:6px 10px;
+  }
+  .icon-btn{
+    width:38px;
+    height:38px;
+    border-radius:10px;
+    font-size:24px;
+  }
+  .currency-row{gap:6px}
+  .currency{
+    min-width:0;
+    padding:6px 9px;
+    font-size:14px;
+  }
+
+  .mode-title{
+    height:36px;
+    font-size:22px;
+  }
+  .mode-title:before,
+  .mode-title:after{
+    width:20px;
+    margin:0 8px;
+  }
+
+  .stage{
+    height:252px;
+  }
+  .arch{
+    top:6px;
+    width:92%;
+    height:172px;
+    border-width:13px;
+  }
+  .back-screen{
+    top:24px;
+    width:31%;
+    height:58px;
+  }
+  .competitor{
+    top:20px;
+    width:31%;
+  }
+  .competitor.left{left:8%}
+  .competitor.right{right:8%}
+  .avatar{
+    width:66px;
+    height:66px;
+    margin-bottom:5px;
+    border-radius:13px;
+    font-size:34px;
+  }
+  .name{
+    min-width:86px;
+    padding:3px 8px;
+    font-size:14px;
+  }
+  .podium{
+    top:112px;
+    width:96px;
+    height:64px;
+  }
+  .podium.left{left:12%}
+  .podium.right{right:12%}
+  .podium:before{
+    left:-8px;
+    right:-8px;
+    top:-12px;
+    height:17px;
+  }
+  .bulbs{
+    left:13px;
+    right:13px;
+    top:18px;
+    bottom:8px;
+    background:
+      radial-gradient(circle,#f5f5f5 0 2px,transparent 3px) 0 0/17px 17px,
+      #444;
+  }
+
+  .answer-band{
+    position:absolute;
+    left:7px;
+    right:7px;
+    bottom:7px;
+    z-index:7;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+    padding:0;
+    background:transparent;
+    border:0;
+  }
+  .answer-card{
+    padding:3px;
+    border-radius:10px;
+    box-shadow:0 2px 0 #999;
+  }
+  .answer-label{
+    margin:0 0 2px;
+    font-size:11px;
+  }
+  .feud-answer{
+    height:43px;
+    grid-template-columns:1fr 42px;
+  }
+  .answer-text{
+    padding:2px;
+    font-size:15px;
+  }
+  .answer-score{
+    font-size:22px;
+  }
+  .placeholder{
+    font-size:13px;
+  }
+
+  .game-panel{
+    padding:10px 14px 14px;
+    border-top:0;
+  }
+  .turn-banner{
+    min-height:48px;
+    margin:0 0 8px;
+    padding:6px 14px 6px 8px;
+    border-radius:12px;
+  }
+  .turn-banner-avatar{
+    width:34px;
+    height:34px;
+    font-size:20px;
+  }
+  .turn-banner-text{
+    font-size:20px;
+  }
+  .question{
+    max-width:390px;
+    margin:0 auto 9px;
+    font-size:25px;
+    line-height:1.08;
+  }
+  .choices{
+    gap:7px;
+  }
+  .choice{
+    min-height:54px;
+    padding:6px 10px 6px 14px;
+    border-radius:12px;
+    font-size:22px;
+  }
+  .choice-owner{
+    max-width:100px;
+    padding:3px 6px;
+    font-size:11px;
+  }
+  .choice .choice-score{
+    min-width:40px;
+    height:34px;
+    padding:0 6px;
+    font-size:19px;
+  }
+  .turn-instruction{
+    display:none;
+  }
+
+  @media (max-height:740px){
+    .topbar{
+      height:48px;
+      padding:4px 9px;
+    }
+    .icon-btn{
+      width:36px;
+      height:36px;
+    }
+    .currency{
+      padding:5px 7px;
+      font-size:13px;
+    }
+    .mode-title{
+      height:32px;
+      font-size:19px;
+    }
+    .stage{
+      height:220px;
+    }
+    .arch{
+      height:148px;
+      border-width:11px;
+    }
+    .back-screen{
+      top:20px;
+      height:49px;
+    }
+    .competitor{
+      top:15px;
+    }
+    .avatar{
+      width:58px;
+      height:58px;
+      font-size:30px;
+    }
+    .name{
+      min-width:78px;
+      font-size:13px;
+    }
+    .podium{
+      top:96px;
+      width:86px;
+      height:52px;
+    }
+    .podium.left{left:13%}
+    .podium.right{right:13%}
+    .answer-band{
+      bottom:5px;
+    }
+    .answer-label{
+      font-size:10px;
+    }
+    .feud-answer{
+      height:39px;
+      grid-template-columns:1fr 38px;
+    }
+    .answer-text{
+      font-size:14px;
+    }
+    .answer-score{
+      font-size:20px;
+    }
+    .game-panel{
+      padding:8px 12px 10px;
+    }
+    .turn-banner{
+      min-height:44px;
+      margin-bottom:6px;
+    }
+    .question{
+      margin-bottom:7px;
+      font-size:22px;
+    }
+    .choices{
+      gap:6px;
+    }
+    .choice{
+      min-height:48px;
+      padding:5px 9px 5px 12px;
+      font-size:20px;
+    }
+  }
+
+
+
+  /* Face-Off enhancer: VS badge between the contestants */
+  .versus-badge{
+    position:absolute;
+    left:50%;
+    top:78px;
+    transform:translateX(-50%);
+    z-index:6;
+    min-width:38px;
+    height:38px;
+    padding:0 8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:3px solid #444;
+    border-radius:999px;
+    background:#f4f4f4;
+    box-shadow:0 3px 0 #999;
+    font-size:20px;
+    font-weight:1000;
+    line-height:1;
+    letter-spacing:.02em;
+    pointer-events:none;
+  }
+
+  @media (max-height:740px){
+    .versus-badge{
+      top:67px;
+      min-width:34px;
+      height:34px;
+      padding:0 7px;
+      font-size:18px;
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -790,37 +1082,38 @@
         <div id="opponentName" class="name">NINJAKID</div>
       </div>
 
+      <div class="versus-badge">VS</div>
       <div id="playerPodium" class="podium left intro-step"><div class="bulbs"></div></div>
       <div id="opponentPodium" class="podium right intro-step"><div class="bulbs"></div></div>
+
+      <section class="answer-band" aria-label="Face-Off answers">
+        <article id="playerAnswerCard" class="answer-card intro-step">
+          <div class="answer-label">YOUR ANSWER</div>
+          <div class="feud-answer">
+            <div id="playerAnswer" class="answer-text placeholder">CHOOSE ANSWER</div>
+            <div id="playerScore" class="answer-score">?</div>
+          </div>
+        </article>
+
+        <article id="opponentAnswerCard" class="answer-card intro-step">
+          <div class="answer-label">OPPONENT ANSWER</div>
+          <div class="feud-answer">
+            <div id="opponentAnswer" class="answer-text answer-content-hidden">IN CHURCH</div>
+            <div id="opponentScore" class="answer-score">?</div>
+          </div>
+        </article>
+      </section>
     </section>
 
-    <section class="answer-band">
-      <article id="playerAnswerCard" class="answer-card intro-step">
-        <div class="answer-label">YOUR ANSWER</div>
-        <div class="feud-answer">
-          <div id="playerAnswer" class="answer-text placeholder">CHOOSE ANSWER</div>
-          <div id="playerScore" class="answer-score">?</div>
-        </div>
-      </article>
-
-      <article id="opponentAnswerCard" class="answer-card intro-step">
-        <div class="answer-label">OPPONENT ANSWER</div>
-        <div class="feud-answer">
-          <div id="opponentAnswer" class="answer-text answer-content-hidden">IN CHURCH</div>
-          <div id="opponentScore" class="answer-score">?</div>
-        </div>
-      </article>
-    </section>
 
     <section class="game-panel">
-      <div id="questionGroup" class="question-group intro-step">
-        <h1 class="question">Name a place where people try not to fall asleep.</h1>
-        <div id="instructionText" class="turn-instruction">Watch their pick.</div>
-      </div>
-
       <div id="turnBanner" class="turn-banner" role="status" aria-live="polite">
         <span id="turnBannerAvatar" class="turn-banner-avatar">👤</span>
         <span id="turnBannerText" class="turn-banner-text">OPPONENT'S TURN</span>
+      </div>
+
+      <div id="questionGroup" class="question-group intro-step">
+        <h1 class="question">Name a place where people try not to fall asleep.</h1>
       </div>
 
       <div class="choices">
@@ -829,6 +1122,7 @@
         <button class="choice" type="button"></button>
         <button class="choice" type="button"></button>
       </div>
+      <div id="instructionText" class="turn-instruction" aria-hidden="true"></div>
     </section>
 
     <div id="introOverlay" class="intro-overlay"><div class="intro-card">FACE OFF</div></div>
