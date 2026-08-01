@@ -1,0 +1,2010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Face Off Variant C13 — Tie Pot Growth</title>
+<style>
+  :root{
+    --bg:#ececec;
+    --panel:#f8f8f8;
+    --line:#242424;
+    --soft:#b9b9b9;
+    --shadow:#c8c8c8;
+    --stage:#e4e4e4;
+    --stage-dark:#cfcfcf;
+    --ink:#111;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#d7d7d7;font-family:Arial,Helvetica,sans-serif;color:var(--ink)}
+  body{display:flex;justify-content:center;min-height:100vh}
+  button{font:inherit;color:inherit}
+  .phone{
+    width:min(100vw, 430px);
+    min-height:100vh;
+    background:var(--bg);
+    border-left:2px solid var(--line);
+    border-right:2px solid var(--line);
+    overflow:hidden;
+    position:relative;
+  }
+  .topbar{
+    height:64px;
+    display:grid;
+    grid-template-columns:52px 1fr 52px;
+    align-items:center;
+    gap:8px;
+    padding:8px 12px;
+    background:#f5f5f5;
+    border-bottom:2px solid var(--line);
+  }
+  .icon-btn{
+    height:44px;width:44px;border:2px solid var(--line);border-radius:12px;
+    background:white;font-size:28px;line-height:1;display:grid;place-items:center;
+  }
+  .currency-row{display:flex;justify-content:center;gap:8px}
+  .currency{
+    background:white;border:2px solid var(--line);border-radius:22px;
+    padding:7px 12px;font-weight:800;min-width:112px;text-align:center;
+  }
+
+  .mode-title{
+    height:52px;display:flex;align-items:center;justify-content:center;
+    font-size:30px;font-weight:900;letter-spacing:.5px;background:#f5f5f5;
+  }
+  .mode-title:before,.mode-title:after{
+    content:"";width:28px;border-top:2px solid var(--line);margin:0 12px;
+  }
+
+  .stage{
+    position:relative;
+    height:320px;
+    background:
+      radial-gradient(circle at 50% 22%, #f0f0f0 0 10%, transparent 11%),
+      linear-gradient(#e7e7e7,#d5d5d5);
+    border-top:2px solid var(--line);
+    border-bottom:2px solid var(--line);
+    overflow:hidden;
+  }
+  .arch{
+    position:absolute;left:50%;top:10px;transform:translateX(-50%);
+    width:94%;height:230px;border:18px solid #d6d6d6;border-bottom:none;
+    border-radius:210px 210px 0 0;box-shadow:inset 0 0 0 3px var(--line);
+  }
+  .arch:before{
+    content:"";position:absolute;inset:7px;border:2px dashed #fff;border-bottom:none;
+    border-radius:180px 180px 0 0;
+  }
+  .back-screen{
+    position:absolute;left:50%;top:38px;transform:translateX(-50%);
+    width:34%;height:88px;border:3px solid #888;border-radius:10px;
+    background:linear-gradient(135deg,#d7d7d7,#bfbfbf);
+    filter:blur(1.2px);opacity:.48;box-shadow:0 0 0 6px #ddd;
+  }
+  .competitor{
+    position:absolute;top:52px;width:30%;text-align:center;z-index:3;
+  }
+  .competitor.left{left:7%}.competitor.right{right:7%}
+  .avatar{
+    width:88px;height:88px;margin:0 auto 8px;border:3px solid var(--line);
+    border-radius:16px;background:#fafafa;display:grid;place-items:center;font-size:44px;
+  }
+  .name{
+    display:inline-block;
+    min-width:104px;
+    padding:4px 10px;
+    border:2px solid var(--line);
+    border-radius:8px;
+    background:#f7f7f7;
+    font-size:17px;
+    font-weight:900;
+    line-height:1;
+    white-space:nowrap;
+  }
+  .podium{
+    position:absolute;top:186px;width:118px;height:108px;z-index:2;
+    border:3px solid var(--line);border-radius:8px;background:#d4d4d4;
+    box-shadow:0 6px 0 #bdbdbd;
+  }
+  .podium.left{left:11%}.podium.right{right:11%}
+  .podium:before{
+    content:"";position:absolute;left:-10px;right:-10px;top:-16px;height:22px;
+    background:#efefef;border:3px solid var(--line);border-radius:8px;
+  }
+  .bulbs{
+    position:absolute;left:17px;right:17px;top:26px;bottom:12px;border:3px solid #555;
+    border-radius:7px;background:
+      radial-gradient(circle,#f5f5f5 0 3px,transparent 4px) 0 0/22px 22px,
+      #444;
+  }
+
+  .answer-band{
+    display:grid;grid-template-columns:1fr 1fr;gap:6px;
+    padding:8px 8px 10px;background:#d6d6d6;border-bottom:2px solid var(--line);
+  }
+  .answer-card{
+    border:3px solid var(--line);border-radius:12px;background:#ececec;padding:4px;
+    box-shadow:0 3px 0 #aaa;
+  }
+  .answer-label{
+    text-align:center;font-weight:900;font-size:14px;margin:0 0 4px;
+  }
+  .feud-answer{
+    height:62px;display:grid;grid-template-columns:1fr 54px;border:3px solid #555;border-radius:8px;
+    overflow:hidden;background:white;
+  }
+  .answer-text,.answer-score{
+    display:grid;place-items:center;font-weight:900;
+  }
+  .answer-text{font-size:19px;padding:4px}
+  .answer-score{font-size:28px;border-left:3px solid #555}
+  .placeholder{color:#8f8f8f;font-size:16px}
+
+  .game-panel{
+    background:#fafafa;margin:0;padding:18px 18px 22px;
+    border-top:2px solid #aaa;
+  }
+  .eyebrow{text-align:center;font-size:18px;margin-bottom:6px}
+  .question{
+    font-size:30px;line-height:1.1;font-weight:900;text-align:center;
+    max-width:370px;margin:2px auto 14px;
+  }
+  .instruction{
+    display:flex;align-items:center;gap:10px;justify-content:center;
+    font-size:17px;margin:8px 0 12px;color:#333;
+  }
+  .instruction:before,.instruction:after{content:"";height:1px;background:#888;flex:1}
+  .game-panel{
+    transition:opacity .25s ease, filter .25s ease;
+  }
+  .game-panel.reveal-focus{
+    opacity:.52;
+    filter:grayscale(.35);
+  }
+  .choices{display:grid;gap:9px}
+  .choice{
+    min-height:66px;
+    border:3px solid #444;
+    border-radius:14px;
+    background:#fff;
+    box-shadow:inset 0 0 0 4px #e2e2e2,0 4px 0 #aaa;
+    padding:8px 12px 8px 18px;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto auto;
+    align-items:center;
+    gap:8px;
+    text-align:left;
+    font-size:26px;
+    font-weight:900;
+    cursor:pointer;
+  }
+  .choice:active{
+    transform:translateY(3px);
+    box-shadow:inset 0 0 0 4px #e2e2e2,0 1px 0 #aaa;
+  }
+  .choice[disabled]{cursor:default}
+  .choice-label{
+    min-width:0;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+  }
+  .choice-owner{
+    display:none;
+    align-items:center;
+    gap:5px;
+    max-width:118px;
+    padding:4px 7px;
+    border:2px solid #666;
+    border-radius:999px;
+    background:#eee;
+    font-size:12px;
+    line-height:1;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .choice.opponent-picked{
+    color:#555;
+    background:#d5d5d5;
+    border-color:#666;
+    filter:grayscale(.25);
+    box-shadow:inset 0 0 0 4px #c4c4c4,0 2px 0 #999;
+  }
+  .choice.opponent-picked .choice-owner,
+  .choice.selected .choice-owner{
+    display:inline-flex;
+  }
+  .choice.claim-pulse{
+    animation:claimPulse .55s ease;
+  }
+  @keyframes claimPulse{
+    0%{transform:scale(1)}
+    35%{transform:scale(1.045)}
+    100%{transform:scale(1)}
+  }
+  .choice.selected{
+    opacity:1;
+    color:#666;
+    background:#cfcfcf;
+    border-color:#666;
+    filter:grayscale(1);
+    transform:translateY(2px);
+    box-shadow:inset 0 0 0 4px #bdbdbd,0 1px 0 #8f8f8f;
+  }
+  .choice .choice-score{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:46px;
+    height:38px;
+    padding:0 8px;
+    border:3px solid #444;
+    border-radius:8px;
+    background:#f2f2f2;
+    font-size:22px;
+    line-height:1;
+    opacity:0;
+    transform:scale(.82);
+    transition:opacity .22s ease,transform .22s ease;
+  }
+  .choice.reveal-score .choice-score{
+    opacity:1;
+    transform:scale(1);
+  }
+
+  .ribbon{
+    position:absolute;left:-4%;right:-4%;top:45%;z-index:20;
+    background:#f3f3f3;border:4px solid var(--line);padding:18px 16px;
+    text-align:center;font-size:34px;font-weight:1000;
+    box-shadow:0 8px 20px #5558;
+    transform:translateX(-120%);transition:transform .35s ease;
+  }
+  .ribbon.show{transform:translateX(0)}
+  .ribbon.hide-right{transform:translateX(120%)}
+  .ribbon.instant-left{
+    transition:none !important;
+    transform:translateX(-120%) !important;
+  }
+
+  .result-actions{
+    display:none;padding:14px;background:#f7f7f7;border-top:2px solid var(--line);
+  }
+  .result-actions.show{display:block}
+  .primary{
+    width:100%;min-height:58px;border:3px solid var(--line);border-radius:14px;
+    background:white;font-size:22px;font-weight:900;
+  }
+
+  @media (max-height:760px){
+    .topbar{height:56px}
+    .mode-title{height:44px;font-size:26px}
+    .stage{height:285px}
+    .arch{height:205px}
+    .competitor{top:46px}
+    .avatar{width:74px;height:74px;font-size:37px}
+    .name{min-width:92px;font-size:15px}
+    .podium{top:172px;height:92px}
+    .game-panel{padding-top:12px}
+    .question{font-size:25px}
+    .choice{min-height:56px;font-size:22px}
+  }
+
+  /* Intro sequence: content remains visible if JavaScript is unavailable. */
+  .intro-overlay{
+    position:absolute;
+    inset:0;
+    z-index:60;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(20,20,20,.86);
+    color:#fff;
+    opacity:0;
+    visibility:hidden;
+    transition:opacity .25s ease, visibility .25s ease;
+    pointer-events:none;
+  }
+  .intro-overlay.show{opacity:1;visibility:visible}
+  .intro-card{
+    padding:18px 30px;
+    border:4px solid #fff;
+    border-radius:18px;
+    font-size:42px;
+    font-weight:900;
+    background:rgba(255,255,255,.08);
+  }
+
+  .js-intro .intro-step{
+    opacity:0;
+    transform:translateY(10px);
+  }
+  .js-intro .intro-step.show{
+    opacity:1;
+    transform:translateY(0);
+    transition:opacity .28s ease, transform .28s ease;
+  }
+
+  .js-intro .choice{
+    opacity:0;
+    transform:translateY(10px);
+  }
+  .js-intro .choice.show{
+    opacity:1;
+    transform:translateY(0);
+    transition:opacity .22s ease, transform .22s ease;
+  }
+
+  .question-group{
+    opacity:1;
+    transform:none;
+  }
+
+
+  .answer-card.player-active{
+    box-shadow:0 0 0 3px #777, 0 3px 0 #aaa;
+    transform:translateY(-1px);
+    transition:box-shadow .2s ease, transform .2s ease;
+  }
+
+
+  .opponent-focus{
+    transform:scale(1.04);
+    filter:brightness(1.06);
+    transition:transform .22s ease, filter .22s ease;
+  }
+
+  .opponent-callout{
+    position:absolute;
+    z-index:18;
+    top:128px;
+    right:22px;
+    padding:8px 12px;
+    border:3px solid var(--line);
+    border-radius:12px;
+    background:#fff;
+    font-weight:900;
+    font-size:18px;
+    opacity:0;
+    transform:translateY(8px);
+    transition:opacity .2s ease, transform .2s ease;
+    pointer-events:none;
+  }
+  .opponent-callout.show{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  .flying-answer{
+    position:absolute;
+    z-index:55;
+    padding:10px 16px;
+    border:3px solid var(--line);
+    border-radius:10px;
+    background:#fff;
+    font-weight:900;
+    font-size:20px;
+    box-shadow:0 5px 12px #0003;
+    opacity:0;
+    pointer-events:none;
+  }
+
+  .player-pulse{
+    animation:playerPulse .75s ease 1;
+  }
+  @keyframes playerPulse{
+    0%{box-shadow:0 3px 0 #aaa}
+    45%{box-shadow:0 0 0 6px #888,0 3px 0 #aaa;transform:translateY(-2px)}
+    100%{box-shadow:0 3px 0 #aaa;transform:translateY(0)}
+  }
+
+
+  .stage{
+    transition:opacity .22s ease, filter .22s ease;
+  }
+  .stage.player-turn-dim{
+    opacity:.42;
+    filter:brightness(.78);
+  }
+
+  .answer-band{
+    position:relative;
+    z-index:12;
+  }
+
+  .game-panel{
+    position:relative;
+    z-index:12;
+  }
+
+  .answer-card.player-active{
+    box-shadow:0 0 0 3px #777, 0 3px 0 #aaa;
+  }
+
+
+  .answer-content-hidden{
+    visibility:hidden;
+  }
+
+  .opponent-answer-reveal{
+    perspective:700px;
+  }
+
+  .opponent-answer-reveal .answer-text,
+  .opponent-answer-reveal .answer-score{
+    backface-visibility:hidden;
+  }
+
+  .answer-card.player-active{
+    animation:playerSlotHighlight .42s ease 1;
+  }
+
+  @keyframes playerSlotHighlight{
+    0%{box-shadow:0 3px 0 #aaa}
+    55%{box-shadow:0 0 0 4px #777, 0 3px 0 #aaa}
+    100%{box-shadow:0 0 0 3px #777, 0 3px 0 #aaa}
+  }
+
+
+  .stage{
+    position:relative;
+  }
+
+  .spotlight-beam{
+    position:absolute;
+    top:-18px;
+    width:46%;
+    height:118%;
+    z-index:8;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .38s ease, left .46s ease, right .46s ease;
+    background:
+      linear-gradient(
+        to bottom,
+        rgba(255,255,255,.02) 0%,
+        rgba(255,255,255,.34) 28%,
+        rgba(255,255,255,.16) 68%,
+        rgba(255,255,255,0) 100%
+      );
+    clip-path:polygon(36% 0,64% 0,100% 100%,0 100%);
+    filter:blur(.3px);
+  }
+  .spotlight-beam.left{left:-2%}
+  .spotlight-beam.right{right:-2%}
+  .spotlight-beam.show{opacity:1}
+
+  .competitor,
+  .podium{
+    transition:opacity .38s ease, filter .38s ease, transform .38s ease;
+  }
+
+  .stage.opponent-turn .competitor.left,
+  .stage.opponent-turn .podium.left{
+    opacity:.34;
+    filter:grayscale(1) brightness(.75);
+  }
+
+  .stage.opponent-turn .competitor.right,
+  .stage.opponent-turn .podium.right{
+    opacity:1;
+    filter:none;
+    transform:scale(1.02);
+  }
+
+  .stage.player-turn .competitor.right,
+  .stage.player-turn .podium.right{
+    opacity:.34;
+    filter:grayscale(1) brightness(.75);
+    transform:none;
+  }
+
+  .stage.player-turn .competitor.left,
+  .stage.player-turn .podium.left{
+    opacity:1;
+    filter:none;
+    transform:scale(1.02);
+  }
+
+  .game-panel{
+    transition:opacity .25s ease, filter .25s ease;
+  }
+
+  .game-panel.choices-locked{
+    opacity:1;
+    filter:none;
+  }
+
+  .answer-card{
+    transition:opacity .24s ease, transform .24s ease, box-shadow .24s ease;
+  }
+
+  .answer-card.hidden-card{
+    opacity:0 !important;
+    transform:translateY(12px) scale(.98) !important;
+    pointer-events:none;
+  }
+
+  .answer-card.player-ready{
+    box-shadow:0 0 0 3px #777,0 3px 0 #aaa;
+  }
+
+
+  .entrance-hidden-left{
+    opacity:0 !important;
+    transform:translateX(-70px) !important;
+  }
+  .entrance-hidden-right{
+    opacity:0 !important;
+    transform:translateX(70px) !important;
+  }
+
+  .competitor,
+  .podium,
+  .answer-card{
+    transition:
+      opacity .58s ease,
+      transform .58s cubic-bezier(.2,.75,.2,1),
+      filter .48s ease;
+  }
+
+  .stage.player-focus .competitor.right,
+  .stage.player-focus .podium.right{
+    opacity:.34;
+    filter:grayscale(1) brightness(.72);
+  }
+
+  .stage.player-focus .competitor.left,
+  .stage.player-focus .podium.left{
+    opacity:1;
+    filter:none;
+    transform:scale(1.02);
+  }
+
+  .answer-card.opponent-dim{
+    opacity:.7;
+    filter:grayscale(.65) brightness(.9);
+  }
+
+  .answer-card.player-ready{
+    box-shadow:0 0 0 3px #777,0 3px 0 #aaa;
+  }
+
+
+  .phone.prelaunch-hidden{
+    display:none !important;
+  }
+
+  .start-screen{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background:#f1f1f1;
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:opacity .18s ease;
+  }
+  .start-screen.show{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+  }
+  .start-card{
+    width:min(88vw, 420px);
+    border:4px solid #444;
+    border-radius:24px;
+    background:#ffffff;
+    box-shadow:0 14px 34px rgba(0,0,0,.14), inset 0 0 0 4px #fff;
+    padding:30px 22px 24px;
+    text-align:center;
+  }
+  .start-kicker{
+    font-size:14px;
+    font-weight:800;
+    letter-spacing:.08em;
+    color:#666;
+    margin-bottom:8px;
+  }
+  .start-title{
+    font-size:46px;
+    line-height:1;
+    font-weight:1000;
+    margin:0 0 24px;
+  }
+  .start-play{
+    min-width:190px;
+    min-height:64px;
+    border:4px solid #444;
+    border-radius:16px;
+    background:#fff;
+    box-shadow:0 4px 0 #aaa;
+    font-size:28px;
+    font-weight:1000;
+    cursor:pointer;
+  }
+  .start-play:active{
+    transform:translateY(3px);
+    box-shadow:0 1px 0 #aaa;
+  }
+
+
+  .phone.stage-primed #playerProfile,
+  .phone.stage-primed #opponentProfile,
+  .phone.stage-primed #playerPodium,
+  .phone.stage-primed #opponentPodium,
+  .phone.stage-primed #playerAnswerCard,
+  .phone.stage-primed #opponentAnswerCard,
+  .phone.stage-primed #questionGroup,
+  .phone.stage-primed .choice{
+    opacity:0 !important;
+    visibility:hidden !important;
+    pointer-events:none !important;
+  }
+
+
+  .turn-instruction{
+    min-height:22px;
+    text-align:center;
+    font-size:16px;
+    font-weight:700;
+    color:#555;
+    margin:8px 0 12px;
+  }
+
+
+  .turn-banner{
+    width:100%;
+    min-height:58px;
+    margin:0 0 10px;
+    padding:9px 16px 9px 10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    border:3px solid #444;
+    border-radius:14px;
+    background:#f4f4f4;
+    box-shadow:0 6px 16px #5554;
+    opacity:0;
+    visibility:hidden;
+    transform:translateX(-108%);
+    transition:
+      opacity .26s ease,
+      transform .34s cubic-bezier(.2,.8,.2,1),
+      visibility 0s linear .34s;
+    pointer-events:none;
+  }
+  .turn-banner.show{
+    opacity:1;
+    visibility:visible;
+    transform:translateX(0);
+    transition:
+      opacity .26s ease,
+      transform .34s cubic-bezier(.2,.8,.2,1),
+      visibility 0s;
+  }
+  .turn-banner.hide-right{
+    opacity:0;
+    visibility:hidden;
+    transform:translateX(108%);
+    transition:
+      opacity .22s ease,
+      transform .30s cubic-bezier(.2,.8,.2,1),
+      visibility 0s linear .30s;
+  }
+  .turn-banner-avatar{
+    width:40px;
+    height:40px;
+    display:grid;
+    place-items:center;
+    border:3px solid #555;
+    border-radius:50%;
+    background:#fff;
+    font-size:24px;
+    line-height:1;
+    flex:0 0 auto;
+  }
+  .turn-banner-text{
+    font-size:23px;
+    font-weight:1000;
+    line-height:1;
+    white-space:nowrap;
+  }
+
+  .choices{
+    transition:opacity .24s ease, filter .24s ease;
+  }
+  .choices.turn-locked{
+    pointer-events:none;
+  }
+  .choices.turn-locked .choice{
+    opacity:.38;
+    filter:grayscale(1);
+  }
+  .choices.turn-locked .choice.opponent-picked{
+    opacity:1;
+    filter:none;
+    transform:translateY(-1px) scale(1.02);
+    border-color:#555;
+    background:#dedede;
+    box-shadow:inset 0 0 0 4px #cfcfcf,0 4px 0 #8f8f8f;
+  }
+  .choices.turn-locked .choice.opponent-picked .choice-owner{
+    background:#fff;
+  }
+  .choices.turn-locked .choice.selected{
+    opacity:1;
+    filter:none;
+    transform:translateY(-1px) scale(1.02);
+    color:#555;
+    border-color:#555;
+    background:#dedede;
+    box-shadow:inset 0 0 0 4px #cfcfcf,0 4px 0 #8f8f8f;
+  }
+  .choices.turn-locked .choice.selected .choice-owner{
+    background:#fff;
+  }
+
+  .competitor-turn-dim{
+    opacity:.28 !important;
+    filter:grayscale(1) brightness(.78) !important;
+  }
+  .competitor-turn-active{
+    opacity:1 !important;
+    filter:none !important;
+  }
+
+
+  .answer-card.intro-step:not(.show){
+    visibility:hidden;
+  }
+
+
+  /* Compact portrait hierarchy:
+     HUD -> compact Face-Off stage with integrated answer tiles
+     -> turn banner -> question -> answer choices. */
+  .topbar{
+    height:54px;
+    grid-template-columns:42px 1fr 42px;
+    padding:6px 10px;
+  }
+  .icon-btn{
+    width:38px;
+    height:38px;
+    border-radius:10px;
+    font-size:24px;
+  }
+  .currency-row{gap:6px}
+  .currency{
+    min-width:0;
+    padding:6px 9px;
+    font-size:14px;
+  }
+
+  .mode-title{
+    height:36px;
+    font-size:22px;
+  }
+  .mode-title:before,
+  .mode-title:after{
+    width:20px;
+    margin:0 8px;
+  }
+
+  .stage{
+    height:252px;
+  }
+  .arch{
+    top:6px;
+    width:92%;
+    height:172px;
+    border-width:13px;
+  }
+  .back-screen{
+    top:24px;
+    width:31%;
+    height:58px;
+  }
+  .competitor{
+    top:20px;
+    width:31%;
+  }
+  .competitor.left{left:8%}
+  .competitor.right{right:8%}
+  .avatar{
+    width:66px;
+    height:66px;
+    margin-bottom:5px;
+    border-radius:13px;
+    font-size:34px;
+  }
+  .name{
+    min-width:86px;
+    padding:3px 8px;
+    font-size:14px;
+  }
+  .podium{
+    top:112px;
+    width:96px;
+    height:64px;
+  }
+  .podium.left{left:12%}
+  .podium.right{right:12%}
+  .podium:before{
+    left:-8px;
+    right:-8px;
+    top:-12px;
+    height:17px;
+  }
+  .bulbs{
+    left:13px;
+    right:13px;
+    top:18px;
+    bottom:8px;
+    background:
+      radial-gradient(circle,#f5f5f5 0 2px,transparent 3px) 0 0/17px 17px,
+      #444;
+  }
+
+  .answer-band{
+    position:absolute;
+    left:7px;
+    right:7px;
+    bottom:7px;
+    z-index:7;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+    padding:0;
+    background:transparent;
+    border:0;
+  }
+  .answer-card{
+    padding:3px;
+    border-radius:10px;
+    box-shadow:0 2px 0 #999;
+  }
+  .answer-label{
+    margin:0 0 2px;
+    font-size:11px;
+  }
+  .feud-answer{
+    height:43px;
+    grid-template-columns:1fr 42px;
+  }
+  .answer-text{
+    padding:2px;
+    font-size:15px;
+  }
+  .answer-score{
+    font-size:22px;
+  }
+  .placeholder{
+    font-size:13px;
+  }
+
+  .game-panel{
+    padding:10px 14px 14px;
+    border-top:0;
+  }
+  .turn-banner{
+    min-height:48px;
+    margin:0 0 8px;
+    padding:6px 14px 6px 8px;
+    border-radius:12px;
+  }
+  .turn-banner-avatar{
+    width:34px;
+    height:34px;
+    font-size:20px;
+  }
+  .turn-banner-text{
+    font-size:20px;
+  }
+  .question{
+    max-width:390px;
+    margin:0 auto 9px;
+    font-size:25px;
+    line-height:1.08;
+  }
+  .choices{
+    gap:7px;
+  }
+  .choice{
+    min-height:54px;
+    padding:6px 10px 6px 14px;
+    border-radius:12px;
+    font-size:22px;
+  }
+  .choice-owner{
+    max-width:100px;
+    padding:3px 6px;
+    font-size:11px;
+  }
+  .choice .choice-score{
+    min-width:40px;
+    height:34px;
+    padding:0 6px;
+    font-size:19px;
+  }
+  .turn-instruction{
+    display:none;
+  }
+
+  @media (max-height:740px){
+    .topbar{
+      height:48px;
+      padding:4px 9px;
+    }
+    .icon-btn{
+      width:36px;
+      height:36px;
+    }
+    .currency{
+      padding:5px 7px;
+      font-size:13px;
+    }
+    .mode-title{
+      height:32px;
+      font-size:19px;
+    }
+    .stage{
+      height:220px;
+    }
+    .arch{
+      height:148px;
+      border-width:11px;
+    }
+    .back-screen{
+      top:20px;
+      height:49px;
+    }
+    .competitor{
+      top:15px;
+    }
+    .avatar{
+      width:58px;
+      height:58px;
+      font-size:30px;
+    }
+    .name{
+      min-width:78px;
+      font-size:13px;
+    }
+    .podium{
+      top:96px;
+      width:86px;
+      height:52px;
+    }
+    .podium.left{left:13%}
+    .podium.right{right:13%}
+    .answer-band{
+      bottom:5px;
+    }
+    .answer-label{
+      font-size:10px;
+    }
+    .feud-answer{
+      height:39px;
+      grid-template-columns:1fr 38px;
+    }
+    .answer-text{
+      font-size:14px;
+    }
+    .answer-score{
+      font-size:20px;
+    }
+    .game-panel{
+      padding:8px 12px 10px;
+    }
+    .turn-banner{
+      min-height:44px;
+      margin-bottom:6px;
+    }
+    .question{
+      margin-bottom:7px;
+      font-size:22px;
+    }
+    .choices{
+      gap:6px;
+    }
+    .choice{
+      min-height:48px;
+      padding:5px 9px 5px 12px;
+      font-size:20px;
+    }
+  }
+
+
+
+  /* Face-Off enhancer: VS badge between the contestants */
+  .versus-badge{
+    position:absolute;
+    left:50%;
+    top:78px;
+    transform:translateX(-50%);
+    z-index:6;
+    min-width:38px;
+    height:38px;
+    padding:0 8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:3px solid #444;
+    border-radius:999px;
+    background:#f4f4f4;
+    box-shadow:0 3px 0 #999;
+    font-size:20px;
+    font-weight:1000;
+    line-height:1;
+    letter-spacing:.02em;
+    pointer-events:none;
+  }
+
+  @media (max-height:740px){
+    .versus-badge{
+      top:67px;
+      min-width:34px;
+      height:34px;
+      padding:0 7px;
+      font-size:18px;
+    }
+  }
+
+
+  /* Variant C: both contestants make a hidden selection from the same
+     three official survey answers, then reveal simultaneously. */
+  .choice.opponent-revealed{
+    opacity:1;
+    filter:none;
+    transform:translateY(-1px) scale(1.02);
+    color:#555;
+    border-color:#555;
+    background:#dedede;
+    box-shadow:inset 0 0 0 4px #cfcfcf,0 4px 0 #8f8f8f;
+  }
+  .choice.opponent-revealed .choice-owner{
+    display:inline-flex;
+    background:#fff;
+  }
+  .choice.both-picked{
+    opacity:1;
+    filter:none;
+    transform:translateY(-1px) scale(1.025);
+    color:#444;
+    border-width:4px;
+    background:#f1f1f1;
+    box-shadow:inset 0 0 0 4px #d4d4d4,0 5px 0 #777;
+  }
+  .choice.both-picked .choice-owner{
+    display:inline-flex;
+    background:#fff;
+  }
+  .choices.turn-locked .choice.opponent-revealed,
+  .choices.turn-locked .choice.both-picked{
+    opacity:1;
+    filter:none;
+  }
+  .answer-card.hidden-lock .answer-text{
+    color:transparent;
+    position:relative;
+  }
+  .answer-card.hidden-lock .answer-text::after{
+    content:"LOCKED";
+    position:absolute;
+    inset:0;
+    display:grid;
+    place-items:center;
+    color:#777;
+    font-size:13px;
+    font-weight:1000;
+    letter-spacing:.08em;
+  }
+  .answer-card.hidden-lock .answer-score{
+    color:#777;
+  }
+  .answer-card.simultaneous-reveal{
+    transform-origin:center;
+  }
+  .score-pop{
+    animation:scorePop .42s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes scorePop{
+    0%{transform:scale(.55);opacity:.1}
+    65%{transform:scale(1.18);opacity:1}
+    100%{transform:scale(1);opacity:1}
+  }
+  .stage.both-active .competitor,
+  .stage.both-active .podium{
+    opacity:1 !important;
+    filter:none !important;
+  }
+  .stage.both-active .spotlight-beam{
+    opacity:.58;
+  }
+  .turn-banner.locked-state{
+    background:#e5e5e5;
+    box-shadow:0 3px 0 #999;
+  }
+
+
+  /* Variant C2 reveal pacing: the choice is fast, the payoff breathes. */
+  .versus-badge.reveal-charge{
+    animation:versusCharge .72s ease-in-out infinite alternate;
+  }
+  @keyframes versusCharge{
+    from{transform:translateX(-50%) scale(1);box-shadow:0 3px 0 #999}
+    to{transform:translateX(-50%) scale(1.16);box-shadow:0 5px 0 #777,0 0 0 7px #fff8}
+  }
+
+
+  .prize-rail{
+    margin:6px 14px 0;
+    min-height:38px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:6px 12px;
+    border:3px solid #444;
+    border-radius:999px;
+    background:#f4f4f4;
+    box-shadow:0 3px 0 #999;
+  }
+  .prize-label{
+    font-size:14px;
+    font-weight:1000;
+    letter-spacing:.04em;
+    color:#555;
+  }
+  .prize-value{
+    font-size:18px;
+    font-weight:1000;
+    color:#222;
+  }
+  .prize-rail.payout-pulse{
+    animation:prizePulse .55s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes prizePulse{
+    0%{transform:scale(1)}
+    40%{transform:scale(1.05)}
+    100%{transform:scale(1)}
+  }
+  .coin-burst{
+    position:absolute;
+    left:50%;
+    top:44%;
+    transform:translateX(-50%);
+    z-index:60;
+    font-size:34px;
+    font-weight:1000;
+    color:#222;
+    background:#f4f4f4;
+    border:3px solid #444;
+    border-radius:16px;
+    padding:8px 18px;
+    box-shadow:0 6px 16px #5556;
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+  }
+  .coin-burst.show{
+    animation:coinBurst .92s cubic-bezier(.2,.8,.2,1) forwards;
+    visibility:visible;
+  }
+  @keyframes coinBurst{
+    0%{opacity:0; transform:translateX(-50%) translateY(16px) scale(.72)}
+    15%{opacity:1; transform:translateX(-50%) translateY(0) scale(1)}
+    75%{opacity:1; transform:translateX(-50%) translateY(-12px) scale(1)}
+    100%{opacity:0; transform:translateX(-50%) translateY(-34px) scale(1.06)}
+  }
+  .stage.opponent-locked .competitor.right,
+  .stage.opponent-locked .podium.right{
+    opacity:1 !important;
+    filter:none !important;
+  }
+  .stage.opponent-locked .competitor.left,
+  .stage.opponent-locked .podium.left{
+    opacity:.35 !important;
+    filter:grayscale(1) brightness(.78) !important;
+  }
+  .stage.opponent-locked .spotlight-beam.left{
+    opacity:.15 !important;
+  }
+  .stage.opponent-locked .spotlight-beam.right{
+    opacity:.72 !important;
+  }
+  .stage.player-pick .competitor.left,
+  .stage.player-pick .podium.left{
+    opacity:1 !important;
+    filter:none !important;
+  }
+  .stage.player-pick .competitor.right,
+  .stage.player-pick .podium.right{
+    opacity:.35 !important;
+    filter:grayscale(1) brightness(.78) !important;
+  }
+  .stage.player-pick .spotlight-beam.left{
+    opacity:.72 !important;
+  }
+  .stage.player-pick .spotlight-beam.right{
+    opacity:.15 !important;
+  }
+  .stage.vs-charge .versus-badge{
+    animation:vsCharge .55s ease-in-out infinite alternate;
+  }
+  @keyframes vsCharge{
+    from{transform:translateX(-50%) scale(1)}
+    to{transform:translateX(-50%) scale(1.08)}
+  }
+  .choices.turn-locked .choice.both-picked,
+  .choices.turn-locked .choice.opponent-revealed,
+  .choices.turn-locked .choice.selected{
+    opacity:1;
+    filter:none;
+  }
+
+
+  /* Result focus: celebrate the winner at the podium and dim the loser. */
+  .stage.player-wins .competitor.left,
+  .stage.player-wins .podium.left,
+  .stage.opponent-wins .competitor.right,
+  .stage.opponent-wins .podium.right{
+    opacity:1 !important;
+    filter:none !important;
+    transform:scale(1.04);
+    transition:opacity .28s ease, filter .28s ease, transform .28s ease;
+  }
+  .stage.player-wins .competitor.right,
+  .stage.player-wins .podium.right,
+  .stage.opponent-wins .competitor.left,
+  .stage.opponent-wins .podium.left{
+    opacity:.24 !important;
+    filter:grayscale(1) brightness(.68) !important;
+    transform:scale(.97);
+    transition:opacity .28s ease, filter .28s ease, transform .28s ease;
+  }
+  .stage.player-wins .spotlight-beam.left,
+  .stage.opponent-wins .spotlight-beam.right{
+    opacity:.88 !important;
+  }
+  .stage.player-wins .spotlight-beam.right,
+  .stage.opponent-wins .spotlight-beam.left{
+    opacity:.08 !important;
+  }
+  .stage.player-wins .podium.left,
+  .stage.opponent-wins .podium.right{
+    animation:winnerPodiumPulse .58s ease-in-out 2 alternate;
+  }
+  .stage.player-wins .podium.left .bulbs,
+  .stage.opponent-wins .podium.right .bulbs{
+    filter:brightness(1.8);
+  }
+  .stage.player-wins #playerAnswerCard,
+  .stage.opponent-wins #opponentAnswerCard{
+    opacity:1;
+    transform:scale(1.025);
+    transition:opacity .28s ease, transform .28s ease;
+  }
+  .stage.player-wins #opponentAnswerCard,
+  .stage.opponent-wins #playerAnswerCard{
+    opacity:.38;
+    filter:grayscale(1);
+    transition:opacity .28s ease, filter .28s ease;
+  }
+  @keyframes winnerPodiumPulse{
+    from{transform:scale(1.04)}
+    to{transform:scale(1.09)}
+  }
+
+</style>
+</head>
+<body>
+  <main id="phoneRoot" class="phone prelaunch-hidden stage-primed" aria-label="Face Off prototype">
+    <header class="topbar">
+      <button class="icon-btn" aria-label="Back">←</button>
+      <div class="currency-row">
+        <div class="currency">🏆 12,450</div>
+        <div class="currency">🪙 1,200</div>
+      </div>
+      <button class="icon-btn" aria-label="Menu">☰</button>
+    </header>
+
+    <div class="mode-title">FACE OFF</div>
+
+    <div class="prize-rail" aria-label="Face Off prize">
+      <span class="prize-label">FACE OFF PRIZE</span>
+      <span id="prizeValue" class="prize-value">40,000 COINS</span>
+    </div>
+
+    <section class="stage" id="stageSection">
+      <div id="leftSpotlight" class="spotlight-beam left"></div>
+      <div id="rightSpotlight" class="spotlight-beam right"></div>
+      <div class="arch"></div>
+      <div class="back-screen"></div>
+
+      <div id="playerProfile" class="competitor left intro-step">
+        <div class="avatar">👩🏻</div>
+        <div class="name">YOU</div>
+      </div>
+      <div id="opponentProfile" class="competitor right intro-step">
+        <div id="opponentAvatar" class="avatar">👤</div>
+        <div id="opponentName" class="name">NINJAKID</div>
+      </div>
+
+      <div class="versus-badge">VS</div>
+      <div id="playerPodium" class="podium left intro-step"><div class="bulbs"></div></div>
+      <div id="opponentPodium" class="podium right intro-step"><div class="bulbs"></div></div>
+
+      <section class="answer-band" aria-label="Face-Off answers">
+        <article id="playerAnswerCard" class="answer-card intro-step">
+          <div class="answer-label">YOUR ANSWER</div>
+          <div class="feud-answer">
+            <div id="playerAnswer" class="answer-text placeholder">HIDDEN PICK</div>
+            <div id="playerScore" class="answer-score">?</div>
+          </div>
+        </article>
+
+        <article id="opponentAnswerCard" class="answer-card intro-step">
+          <div class="answer-label">OPPONENT ANSWER</div>
+          <div class="feud-answer">
+            <div id="opponentAnswer" class="answer-text answer-content-hidden">HIDDEN PICK</div>
+            <div id="opponentScore" class="answer-score">?</div>
+          </div>
+        </article>
+      </section>
+    </section>
+
+
+    <section class="game-panel">
+      <div id="turnBanner" class="turn-banner" role="status" aria-live="polite">
+        <span id="turnBannerAvatar" class="turn-banner-avatar">🔒</span>
+        <span id="turnBannerText" class="turn-banner-text">ANSWERS LOCKED</span>
+      </div>
+
+      <div id="questionGroup" class="question-group intro-step">
+        <h1 class="question">Name a place where people try not to fall asleep.</h1>
+      </div>
+
+      <div class="choices">
+        <button class="choice" type="button"></button>
+        <button class="choice" type="button"></button>
+        <button class="choice" type="button"></button>
+      </div>
+      <div id="instructionText" class="turn-instruction" aria-hidden="true"></div>
+    </section>
+
+    <div id="introOverlay" class="intro-overlay"><div class="intro-card">FACE OFF</div></div>
+    <div id="opponentCallout" class="opponent-callout">NINJAKID ANSWERS…</div>
+    <div id="flyingAnswer" class="flying-answer">IN CHURCH</div>
+
+
+    <div id="coinBurst" class="coin-burst" aria-hidden="true">+40,000 COINS</div>
+    <div id="ribbon" class="ribbon" role="status" aria-live="polite">SURVEY SAYS…</div>
+
+    <section id="resultActions" class="result-actions">
+      <button id="playAgain" class="primary">PLAY AGAIN</button>
+    </section>
+  </main>
+
+<div id="startScreen" class="start-screen show" aria-modal="true" role="dialog" aria-label="Face Off start screen">
+  <div class="start-card">
+    <div class="start-kicker">VARIANT C13 · TIE POT</div>
+    <h2 class="start-title">FACE-OFF</h2>
+    <button id="startPlay" class="start-play" type="button">PLAY</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  function ready(fn) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", fn, { once: true });
+    } else {
+      fn();
+    }
+  }
+
+  ready(function () {
+    var phoneRoot = document.getElementById("phoneRoot");
+    var startScreen = document.getElementById("startScreen");
+    var startPlay = document.getElementById("startPlay");
+    var stageSection = document.getElementById("stageSection");
+
+    var playerProfile = document.getElementById("playerProfile");
+    var opponentProfile = document.getElementById("opponentProfile");
+    var playerPodium = document.getElementById("playerPodium");
+    var opponentPodium = document.getElementById("opponentPodium");
+    var leftSpotlight = document.getElementById("leftSpotlight");
+    var rightSpotlight = document.getElementById("rightSpotlight");
+
+    var playerAnswerCard = document.getElementById("playerAnswerCard");
+    var opponentAnswerCard = document.getElementById("opponentAnswerCard");
+    var playerAnswer = document.getElementById("playerAnswer");
+    var opponentAnswerText = document.getElementById("opponentAnswer");
+    var playerScore = document.getElementById("playerScore");
+    var opponentScore = document.getElementById("opponentScore");
+
+    var opponentAvatar = document.getElementById("opponentAvatar");
+    var opponentName = document.getElementById("opponentName");
+    var questionGroup = document.getElementById("questionGroup");
+    var questionText = document.querySelector(".question");
+    var instructionText = document.getElementById("instructionText");
+
+    var prizeValue = document.getElementById("prizeValue");
+    var prizeRail = document.querySelector(".prize-rail");
+    var coinBurst = document.getElementById("coinBurst");
+
+    var turnBanner = document.getElementById("turnBanner");
+    var turnBannerAvatar = document.getElementById("turnBannerAvatar");
+    var turnBannerText = document.getElementById("turnBannerText");
+
+    var gamePanel = document.querySelector(".game-panel");
+    var choicesContainer = document.querySelector(".choices");
+    var choiceButtons = Array.prototype.slice.call(
+      document.querySelectorAll(".choice")
+    );
+
+    var ribbon = document.getElementById("ribbon");
+    var resultActions = document.getElementById("resultActions");
+    var playAgain = document.getElementById("playAgain");
+
+    var questionSets = [
+      {
+        question: "Name something people do while waiting in a long line.",
+        answers: [
+          { text: "CHECK THEIR PHONE", score: 42, botWeight: 46 },
+          { text: "TALK TO SOMEONE", score: 31, botWeight: 34 },
+          { text: "COMPLAIN", score: 18, botWeight: 20 }
+        ],
+        displayOrder: [1, 0, 2]
+      },
+      {
+        question: "Name something people often forget when leaving the house.",
+        answers: [
+          { text: "PHONE", score: 44, botWeight: 43 },
+          { text: "KEYS", score: 35, botWeight: 39 },
+          { text: "WALLET", score: 21, botWeight: 18 }
+        ],
+        displayOrder: [2, 1, 0]
+      },
+      {
+        question: "Name something people do when they cannot sleep.",
+        answers: [
+          { text: "CHECK THEIR PHONE", score: 39, botWeight: 40 },
+          { text: "WATCH TV", score: 33, botWeight: 37 },
+          { text: "READ", score: 22, botWeight: 23 }
+        ],
+        displayOrder: [0, 2, 1]
+      },
+      {
+        question: "Name something people might do before a first date.",
+        answers: [
+          { text: "CHOOSE AN OUTFIT", score: 41, botWeight: 45 },
+          { text: "FIX THEIR HAIR", score: 34, botWeight: 36 },
+          { text: "ASK FOR ADVICE", score: 17, botWeight: 19 }
+        ],
+        displayOrder: [1, 2, 0]
+      },
+      {
+        question: "Name something people keep in their car.",
+        answers: [
+          { text: "PHONE CHARGER", score: 37, botWeight: 40 },
+          { text: "SUNGLASSES", score: 29, botWeight: 34 },
+          { text: "TISSUES", score: 16, botWeight: 26 }
+        ],
+        displayOrder: [2, 0, 1]
+      },
+      {
+        question: "Name a place where people try not to fall asleep.",
+        answers: [
+          { text: "AT WORK", score: 40, botWeight: 42 },
+          { text: "IN CHURCH", score: 32, botWeight: 38 },
+          { text: "AT SCHOOL", score: 20, botWeight: 20 }
+        ],
+        displayOrder: [1, 0, 2]
+      }
+    ];
+
+    var opponents = [
+      { name: "NINJAKID", avatar: "👨🏽" },
+      { name: "STARLILY", avatar: "👩🏻" },
+      { name: "BIGMIKE", avatar: "👨🏿" },
+      { name: "QUEENBEE", avatar: "👩🏾" },
+      { name: "ACEJAX", avatar: "👨🏻" },
+      { name: "MIA POP", avatar: "👩🏼" }
+    ];
+
+    var prizeOptions = [30000, 40000, 50000, 60000, 80000];
+    var tiePrizeGrowth = 10000;
+    var carryOverPrize = 0;
+    var currentPrize = 40000;
+    var currentQuestionIndex = 0;
+    var currentOpponentIndex = 0;
+    var currentOpponentAnswerIndex = 0;
+    var locked = false;
+    var introPlaying = false;
+
+    function wait(ms) {
+      return new Promise(function (resolve) {
+        window.setTimeout(resolve, ms);
+      });
+    }
+
+    function formatCoins(value) {
+      return value.toLocaleString() + " COINS";
+    }
+
+    function fitAnswerText(element, text) {
+      element.classList.remove("compact", "tiny");
+      if (text.length > 17) {
+        element.classList.add("tiny");
+      } else if (text.length > 12) {
+        element.classList.add("compact");
+      }
+    }
+
+    function weightedBotPick(answers) {
+      var total = answers.reduce(function (sum, answer) {
+        return sum + answer.botWeight;
+      }, 0);
+      var roll = Math.random() * total;
+      for (var i = 0; i < answers.length; i++) {
+        roll -= answers[i].botWeight;
+        if (roll <= 0) return i;
+      }
+      return answers.length - 1;
+    }
+
+    async function showRibbon(text, hold) {
+      // Reset off-screen to the left without animating back into view.
+      ribbon.textContent = text;
+      ribbon.classList.remove("show", "hide-right");
+      ribbon.classList.add("instant-left");
+      void ribbon.offsetWidth;
+      ribbon.classList.remove("instant-left");
+
+      await wait(30);
+      ribbon.classList.add("show");
+      await wait(hold || 900);
+
+      // Always exit to the right.
+      ribbon.classList.remove("show");
+      ribbon.classList.add("hide-right");
+      await wait(380);
+
+      // Snap back to the left invisibly so the next ribbon can enter
+      // from the same direction without the visual fly-back glitch.
+      ribbon.classList.remove("hide-right");
+      ribbon.classList.add("instant-left");
+      void ribbon.offsetWidth;
+      ribbon.classList.remove("instant-left");
+    }
+
+    async function showTurnStatus(avatar, text, hold, lockedState) {
+      turnBanner.classList.remove("show", "hide-right");
+      turnBanner.classList.toggle("locked-state", !!lockedState);
+      turnBannerAvatar.textContent = avatar;
+      turnBannerText.textContent = text;
+      await wait(40);
+      turnBanner.classList.add("show");
+      await wait(hold || 420);
+    }
+
+    async function swapTurnStatus(avatar, text, hold, lockedState) {
+      turnBanner.classList.remove("show");
+      turnBanner.classList.add("hide-right");
+      await wait(240);
+      turnBanner.classList.remove("hide-right");
+      turnBanner.classList.toggle("locked-state", !!lockedState);
+      turnBannerAvatar.textContent = avatar;
+      turnBannerText.textContent = text;
+      await wait(40);
+      turnBanner.classList.add("show");
+      await wait(hold || 420);
+    }
+
+    async function hideTurnStatus() {
+      turnBanner.classList.remove("show");
+      turnBanner.classList.add("hide-right");
+      await wait(260);
+      turnBanner.classList.remove("hide-right", "locked-state");
+    }
+
+    function clearRoundUI() {
+      locked = false;
+      introPlaying = false;
+
+      [
+        playerProfile,
+        opponentProfile,
+        playerPodium,
+        opponentPodium,
+        playerAnswerCard,
+        opponentAnswerCard,
+        questionGroup
+      ].forEach(function (element) {
+        element.classList.remove(
+          "show",
+          "entrance-hidden-left",
+          "entrance-hidden-right"
+        );
+      });
+
+      stageSection.classList.remove(
+        "both-active",
+        "opponent-locked",
+        "player-pick",
+        "vs-charge",
+        "player-wins",
+        "opponent-wins"
+      );
+      leftSpotlight.classList.remove("show");
+      rightSpotlight.classList.remove("show");
+      leftSpotlight.style.opacity = "";
+      rightSpotlight.style.opacity = "";
+
+      playerAnswerCard.classList.remove("hidden-lock", "simultaneous-reveal");
+      opponentAnswerCard.classList.remove("hidden-lock", "simultaneous-reveal");
+
+      turnBanner.classList.remove("show", "hide-right", "locked-state");
+      choicesContainer.classList.remove("turn-locked");
+      gamePanel.classList.remove("reveal-focus");
+      resultActions.classList.remove("show");
+      prizeRail.classList.remove("payout-pulse");
+      coinBurst.classList.remove("show");
+
+      playerAnswer.textContent = "HIDDEN PICK";
+      playerAnswer.classList.add("placeholder", "answer-content-hidden");
+      playerAnswer.classList.remove("compact", "tiny");
+      opponentAnswerText.textContent = "HIDDEN PICK";
+      opponentAnswerText.classList.add("answer-content-hidden");
+      opponentAnswerText.classList.remove("compact", "tiny");
+
+      playerScore.textContent = "?";
+      opponentScore.textContent = "?";
+      playerScore.classList.remove("score-pop");
+      opponentScore.classList.remove("score-pop");
+
+      instructionText.textContent = "";
+
+      choiceButtons.forEach(function (button) {
+        button.classList.remove(
+          "show",
+          "selected",
+          "opponent-picked",
+          "opponent-revealed",
+          "both-picked",
+          "claim-pulse",
+          "reveal-score"
+        );
+        button.disabled = true;
+        button.innerHTML = "";
+      });
+    }
+
+    function setPrizeForRound() {
+      if (carryOverPrize > 0) {
+        currentPrize = carryOverPrize;
+      } else {
+        currentPrize = prizeOptions[currentQuestionIndex % prizeOptions.length];
+      }
+      prizeValue.textContent = formatCoins(currentPrize);
+      coinBurst.textContent = "+" + formatCoins(currentPrize);
+    }
+
+    async function growPrizeOnTie() {
+      currentPrize += tiePrizeGrowth;
+      carryOverPrize = currentPrize;
+      prizeValue.textContent = formatCoins(currentPrize);
+      prizeRail.classList.remove("payout-pulse");
+      void prizeRail.offsetWidth;
+      prizeRail.classList.add("payout-pulse");
+      coinBurst.textContent = "+10,000 TO POT";
+      coinBurst.classList.remove("show");
+      void coinBurst.offsetWidth;
+      coinBurst.classList.add("show");
+      await wait(980);
+      coinBurst.classList.remove("show");
+      coinBurst.textContent = "+" + formatCoins(currentPrize);
+    }
+
+    function loadQuestion(index) {
+      var data = questionSets[index];
+      var opponent = opponents[currentOpponentIndex];
+
+      currentOpponentAnswerIndex = weightedBotPick(data.answers);
+      setPrizeForRound();
+
+      questionText.textContent = data.question;
+      opponentAvatar.textContent = opponent.avatar;
+      opponentName.textContent = opponent.name;
+
+      data.displayOrder.forEach(function (answerIndex, buttonIndex) {
+        var answer = data.answers[answerIndex];
+        var button = choiceButtons[buttonIndex];
+
+        var label = document.createElement("span");
+        label.className = "choice-label";
+        label.textContent = answer.text;
+
+        var owner = document.createElement("span");
+        owner.className = "choice-owner";
+        owner.textContent = "";
+
+        var scoreBadge = document.createElement("span");
+        scoreBadge.className = "choice-score";
+        scoreBadge.textContent = String(answer.score);
+
+        button.appendChild(label);
+        button.appendChild(owner);
+        button.appendChild(scoreBadge);
+        button.setAttribute("data-answer-index", String(answerIndex));
+        button.disabled = true;
+      });
+    }
+
+    async function animateBothAnswerCards() {
+      playerAnswerCard.classList.add("simultaneous-reveal");
+      opponentAnswerCard.classList.add("simultaneous-reveal");
+
+      var playerAnimation = playerAnswerCard.animate(
+        [
+          { transform: "rotateX(82deg) scale(.96)", opacity: .15 },
+          { transform: "rotateX(0deg) scale(1)", opacity: 1 }
+        ],
+        {
+          duration: 500,
+          easing: "cubic-bezier(.2,.78,.2,1)",
+          fill: "both"
+        }
+      );
+
+      var opponentAnimation = opponentAnswerCard.animate(
+        [
+          { transform: "rotateX(82deg) scale(.96)", opacity: .15 },
+          { transform: "rotateX(0deg) scale(1)", opacity: 1 }
+        ],
+        {
+          duration: 500,
+          easing: "cubic-bezier(.2,.78,.2,1)",
+          fill: "both"
+        }
+      );
+
+      await Promise.all([playerAnimation.finished, opponentAnimation.finished]);
+      playerAnimation.cancel();
+      opponentAnimation.cancel();
+      playerAnswerCard.classList.remove("simultaneous-reveal");
+      opponentAnswerCard.classList.remove("simultaneous-reveal");
+    }
+
+    async function playIntro() {
+      if (introPlaying) return;
+      introPlaying = true;
+      clearRoundUI();
+      introPlaying = true;
+      phoneRoot.classList.add("js-intro");
+      phoneRoot.classList.remove("stage-primed");
+      loadQuestion(currentQuestionIndex);
+
+      // Both contestants enter together.
+      playerProfile.classList.add("entrance-hidden-left", "show");
+      playerPodium.classList.add("entrance-hidden-left", "show");
+      opponentProfile.classList.add("entrance-hidden-right", "show");
+      opponentPodium.classList.add("entrance-hidden-right", "show");
+
+      requestAnimationFrame(function () {
+        playerProfile.classList.remove("entrance-hidden-left");
+        playerPodium.classList.remove("entrance-hidden-left");
+        opponentProfile.classList.remove("entrance-hidden-right");
+        opponentPodium.classList.remove("entrance-hidden-right");
+      });
+      await wait(700);
+
+      questionGroup.classList.add("show");
+      await wait(760);
+
+      for (var i = 0; i < choiceButtons.length; i++) {
+        choiceButtons[i].classList.add("show");
+        await wait(110);
+      }
+      await wait(180);
+
+      leftSpotlight.classList.add("show");
+      rightSpotlight.classList.add("show");
+      stageSection.classList.add("both-active");
+
+      choiceButtons.forEach(function (button) { button.disabled = false; });
+      await showTurnStatus("⚡", "MAKE YOUR PICK", 760, false);
+
+      introPlaying = false;
+    }
+
+    async function chooseAnswer(button) {
+      if (locked || introPlaying || button.disabled) return;
+
+      locked = true;
+      choiceButtons.forEach(function (choiceButton) { choiceButton.disabled = true; });
+
+      var data = questionSets[currentQuestionIndex];
+      var opponent = opponents[currentOpponentIndex];
+      var playerAnswerIndex = Number(button.getAttribute("data-answer-index"));
+      var playerChoice = data.answers[playerAnswerIndex];
+      var opponentChoice = data.answers[currentOpponentAnswerIndex];
+
+      var playerOwner = button.querySelector(".choice-owner");
+      playerOwner.textContent = "👩🏻 YOU";
+      button.classList.add("selected", "claim-pulse");
+      choicesContainer.classList.add("turn-locked");
+      gamePanel.classList.add("reveal-focus");
+
+      playerAnswer.textContent = playerChoice.text;
+      fitAnswerText(playerAnswer, playerChoice.text);
+      playerAnswer.classList.remove("placeholder");
+
+      // First, your hidden answer box slides in from left to right.
+      playerAnswerCard.classList.add("hidden-lock", "show");
+      playerAnswerCard.classList.remove("entrance-hidden-left");
+      var playerArrival = playerAnswerCard.animate(
+        [
+          { transform: "translateX(-30px) scale(.96)", opacity: .15 },
+          { transform: "translateX(0) scale(1)", opacity: 1 }
+        ],
+        {
+          duration: 420,
+          easing: "cubic-bezier(.2,.78,.2,1)",
+          fill: "both"
+        }
+      );
+      await playerArrival.finished;
+      playerArrival.cancel();
+
+      await wait(160);
+
+      // Then the opponent hidden answer box slides in from right to left.
+      opponentAnswerCard.classList.add("hidden-lock", "show");
+      opponentAnswerCard.classList.remove("entrance-hidden-right");
+      var opponentArrival = opponentAnswerCard.animate(
+        [
+          { transform: "translateX(30px) scale(.96)", opacity: .15 },
+          { transform: "translateX(0) scale(1)", opacity: 1 }
+        ],
+        {
+          duration: 420,
+          easing: "cubic-bezier(.2,.78,.2,1)",
+          fill: "both"
+        }
+      );
+      await opponentArrival.finished;
+      opponentArrival.cancel();
+
+      stageSection.classList.remove("both-active");
+      stageSection.classList.add("vs-charge");
+      await hideTurnStatus();
+
+      await showRibbon("SURVEY SAYS…", 900);
+
+      // Load both answer texts and values before the flip so each card
+      // reveals its complete answer and survey value in one motion.
+      playerAnswerCard.classList.remove("hidden-lock");
+      opponentAnswerCard.classList.remove("hidden-lock");
+
+      playerAnswer.classList.remove("answer-content-hidden");
+      opponentAnswerText.textContent = opponentChoice.text;
+      fitAnswerText(opponentAnswerText, opponentChoice.text);
+      opponentAnswerText.classList.remove("answer-content-hidden");
+
+      playerScore.textContent = String(playerChoice.score);
+      opponentScore.textContent = String(opponentChoice.score);
+
+      await animateBothAnswerCards();
+
+      var opponentButton = choiceButtons.find(function (choiceButton) {
+        return Number(choiceButton.getAttribute("data-answer-index")) === currentOpponentAnswerIndex;
+      });
+      var opponentOwner = opponentButton.querySelector(".choice-owner");
+
+      if (playerAnswerIndex === currentOpponentAnswerIndex) {
+        playerOwner.textContent = "BOTH PICKED";
+        button.classList.add("both-picked");
+      } else {
+        opponentOwner.textContent = opponent.avatar + " " + opponent.name;
+        opponentButton.classList.add("opponent-picked", "opponent-revealed", "claim-pulse");
+      }
+
+      stageSection.classList.remove("vs-charge");
+      await wait(760);
+
+      var isTie = playerChoice.score === opponentChoice.score;
+      var playerWon = playerChoice.score > opponentChoice.score;
+
+      if (isTie) {
+        choicesContainer.classList.remove("turn-locked");
+        choiceButtons.forEach(function (choiceButton) {
+          choiceButton.classList.add("reveal-score");
+        });
+        await showRibbon("TIE! PRIZE GROWS!", 1050);
+        await growPrizeOnTie();
+        await showRibbon("RUN IT BACK", 850);
+        await wait(320);
+        currentQuestionIndex = (currentQuestionIndex + 1) % questionSets.length;
+        clearRoundUI();
+        await wait(280);
+        playIntro();
+        return;
+      }
+
+      if (playerWon) {
+        stageSection.classList.add("player-wins");
+        await wait(320);
+        await showRibbon("YOU WIN!", 950);
+        prizeRail.classList.add("payout-pulse");
+        coinBurst.classList.add("show");
+        await wait(980);
+      } else {
+        stageSection.classList.add("opponent-wins");
+        await wait(320);
+        await showRibbon(opponent.name + " WINS!", 1150);
+      }
+
+      gamePanel.classList.remove("reveal-focus");
+      choicesContainer.classList.remove("turn-locked");
+      choiceButtons.forEach(function (choiceButton) {
+        choiceButton.classList.add("reveal-score");
+      });
+
+      await wait(320);
+      resultActions.classList.add("show");
+    }
+
+    choiceButtons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        chooseAnswer(button);
+      });
+    });
+
+    playAgain.addEventListener("click", async function () {
+      carryOverPrize = 0;
+      clearRoundUI();
+
+      playerProfile.classList.add("entrance-hidden-left");
+      playerPodium.classList.add("entrance-hidden-left");
+      playerAnswerCard.classList.add("entrance-hidden-left");
+      opponentProfile.classList.add("entrance-hidden-right");
+      opponentPodium.classList.add("entrance-hidden-right");
+      opponentAnswerCard.classList.add("entrance-hidden-right");
+
+      await wait(360);
+      currentQuestionIndex = (currentQuestionIndex + 1) % questionSets.length;
+      currentOpponentIndex = (currentOpponentIndex + 1) % opponents.length;
+      window.scrollTo(0, 0);
+      await wait(70);
+      playIntro();
+    });
+
+    clearRoundUI();
+    startScreen.classList.add("show");
+    phoneRoot.classList.add("prelaunch-hidden");
+
+    startPlay.addEventListener("click", async function () {
+      carryOverPrize = 0;
+      startScreen.classList.remove("show");
+      clearRoundUI();
+      phoneRoot.classList.add("stage-primed");
+      phoneRoot.classList.remove("prelaunch-hidden");
+      await wait(110);
+      playIntro();
+    });
+  });
+})();
+</script>
+</body>
+</html>
