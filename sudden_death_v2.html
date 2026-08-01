@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Family Feud: Fast Money — Sudden Death Prototype v3</title>
+<style>
+:root{
+  --bg:#060a1d; --navy:#101a4c; --blue:#244fa9; --blue2:#183777;
+  --gold:#ffd45a; --orange:#ff9f1c; --red:#ef233c; --green:#35d69a;
+  --white:#f7fbff; --muted:#aab9e4;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at 50% 0%,#25439b 0,#0b1232 34%,#050817 100%);color:var(--white)}
+button{font:inherit}
+.app{width:100vw;height:100vh;display:grid;place-items:center;padding:10px}
+.phone{position:relative;width:min(430px,100%);height:min(900px,100vh - 20px);border-radius:34px;overflow:hidden;background:linear-gradient(180deg,#101a50 0%,#0a1236 34%,#06091e 100%);box-shadow:0 24px 70px rgba(0,0,0,.48),inset 0 0 0 1px rgba(255,255,255,.1)}
+.lights{position:absolute;inset:0;pointer-events:none;background:conic-gradient(from 262deg at 8% -5%,transparent 0 20deg,rgba(255,255,255,.08) 20deg 29deg,transparent 29deg 65deg),conic-gradient(from 96deg at 92% -5%,transparent 0 20deg,rgba(255,255,255,.08) 20deg 29deg,transparent 29deg 65deg);opacity:.72}
+.topbar{position:relative;z-index:5;height:70px;padding:14px 18px 8px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-size:13px;font-weight:1000;letter-spacing:.06em;text-transform:uppercase}.brand b{color:var(--gold)}
+.reset{border:0;background:rgba(255,255,255,.1);color:white;width:38px;height:38px;border-radius:50%;cursor:pointer}
+.content{position:relative;z-index:4;height:calc(100% - 70px);padding:8px 16px 20px}
+.screen{display:none;height:100%;animation:fade .3s ease both}
+.screen.active{display:flex}
+@keyframes fade{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
+.center{align-items:center;justify-content:center;flex-direction:column;text-align:center}
+.eyebrow{font-size:12px;font-weight:1000;letter-spacing:.2em;text-transform:uppercase;color:#afbef0;margin-bottom:10px}
+.title{font-size:48px;line-height:.92;font-weight:1000;text-transform:uppercase;letter-spacing:-.045em;text-shadow:0 5px 0 #7d1023,0 14px 30px rgba(239,35,60,.45)}
+.title span{color:var(--red)}
+.rule{margin-top:18px;max-width:320px;font-size:18px;line-height:1.38;font-weight:800;color:#e6eeff}.rule b{color:var(--gold)}
+.primary{margin-top:28px;border:0;border-radius:18px;min-width:220px;padding:16px 32px;cursor:pointer;background:linear-gradient(180deg,#ffe78a,#ffb62e);color:#291600;font-weight:1000;font-size:20px;box-shadow:0 8px 0 #9d5a03,0 18px 32px rgba(255,181,46,.25)}
+.primary:active{transform:translateY(5px);box-shadow:0 3px 0 #9d5a03}
+.secondary{margin-top:14px;border:1px solid rgba(255,255,255,.2);border-radius:15px;padding:13px 22px;cursor:pointer;color:white;background:rgba(255,255,255,.08);font-weight:900}
+.prize-title{font-size:34px;line-height:1;font-weight:1000;text-transform:uppercase;letter-spacing:-.03em}
+.cards{width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}
+.card-wrap{perspective:1200px;aspect-ratio:.72}
+.prize-card{position:relative;width:100%;height:100%;transform-style:preserve-3d;border:0;background:none;padding:0;cursor:pointer;transition:transform .65s cubic-bezier(.2,.8,.2,1),opacity .25s ease,filter .25s ease}
+.prize-card:disabled{cursor:default}
+.card-wrap{transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.card-wrap.shuffle-left{transform:translateX(112%) scale(.98)}
+.card-wrap.shuffle-right{transform:translateX(-112%) scale(.98)}
+.card-wrap.shuffle-mid-left{transform:translateX(-112%) scale(.98)}
+.card-wrap.shuffle-mid-right{transform:translateX(112%) scale(.98)}
+.cards.ready .prize-card{cursor:pointer}
+.pick-prompt{margin-top:14px;color:var(--gold);font-size:15px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase;opacity:0;transform:translateY(8px);transition:.3s ease}
+.pick-prompt.show{opacity:1;transform:translateY(0)}
+.pick-prompt.waiting::after{content:"";display:inline-block;width:20px;text-align:left;animation:dots 1.1s steps(4,end) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%,100%{content:"..."}}
+.cards.waiting{filter:brightness(.8)}
+.cards.ready{filter:brightness(1)}
+.cards.ready .card-wrap{animation:readyPulse .5s ease both}
+.flying-prize{
+  position:absolute;
+  z-index:40;
+  border-radius:18px;
+  background:linear-gradient(160deg,#573200,#8b5605 30%,#ffbf3f);
+  color:#201000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  box-shadow:0 14px 30px rgba(0,0,0,.35),inset 0 0 0 2px rgba(255,255,255,.18);
+  transition:left .9s cubic-bezier(.2,.8,.2,1),top .9s cubic-bezier(.2,.8,.2,1),width .9s cubic-bezier(.2,.8,.2,1),height .9s cubic-bezier(.2,.8,.2,1),opacity .25s ease;
+}
+.answers.locked .mco{
+  pointer-events:none;
+  filter:brightness(.72);
+}
+.answers.unlocked .mco{
+  animation:answerReady .42s ease both;
+}
+@keyframes answerReady{
+  0%{transform:scale(.97);filter:brightness(.75)}
+  50%{transform:scale(1.02);filter:brightness(1.14)}
+  100%{transform:scale(1);filter:brightness(1)}
+}
+@keyframes readyPulse{0%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.03)}100%{transform:translateY(0) scale(1)}}
+.cards.locked-shake{animation:lockedShake .32s ease}
+@keyframes lockedShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+.prize-card.flipped{transform:rotateY(180deg)}
+.prize-card.unchosen .card-back{
+  filter:grayscale(1) brightness(.78);
+  opacity:1;
+}
+.prize-card.unchosen{
+  opacity:.72 !important;
+}
+.prize-card.unchosen .amount,
+.prize-card.unchosen .label{
+  color:#f1f1f1;
+  opacity:1;
+}
+.card-face{position:absolute;inset:0;border-radius:18px;backface-visibility:hidden;overflow:hidden;box-shadow:0 11px 0 #05091d,0 20px 30px rgba(0,0,0,.28),inset 0 0 0 2px rgba(255,255,255,.14)}
+.card-front{background:linear-gradient(160deg,#244aa3,#17306d 55%,#0b133e)}
+.prize-card.revealed-unchosen .card-front{
+  background:linear-gradient(160deg,#6d6d6d,#484848 55%,#303030);
+}
+.prize-card.revealed-unchosen .card-front:before{
+  border-color:#d0d0d0;
+}
+.prize-card.revealed-unchosen .ff,
+.prize-card.revealed-unchosen .mystery{
+  display:none;
+}
+.reveal-label{
+  font-size:11px;
+  font-weight:1000;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:#f2f2f2;
+  opacity:.92;
+}
+.reveal-amount{
+  font-size:28px;
+  line-height:1;
+  margin-top:10px;
+  font-weight:1000;
+  color:#ffffff;
+}
+.card-front:before,.card-back:before{content:"";position:absolute;inset:8px;border-radius:12px;border:2px solid var(--gold)}
+.card-back{transform:rotateY(180deg);background:linear-gradient(160deg,#573200,#8b5605 30%,#ffbf3f);color:#201000}
+.card-center,.card-back-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px}
+.ff{font-size:20px;font-weight:1000;color:var(--gold);letter-spacing:.06em}.mystery{font-size:50px;line-height:1;margin-top:16px;font-weight:1000}
+.card-back .label{font-size:11px;font-weight:1000;letter-spacing:.18em;text-transform:uppercase;opacity:.85}.card-back .amount{font-size:31px;line-height:1;font-weight:1000;margin-top:10px}
+.sub{margin-top:14px;color:var(--muted);font-size:14px;font-weight:700;max-width:320px}
+
+.quiz{flex-direction:column;gap:11px}
+.stake-slot{min-height:72px;width:100%;border-radius:18px;border:1px solid rgba(255,212,90,.35);background:linear-gradient(180deg,rgba(255,212,90,.14),rgba(255,159,28,.06));display:flex;align-items:center;justify-content:center;padding:8px 10px;opacity:0;transform:translateY(-14px);transition:.35s ease}
+.stake-slot.visible{opacity:1;transform:translateY(0)}
+.stake-card{width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:14px;border:2px solid rgba(255,212,90,.64);background:linear-gradient(160deg,#5a3500,#9a620c 35%,#ffd45a);color:#2c1900;padding:7px 12px}
+.mini-label{font-size:10px;font-weight:1000;letter-spacing:.16em;text-transform:uppercase;opacity:.8;text-align:center}
+.mini-amount{font-size:25px;font-weight:1000;line-height:1;margin-top:4px;text-align:center}
+
+.board-frame{background:linear-gradient(180deg,#173577,#0c2150);border:2px solid rgba(255,212,90,.62);border-radius:24px;padding:12px;box-shadow:0 16px 34px rgba(0,0,0,.3),inset 0 0 24px rgba(103,164,255,.18)}
+.board-header{text-align:center;font-size:11px;font-weight:1000;letter-spacing:.18em;text-transform:uppercase;color:#c5d2f6;margin-bottom:8px}
+.board-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.board-slot{position:relative;height:44px;border-radius:9px;background:linear-gradient(180deg,#2b58b3,#183b8d);box-shadow:0 4px 0 #0d2458,inset 0 0 0 1px rgba(255,255,255,.12);overflow:hidden;perspective:800px}
+.slot-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.2,.8,.2,1)}
+.board-slot.flipped .slot-inner{transform:rotateX(180deg)}
+.slot-front,.slot-back{position:absolute;inset:0;backface-visibility:hidden;display:flex;align-items:center}
+.slot-front{justify-content:center}
+.slot-back{transform:rotateX(180deg);background:linear-gradient(180deg,#35d69a,#17895f);padding:0 9px;justify-content:space-between;color:white}
+.board-slot.reveal-wrong .slot-back{background:linear-gradient(180deg,#ff556b,#b81831)}
+.board-slot.reveal-wrong .answer-value{color:#fff2f4}
+.slot-number{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#08143d;color:var(--gold);font-weight:1000;font-size:15px}
+.board-slot.active-slot .slot-number{background:var(--gold);color:#211300;box-shadow:0 0 16px rgba(255,212,90,.45)}
+.answer-reveal{font-size:14px;font-weight:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:105px}
+.answer-value{font-size:16px;font-weight:1000;color:var(--gold)}
+.board-slot.inactive{opacity:.55}
+.board-slot.inactive .slot-number{color:#6f81b4}
+
+.question-box{background:linear-gradient(180deg,#18285f,#0f1945);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:14px 14px 13px}
+.mode-chip{width:max-content;margin:-28px auto 9px;padding:7px 13px;border-radius:999px;background:var(--red);font-size:11px;font-weight:1000;letter-spacing:.12em;text-transform:uppercase;box-shadow:0 7px 18px rgba(239,35,60,.33)}
+.question{margin:0;text-align:center;font-size:21px;line-height:1.25;font-weight:1000}
+.answers{display:grid;gap:9px}
+.mco{border:0;border-radius:12px;padding:13px 14px;text-align:left;cursor:pointer;color:white;background:linear-gradient(180deg,#2b59b8,#1e3f8b);box-shadow:0 4px 0 #10245b;font-weight:900;font-size:16px;transition:opacity .22s ease,transform .22s ease,filter .15s ease,box-shadow .15s ease}
+.mco:hover{filter:brightness(1.08)}
+.mco:active{transform:translateY(3px);box-shadow:0 1px 0 #10245b}
+.mco.disabled{pointer-events:none;opacity:.55}
+.mco.wrong{background:linear-gradient(180deg,#ff556b,#c5203a);box-shadow:0 4px 0 #761224}
+.answers.loading .mco{opacity:0;transform:translateY(14px)}
+.mco.show-answer{opacity:1;transform:translateY(0)}
+.flash{position:absolute;inset:0;background:white;opacity:0;pointer-events:none;z-index:30}
+.flash.go{animation:flash .35s ease}
+@keyframes flash{0%{opacity:0}25%{opacity:.72}100%{opacity:0}}
+.strike{
+  position:absolute;left:50%;top:53%;transform:translate(-50%,-50%) scale(.2) rotate(-10deg);
+  font-size:150px;font-weight:1000;color:var(--red);line-height:1;
+  text-shadow:0 10px 0 #760f21,0 20px 44px rgba(0,0,0,.5);
+  opacity:0;pointer-events:none;z-index:31
+}
+.strike.show{animation:strike .72s cubic-bezier(.18,.9,.2,1.2)}
+@keyframes strike{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(-10deg)}
+  35%{opacity:1;transform:translate(-50%,-50%) scale(1.14) rotate(-10deg)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(.92) rotate(-10deg)}
+}
+.confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:29}
+.confetti i{position:absolute;top:-30px;width:10px;height:18px;animation:fall 1.6s linear forwards}
+@keyframes fall{to{transform:translateY(1000px) rotate(720deg)}}
+.win-burst{
+  position:absolute;left:50%;top:53%;transform:translate(-50%,-50%) scale(.4);
+  min-width:240px;padding:16px 22px;border-radius:18px;
+  background:linear-gradient(180deg,#ffe78a,#ffb62e);color:#2a1700;
+  text-align:center;font-size:28px;font-weight:1000;letter-spacing:.04em;
+  box-shadow:0 12px 30px rgba(255,181,46,.35), inset 0 0 0 2px rgba(255,255,255,.35);
+  opacity:0;pointer-events:none;z-index:32;text-transform:uppercase;
+}
+.win-burst.show{animation:winBurst .95s cubic-bezier(.2,.85,.2,1.15)}
+@keyframes winBurst{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}
+  22%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}
+  70%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(.96)}
+}
+.fineprint{position:absolute;left:0;right:0;bottom:7px;text-align:center;font-size:10px;color:rgba(255,255,255,.27);letter-spacing:.08em}
+@media(max-height:760px){.phone{height:100vh;border-radius:0}.board-slot{height:38px}.question{font-size:19px}.mco{padding:11px 13px}.stake-slot{min-height:64px}}
+</style>
+</head>
+<body>
+<div class="app">
+<main class="phone">
+  <div class="lights"></div>
+  <div class="flash" id="flash"></div>
+  <div class="strike" id="strike">X</div>
+  <div class="confetti" id="confetti"></div>
+  <div class="win-burst" id="winBurst">Top Answer!</div>
+  <div id="flyingLayer"></div>
+
+  <header class="topbar">
+    <div class="brand">Family Feud: <b>Fast Money</b></div>
+    <button class="reset" id="resetBtn">↻</button>
+  </header>
+
+  <section class="content">
+    <div class="screen active center" id="intro">
+      <div class="title">Sudden<br><span>Death</span></div>
+      <button class="primary" id="startBtn">Play</button>
+    </div>
+
+    <div class="screen center" id="prize">
+      <div class="eyebrow">Choose Your Stakes</div>
+      <div class="prize-title">What Are You<br><span style="color:var(--red)">Playing For?</span></div>
+      <div class="cards" id="prizeCards">
+        <div class="card-wrap"><button class="prize-card flipped" data-prize="75000" disabled><span class="card-face card-front"><span class="card-center"><span class="ff">FEUD</span><span class="mystery">?</span></span></span><span class="card-face card-back"><span class="card-back-inner"><span class="label">Playing For</span><span class="amount">75,000</span></span></span></button></div>
+        <div class="card-wrap"><button class="prize-card flipped" data-prize="125000" disabled><span class="card-face card-front"><span class="card-center"><span class="ff">FEUD</span><span class="mystery">?</span></span></span><span class="card-face card-back"><span class="card-back-inner"><span class="label">Playing For</span><span class="amount">125,000</span></span></span></button></div>
+        <div class="card-wrap"><button class="prize-card flipped" data-prize="200000" disabled><span class="card-face card-front"><span class="card-center"><span class="ff">FEUD</span><span class="mystery">?</span></span></span><span class="card-face card-back"><span class="card-back-inner"><span class="label">Playing For</span><span class="amount">200,000</span></span></span></button></div>
+      </div>
+      <div class="pick-prompt waiting show" id="pickPrompt">Watch the Cards</div>
+    </div>
+
+    <div class="screen quiz" id="quiz">
+      <div class="stake-slot" id="stakeSlot"></div>
+
+      <div class="board-frame">
+        <div class="board-header">Survey Answer Board</div>
+        <div class="board-grid" id="boardGrid"></div>
+      </div>
+
+      <div class="question-box">
+        <div class="mode-chip" id="modeChip" style="opacity:0;transform:translateY(-8px);transition:opacity .3s ease,transform .3s ease">Top Answer Only</div>
+        <h2 class="question" id="questionText"></h2>
+      </div>
+
+      <div class="answers" id="answers"></div>
+    </div>
+
+    <div class="screen center result" id="result">
+      <div class="icon" id="resultIcon">🏆</div>
+      <div class="result-title" id="resultTitle">You Survived!</div>
+      <div class="result-copy" id="resultCopy"></div>
+      <div class="reward" id="rewardBurst"></div>
+      <button class="primary" id="againBtn">Play Again</button>
+      <button class="secondary" id="returnBtn">Return to Show</button>
+    </div>
+  </section>
+  <div class="fineprint">PLAYABLE PRODUCT PROTOTYPE • NOT FINAL ART</div>
+</main>
+</div>
+
+<script>
+const questions=[
+ {q:"Name something people do immediately after waking up.",answers:[{t:"Check their phone",v:21},{t:"Use the bathroom",v:36},{t:"Drink coffee",v:18}]},
+ {q:"Name something people bring to the beach.",answers:[{t:"Towel",v:42},{t:"Sunscreen",v:27},{t:"Cooler",v:16}]},
+ {q:"Name something people hate waiting for.",answers:[{t:"A table at a restaurant",v:22},{t:"Traffic to move",v:47},{t:"A delivery",v:15}]},
+ {q:"Name something people lose around the house.",answers:[{t:"Keys",v:49},{t:"Remote control",v:28},{t:"Socks",v:13}]},
+ {q:"Name something you might hear at a wedding.",answers:[{t:"Music",v:31},{t:"I do",v:45},{t:"Crying",v:12}]}
+];
+const screens=["intro","prize","quiz","result"];
+let selectedPrize=0,currentQuestion=null,locked=false;
+
+function show(id){screens.forEach(s=>document.getElementById(s).classList.toggle("active",s===id))}
+function flash(){const f=document.getElementById("flash");f.classList.remove("go");void f.offsetWidth;f.classList.add("go")}
+function confetti(){const c=document.getElementById("confetti");c.innerHTML="";const colors=["#ffd45a","#ef233c","#6fe9ff","#fff"];for(let i=0;i<70;i++){const p=document.createElement("i");p.style.left=Math.random()*100+"%";p.style.animationDelay=Math.random()*.45+"s";p.style.background=colors[Math.floor(Math.random()*colors.length)];c.appendChild(p)}setTimeout(()=>c.innerHTML="",2200)}
+function celebrateWin(){
+  flash();
+  confetti();
+  const burst=document.getElementById("winBurst");
+  burst.classList.remove("show"); void burst.offsetWidth; burst.classList.add("show");
+}
+function startFlow(){
+ locked=false;selectedPrize=0;currentQuestion=null;
+ const cards=[...document.querySelectorAll(".prize-card")];
+ const wraps=[...document.querySelectorAll(".card-wrap")];
+ const tray=document.getElementById("prizeCards");
+ const prompt=document.getElementById("pickPrompt");
+
+ tray.classList.remove("ready","locked-shake");
+ tray.classList.add("waiting");
+ prompt.textContent="Watch the Cards";
+ prompt.classList.add("waiting","show");
+
+ wraps.forEach(w=>w.className="card-wrap");
+ cards.forEach(c=>{
+   c.classList.remove("unchosen","revealed-unchosen");
+   c.classList.add("flipped");
+   c.disabled=true;
+   c.style.opacity=1;
+   c.style.filter="none";
+   const center=c.querySelector(".card-center");
+   if(center){ center.innerHTML='<span class="ff">FEUD</span><span class="mystery">?</span>'; }
+ });
+
+ show("prize");
+
+ // Let the player read all three face-up values.
+ setTimeout(()=>{
+   cards.forEach(c=>c.classList.remove("flipped"));
+ },1400);
+
+ // Quick shuffle after cards have turned face-down.
+ setTimeout(()=>runPrizeShuffle(),2200);
+}
+function resetAll(){locked=false;selectedPrize=0;currentQuestion=null;show("intro")}
+
+function runPrizeShuffle(){
+ const wraps=[...document.querySelectorAll(".card-wrap")];
+ const cards=[...document.querySelectorAll(".prize-card")];
+ const tray=document.getElementById("prizeCards");
+ const prompt=document.getElementById("pickPrompt");
+
+ const clear=()=>wraps.forEach(w=>w.className="card-wrap");
+
+ // Swap outside cards.
+ wraps[0].classList.add("shuffle-left");
+ wraps[2].classList.add("shuffle-right");
+
+ setTimeout(()=>{
+   clear();
+   wraps[0].classList.add("shuffle-mid-right");
+   wraps[1].classList.add("shuffle-mid-left");
+ },320);
+
+ setTimeout(()=>{
+   clear();
+   wraps[1].classList.add("shuffle-mid-right");
+   wraps[2].classList.add("shuffle-mid-left");
+ },640);
+
+ setTimeout(()=>{
+   clear();
+   cards.forEach(c=>c.disabled=false);
+   tray.classList.remove("waiting");
+   tray.classList.add("ready");
+   prompt.classList.remove("waiting");
+   prompt.textContent="Pick a Card";
+   prompt.classList.add("show");
+ },980);
+}
+
+function pickPrize(card){
+ if(card.disabled)return;
+ selectedPrize=Number(card.dataset.prize);
+
+ const allCards=[...document.querySelectorAll(".prize-card")];
+ allCards.forEach(c=>{
+   c.disabled=true;
+   c.style.filter="none";
+   if(c!==card){
+     c.classList.add("unchosen","revealed-unchosen");
+     c.style.opacity=.72;
+     const center=c.querySelector(".card-center");
+     if(center){
+       center.innerHTML='<span class="reveal-label">Playing For</span><span class="reveal-amount">'+Number(c.dataset.prize).toLocaleString()+'</span>';
+     }
+   }else{
+     c.classList.remove("unchosen","revealed-unchosen");
+     c.style.opacity=1;
+     c.classList.add("flipped");
+   }
+ });
+
+ flash();
+
+ // Hold the comparison moment, then carry the selected prize into gameplay.
+ setTimeout(()=>{
+   const rect=card.getBoundingClientRect();
+   show("quiz");
+   prepareGameplay(false);
+
+   const layer=document.getElementById("flyingLayer");
+   const slot=document.getElementById("stakeSlot");
+   const fly=document.createElement("div");
+   fly.className="flying-prize";
+   fly.style.left=rect.left+"px";
+   fly.style.top=rect.top+"px";
+   fly.style.width=rect.width+"px";
+   fly.style.height=rect.height+"px";
+   fly.innerHTML='<div><div class="mini-label">Playing For</div><div class="mini-amount">'+selectedPrize.toLocaleString()+'</div></div>';
+   layer.appendChild(fly);
+
+   requestAnimationFrame(()=>{
+     const target=slot.getBoundingClientRect();
+     fly.style.left=(target.left+8)+"px";
+     fly.style.top=(target.top+8)+"px";
+     fly.style.width=(target.width-16)+"px";
+     fly.style.height=(target.height-16)+"px";
+   });
+
+   setTimeout(()=>{
+     renderStake();
+     fly.style.opacity="0";
+   },880);
+
+   setTimeout(()=>{
+     layer.innerHTML="";
+     beginQuestionSequence();
+   },1120);
+ },2400);
+}
+function renderStake(){
+ const slot=document.getElementById("stakeSlot");
+ slot.innerHTML=`<div class="stake-card"><div><div class="mini-label">Playing For</div><div class="mini-amount">${selectedPrize.toLocaleString()}</div></div></div>`;
+ requestAnimationFrame(()=>slot.classList.add("visible"));
+}
+
+function prepareGameplay(autoStart=true){
+ currentQuestion=questions[Math.floor(Math.random()*questions.length)];
+ renderBoard();
+
+ const chip=document.getElementById("modeChip");
+ chip.style.opacity="0";
+ chip.style.transform="translateY(-8px)";
+
+ const questionEl=document.getElementById("questionText");
+ questionEl.textContent="";
+ questionEl.style.opacity="0";
+ questionEl.style.transform="translateY(10px)";
+ questionEl.style.transition="opacity .55s ease,transform .55s ease";
+
+ const answers=document.getElementById("answers");
+ answers.innerHTML="";
+ answers.className="answers loading locked";
+
+ currentQuestion.answers.forEach((a,i)=>{
+   const b=document.createElement("button");
+   b.className="mco";
+   b.textContent=a.t;
+   b.onclick=()=>chooseAnswer(i,b);
+   answers.appendChild(b);
+ });
+
+ if(autoStart){
+   renderStake();
+   beginQuestionSequence();
+ }
+}
+
+function beginQuestionSequence(){
+ const questionEl=document.getElementById("questionText");
+ const answers=document.getElementById("answers");
+
+ setTimeout(()=>{
+   questionEl.textContent=currentQuestion.q;
+   requestAnimationFrame(()=>{
+     questionEl.style.opacity="1";
+     questionEl.style.transform="translateY(0)";
+   });
+ },450);
+
+ setTimeout(()=>{
+   const buttons=[...document.querySelectorAll(".mco")];
+   buttons.forEach((b,i)=>{
+     setTimeout(()=>b.classList.add("show-answer"),i*360);
+   });
+   answers.classList.remove("loading");
+ },1350);
+
+ setTimeout(()=>{
+   const chip=document.getElementById("modeChip");
+   chip.style.opacity="1";
+   chip.style.transform="translateY(0)";
+ },2700);
+
+ setTimeout(()=>{
+   answers.classList.remove("locked");
+   answers.classList.add("unlocked");
+ },3150);
+}
+function renderBoard(){
+ const grid=document.getElementById("boardGrid");grid.innerHTML="";
+ for(let i=1;i<=8;i++){
+   const slot=document.createElement("div");
+   slot.className="board-slot "+(i===1?"active-slot":"inactive");
+   slot.dataset.slot=i;
+   slot.innerHTML=`<div class="slot-inner"><div class="slot-front"><div class="slot-number">${i===1?"1":""}</div></div><div class="slot-back"><span class="answer-reveal"></span><span class="answer-value"></span></div></div>`;
+   grid.appendChild(slot);
+ }
+}
+function chooseAnswer(index,button){
+ if(locked)return;locked=true;
+ const max=Math.max(...currentQuestion.answers.map(a=>a.v));
+ const correctIndex=currentQuestion.answers.findIndex(a=>a.v===max);
+ const win=index===correctIndex;
+ document.querySelectorAll(".mco").forEach(b=>b.classList.add("disabled"));
+
+ if(!win){
+   const s=document.getElementById("strike");
+   s.classList.remove("show");void s.offsetWidth;s.classList.add("show");
+
+   const active=document.querySelector('.board-slot[data-slot="1"]');
+   active.querySelector(".answer-reveal").textContent=currentQuestion.answers[correctIndex].t;
+   active.querySelector(".answer-value").textContent=currentQuestion.answers[correctIndex].v;
+   active.classList.add("reveal-wrong");
+
+   setTimeout(()=>active.classList.add("flipped"),650);
+   setTimeout(()=>showResult(false,correctIndex),2550);
+ }else{
+   const active=document.querySelector('.board-slot[data-slot="1"]');
+   active.querySelector(".answer-reveal").textContent=currentQuestion.answers[correctIndex].t;
+   active.querySelector(".answer-value").textContent=currentQuestion.answers[correctIndex].v;
+   setTimeout(()=>active.classList.add("flipped"),180);
+   setTimeout(()=>celebrateWin(),500);
+   setTimeout(()=>showResult(true,correctIndex),2350);
+ }
+}
+function showResult(win,correctIndex){
+ const top=currentQuestion.answers[correctIndex];
+ document.getElementById("resultIcon").textContent=win?"🏆":"❌";
+ document.getElementById("resultTitle").textContent=win?"You Survived!":"Sudden Death!";
+ document.getElementById("resultCopy").innerHTML=win
+   ?`You found the <b>#1 answer</b>. The only active slot flipped open on the Feud board.`
+   :`Your answer missed. The board stays closed and the strike ends the round.<br><br><b>#1 Answer: ${top.t} — ${top.v}</b>`;
+ document.getElementById("rewardBurst").textContent=win?`+${selectedPrize.toLocaleString()} COINS`:"NO PRIZE";
+ document.getElementById("rewardBurst").style.color=win?"var(--gold)":"var(--red)";
+ show("result");
+}
+document.getElementById("prizeCards").addEventListener("click",(e)=>{
+  const card=e.target.closest(".prize-card");
+  if(card && card.disabled){
+    const tray=document.getElementById("prizeCards");
+    const prompt=document.getElementById("pickPrompt");
+    tray.classList.remove("locked-shake");
+    void tray.offsetWidth;
+    tray.classList.add("locked-shake");
+    prompt.textContent="Watch the Cards";
+    prompt.classList.add("waiting","show");
+  }
+},true);
+
+document.getElementById("startBtn").onclick=startFlow;
+document.querySelectorAll(".prize-card").forEach(c=>c.onclick=()=>pickPrize(c));
+document.getElementById("againBtn").onclick=startFlow;
+document.getElementById("returnBtn").onclick=resetAll;
+document.getElementById("resetBtn").onclick=resetAll;
+</script>
+</body>
+</html>
