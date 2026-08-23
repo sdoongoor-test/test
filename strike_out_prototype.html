@@ -383,6 +383,47 @@
     to{box-shadow:inset 0 0 0 2px #713000,inset 0 0 0 4px #ffdb66,inset 0 0 20px #ff002e55,0 0 11px #ff382c}
   }
 
+
+  /* ---------- end-of-game unchosen reveals ---------- */
+  .panel.missed{
+    cursor:default;
+    filter:grayscale(1) brightness(.58) contrast(1.08) drop-shadow(0 2px 1px #000c);
+    opacity:.82;
+  }
+  .panel.missed .panel-back{
+    background:radial-gradient(circle at 50% 50%, #6d7480 0, #30343c 58%, #111319 100%);
+    border-color:#bfc3c9;
+    box-shadow:
+      inset 0 0 0 2px #555,
+      inset 0 0 0 4px #d6d8db,
+      inset 0 0 16px #0008,
+      0 0 0 1px #111;
+  }
+  .panel.missed .coin{
+    filter:grayscale(1);
+    box-shadow:none;
+  }
+  .panel.missed .amount,
+  .panel.missed .big-x{
+    color:#e1e3e7;
+    -webkit-text-stroke:1px #4b4e55;
+    text-shadow:0 2px 0 #222;
+  }
+  .panel.missed .reveal-content::after{
+    content:"UNCHOSEN";
+    position:absolute;
+    left:50%;
+    bottom:-13px;
+    transform:translateX(-50%);
+    padding:1px 5px;
+    border-radius:4px;
+    background:#111b;
+    color:#d8d8d8;
+    font:700 clamp(7px,1.8vw,10px)/1 Arial,sans-serif;
+    letter-spacing:.7px;
+    white-space:nowrap;
+  }
+
   /* ---------- fly particles ---------- */
   .fly-coin{
     position:fixed;
@@ -549,23 +590,25 @@
   <button id="restartBtn">Restart</button>
   <button id="forceRewardBtn" title="Next tap will reveal a reward">Force Reward</button>
   <button id="forceStrikeBtn" title="Next tap will reveal a strike">Force Strike</button>
-  <select id="preset" title="Quick tuning presets">
+  <select id="preset" title="Quick tuning presets — default is 10 doors / 3 strikes">
+    <option value="10/3" selected>10 panels / 3 strikes</option>
     <option value="8/3">8 panels / 3 strikes</option>
     <option value="8/2">8 panels / 2 strikes</option>
-    <option value="10/3">10 panels / 3 strikes</option>
   </select>
 </div>
 
 <script>
 const CONFIG = {
-  panelCount: 8,
+  panelCount: 10,
   strikeCount: 3,
   rewards: {
     small: 5000,
     medium: 15000,
     large: 50000
   },
-  // For non-strike panels after the guaranteed single Large prize:
+  // The wall contains CONFIG.strikeCount X panels.
+  // All other panels are rewards; finding every reward before the 3rd X wins.
+  // For reward panels after the guaranteed single Large prize:
   rewardWeights: { small: 0.55, medium: 0.45 },
   revealMs: 620,
   endDelayMs: 620
@@ -575,6 +618,8 @@ let state = {
   bank: 0,
   strikes: 0,
   revealed: 0,
+  rewardsFound: 0,
+  totalRewards: 0,
   ended: false,
   panels: [],
   forcedNext: null
@@ -640,6 +685,7 @@ function buildPanels(){
   document.documentElement.style.setProperty("--panelCount", CONFIG.panelCount);
   wall.innerHTML="";
   state.panels = makeOutcomes();
+  state.totalRewards = state.panels.filter(o => o.type === "reward").length;
   state.panels.forEach((outcome, index)=>{
     const btn=document.createElement("button");
     btn.className="panel";
@@ -676,23 +722,47 @@ function chooseForcedOutcome(index){
   return {type:"reward", tier:"medium", value:CONFIG.rewards.medium};
 }
 
-function revealPanel(btn){
-  if(state.ended || btn.disabled || btn.classList.contains("open")) return;
-  btn.disabled=true;
 
-  const index=Number(btn.dataset.index);
-  const outcome=chooseForcedOutcome(index);
+function renderOutcomeOnPanel(btn, outcome, missed=false){
   const back=btn.querySelector(".panel-back");
   const content=btn.querySelector(".reveal-content");
+
+  back.classList.remove("reward","strike");
+  content.classList.remove("large-win");
 
   if(outcome.type==="strike"){
     back.classList.add("strike");
     content.innerHTML=`<span class="big-x">X</span>`;
   }else{
     back.classList.add("reward");
-    if(outcome.tier==="large") content.classList.add("large-win");
+    if(outcome.tier==="large" && !missed) content.classList.add("large-win");
     content.innerHTML=`<span class="coin">$</span><span class="amount">${money(outcome.value)}</span>`;
   }
+
+  if(missed) btn.classList.add("missed");
+}
+
+function revealUnchosenPanels(){
+  const remaining=[...document.querySelectorAll(".panel:not(.open)")];
+  remaining.forEach((btn, i)=>{
+    btn.disabled=true;
+    btn.classList.remove("tension");
+    const outcome=state.panels[Number(btn.dataset.index)];
+    setTimeout(()=>{
+      renderOutcomeOnPanel(btn, outcome, true);
+      btn.classList.add("open");
+    }, i*85);
+  });
+  return remaining.length;
+}
+
+function revealPanel(btn){
+  if(state.ended || btn.disabled || btn.classList.contains("open")) return;
+  btn.disabled=true;
+
+  const index=Number(btn.dataset.index);
+  const outcome=chooseForcedOutcome(index);
+  renderOutcomeOnPanel(btn, outcome, false);
 
   // Slight press beat, then door flips open.
   requestAnimationFrame(()=>btn.classList.add("open"));
@@ -713,8 +783,9 @@ function resolveReward(btn,outcome){
   flyCoins(btn, outcome.tier==="large" ? 12 : 7);
   animateBank(state.bank, state.bank + outcome.value, outcome.tier==="large" ? 700 : 480);
   state.bank += outcome.value;
+  state.rewardsFound++;
 
-  if(state.revealed >= CONFIG.panelCount && !state.ended){
+  if(state.rewardsFound >= state.totalRewards && !state.ended){
     finishGame(true);
   }
 }
@@ -747,8 +818,6 @@ function resolveStrike(btn){
 
   if(state.strikes >= CONFIG.strikeCount){
     finishGame(false);
-  } else if(state.revealed >= CONFIG.panelCount){
-    finishGame(true);
   }
 }
 
@@ -794,10 +863,11 @@ function flyCoins(source,count){
 function finishGame(perfect){
   if(state.ended) return;
   state.ended=true;
-  document.querySelectorAll(".panel:not(.open)").forEach(p=>{
-    p.disabled=true;
-    p.classList.remove("tension");
-  });
+
+  // Show the player's missed choices before presenting the result.
+  // These doors flip in muted grayscale so they read as outcomes the player did NOT select.
+  const remainingCount = revealUnchosenPanels();
+  const revealTime = remainingCount ? ((remainingCount - 1) * 85 + CONFIG.revealMs + 240) : 260;
 
   setTimeout(()=>{
     finalBank.textContent=money(state.bank);
@@ -813,11 +883,11 @@ function finishGame(perfect){
         {filter:"brightness(1)"}
       ],{duration:700});
     }
-  },CONFIG.endDelayMs);
+  }, revealTime);
 }
 
 function restart(){
-  state={bank:0,strikes:0,revealed:0,ended:false,panels:[],forcedNext:null};
+  state={bank:0,strikes:0,revealed:0,rewardsFound:0,totalRewards:0,ended:false,panels:[],forcedNext:null};
   bankEl.textContent="$0";
   bankEl.classList.remove("bump");
   endOverlay.classList.remove("show","fail");
