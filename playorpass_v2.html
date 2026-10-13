@@ -1,0 +1,2190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Family Feud – Play or Pass High-Fidelity Prototype</title>
+<style>
+  :root{
+    --bg1:#071441;
+    --bg2:#0B2A87;
+    --bg3:#061031;
+    --panel:#0e2f8d;
+    --panel2:#144bb9;
+    --gold:#FDBA2C;
+    --gold2:#FFD86B;
+    --gold3:#ffefb1;
+    --blue:#1c67ff;
+    --blue2:#77b5ff;
+    --white:#ffffff;
+    --ink:#10295c;
+    --danger:#e11e45;
+    --danger2:#ff6f86;
+    --neutral:#9fb9ef;
+    --card1:#ffffff;
+    --card2:#e8f0ff;
+    --shadow: 0 18px 40px rgba(0,0,0,.34);
+    --glow: 0 0 28px rgba(253,186,44,.28);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:#031037;
+    display:grid;
+    place-items:center;
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    color:white;
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+  .phone{
+    width:min(430px,100vw);
+    height:min(900px,100vh);
+    position:relative;
+    overflow:hidden;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(90,140,255,.40) 0%, rgba(90,140,255,.04) 28%, transparent 48%),
+      radial-gradient(circle at 50% 70%, rgba(26,93,255,.18) 0%, transparent 28%),
+      linear-gradient(180deg, var(--bg2) 0%, #0A216C 24%, #06184e 55%, #041136 100%);
+  }
+  .lights{
+    position:absolute; inset:0;
+    background:
+      radial-gradient(circle, rgba(255,222,142,.55) 0 2px, transparent 3px) 0 0/22px 22px;
+    opacity:.16;
+    -webkit-mask-image:linear-gradient(to bottom, black 0 42%, transparent 58%);
+            mask-image:linear-gradient(to bottom, black 0 42%, transparent 58%);
+    pointer-events:none;
+  }
+  .spot{
+    position:absolute;
+    width:58%;
+    height:70%;
+    left:50%;
+    top:16%;
+    transform:translateX(-50%);
+    background: radial-gradient(ellipse at center, rgba(255,225,152,.12), rgba(255,225,152,.03) 32%, transparent 65%);
+    filter: blur(22px);
+    pointer-events:none;
+  }
+  .topbar{
+    position:relative;
+    z-index:3;
+    padding:14px 16px 8px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .pill{
+    min-width:86px;
+    height:38px;
+    padding:0 14px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    font-weight:1000;
+    letter-spacing:.5px;
+    color:#fff7d4;
+    background:linear-gradient(180deg, rgba(14,25,64,.96), rgba(11,21,51,.96));
+    border:2px solid rgba(255,194,67,.92);
+    box-shadow:0 0 18px rgba(255,194,67,.22), inset 0 1px 0 rgba(255,255,255,.12);
+  }
+  .title{
+    position:relative;
+    z-index:2;
+    text-align:center;
+    margin-top:0;
+    font-size:34px;
+    font-weight:1000;
+    line-height:1;
+    letter-spacing:-1px;
+    text-shadow:0 4px 0 rgba(103,14,26,.9), 0 0 16px rgba(255,255,255,.08);
+  }
+  .sub{
+    position:relative;
+    z-index:2;
+    text-align:center;
+    font-size:12px;
+    font-weight:900;
+    letter-spacing:1.25px;
+    text-transform:uppercase;
+    margin-top:6px;
+    color:#d8e6ff;
+    opacity:.94;
+  }
+  .strikes{
+    position:relative;
+    z-index:2;
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    margin-top:10px;
+  }
+  .strike{
+    width:40px;height:30px;border-radius:8px;
+    display:grid;place-items:center;
+    background:linear-gradient(180deg, #1b2241, #10162f);
+    border:2px solid #596582;
+    color:#647189;
+    font-size:22px;
+    font-weight:1000;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .strike.on{
+    background:linear-gradient(180deg, #ff4868, #c51435);
+    border-color:#ff97aa;
+    color:white;
+    box-shadow:0 0 18px rgba(255,47,81,.55), inset 0 1px 0 rgba(255,255,255,.18);
+    transform:scale(1.04);
+  }
+
+  .question-wrap{
+    position:relative;
+    z-index:2;
+    width:89%;
+    margin:10px auto 8px;
+    border-radius:16px;
+    padding:2px;
+    background:linear-gradient(180deg, rgba(115,176,255,.45), rgba(58,102,214,.18));
+    box-shadow:0 8px 22px rgba(0,0,0,.22);
+  }
+  .question{
+    border-radius:14px;
+    padding:15px 18px;
+    min-height:74px;
+    background:linear-gradient(180deg, #1041bb, #0b2f92);
+    border:1px solid rgba(255,255,255,.18);
+    display:grid;
+    place-items:center;
+    text-align:center;
+    font-size:18px;
+    line-height:1.22;
+    font-weight:900;
+  }
+
+  .board-wrap{
+    position:relative;
+    z-index:2;
+    width:89%;
+    margin:10px auto 8px;
+    padding:7px;
+    border-radius:18px;
+    background:linear-gradient(180deg, var(--gold2), var(--gold));
+    box-shadow:var(--shadow), var(--glow);
+  }
+  .board{
+    background:#0c2d88;
+    border-radius:12px;
+    padding:7px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+  }
+  .slot{
+    min-height:43px;
+    border-radius:8px;
+    border:1px solid rgba(170,212,255,.64);
+    background:linear-gradient(180deg, #2a79ef, #154fbd);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.22);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 10px;
+    font-size:11px;
+    font-weight:1000;
+    text-transform:uppercase;
+    color:white;
+  }
+  .slot.hidden{
+    justify-content:center;
+    color:#bfd6ff;
+    font-size:16px;
+  }
+  .slot.empty{
+    background:linear-gradient(180deg, #173d9a, #11307d);
+    border-color:rgba(175,209,255,.16);
+    opacity:.55;
+    box-shadow:none;
+  }
+  .slot.reveal{ animation:flip .42s ease; }
+  @keyframes flip{
+    0%{transform:rotateX(90deg); opacity:.1}
+    100%{transform:rotateX(0); opacity:1}
+  }
+  .board-x{
+    position:absolute; inset:0;
+    display:grid; place-items:center;
+    font-size:155px; font-weight:1000;
+    color:var(--danger);
+    text-shadow:
+      0 5px 0 #76061d,
+      0 0 24px rgba(255,44,79,.95),
+      0 0 50px rgba(255,44,79,.55);
+    opacity:0; pointer-events:none;
+  }
+  .board-x.show{ animation:xpop .72s cubic-bezier(.2,.85,.2,1); }
+  @keyframes xpop{
+    0%{opacity:0; transform:scale(.2) rotate(-10deg)}
+    24%{opacity:1; transform:scale(1.15) rotate(2deg)}
+    72%{opacity:1; transform:scale(1)}
+    100%{opacity:0; transform:scale(1.06)}
+  }
+
+  .deck-meta{
+    position:relative;
+    z-index:2;
+    width:88%;
+    margin:4px auto 6px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    color:#dbe7ff;
+    font-size:12px;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:1px;
+  }
+  .counter{
+    opacity:.95;
+  }
+
+  .deck-stage{
+    position:relative;
+    z-index:2;
+    width:88%;
+    height:292px;
+    margin:0 auto;
+    perspective:1000px;
+  }
+  .stack{
+    position:absolute;
+    inset:0;
+  }
+  .card{
+    position:absolute;
+    left:7%;
+    top:0;
+    width:86%;
+    height:222px;
+    border-radius:22px;
+    border:4px solid rgba(255,255,255,.92);
+    background:linear-gradient(160deg, var(--card1), var(--card2));
+    box-shadow:
+      0 14px 0 #071c57,
+      0 28px 32px rgba(0,0,0,.34),
+      inset 0 1px 0 rgba(255,255,255,.85);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    color:var(--ink);
+    user-select:none;
+    touch-action:none;
+    transform-origin:center;
+    transition:
+      transform .34s cubic-bezier(.2,.85,.2,1),
+      opacity .24s ease,
+      left .34s cubic-bezier(.2,.85,.2,1),
+      top .34s cubic-bezier(.2,.85,.2,1),
+      filter .2s ease,
+      box-shadow .2s ease,
+      background .2s ease;
+  }
+  .card.next{
+    left:17%;
+    top:16px;
+    width:80%;
+    transform:scale(.96);
+    opacity:.92;
+    z-index:2;
+    filter:saturate(.88);
+  }
+  .card.back{
+    left:25%;
+    top:31px;
+    width:74%;
+    transform:scale(.92);
+    opacity:.72;
+    z-index:1;
+    filter:saturate(.75);
+  }
+  .card.active{
+    z-index:3;
+  }
+  .card.exiting-up{
+    transform:translateY(-320px) rotate(6deg)!important;
+    opacity:0!important;
+  }
+  .card.exiting-down{
+    transform:translateY(340px) rotate(-6deg)!important;
+    opacity:0!important;
+  }
+  .card.play-preview{
+    background:linear-gradient(160deg, #fffef2, #f9e8bf);
+    box-shadow:
+      0 14px 0 #654200,
+      0 24px 40px rgba(0,0,0,.32),
+      0 0 22px rgba(255,208,102,.34),
+      inset 0 1px 0 rgba(255,255,255,.9);
+  }
+  .card.pass-preview{
+    background:linear-gradient(160deg, #f6f9ff, #dce6fa);
+    box-shadow:
+      0 14px 0 #071c57,
+      0 20px 34px rgba(0,0,0,.32),
+      0 0 14px rgba(159,185,239,.18),
+      inset 0 1px 0 rgba(255,255,255,.84);
+    filter:saturate(.9);
+  }
+
+  .answer{
+    padding:0 22px;
+    font-size:32px;
+    line-height:1.02;
+    font-weight:1000;
+    letter-spacing:-.6px;
+    text-transform:uppercase;
+  }
+  .overlay{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    padding:10px 24px;
+    min-width:156px;
+    border-radius:999px;
+    font-size:24px;
+    font-weight:1000;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .12s linear, transform .12s linear, background .12s linear, color .12s linear, box-shadow .12s linear;
+  }
+  .overlay.play{
+    top:20px;
+    color:#6b4900;
+    background:linear-gradient(180deg, #ffe28d, #ffc643);
+    border:2px solid rgba(255,255,255,.7);
+    box-shadow:0 0 20px rgba(255,194,67,.32);
+  }
+  .overlay.pass{
+    bottom:20px;
+    color:#1d376f;
+    background:linear-gradient(180deg, #f2f7ff, #dce8fb);
+    border:2px solid rgba(255,255,255,.7);
+    box-shadow:0 0 16px rgba(175,198,242,.18);
+  }
+
+  .actions{
+    position:relative;
+    z-index:3;
+    width:88%;
+    margin:10px auto 0;
+    display:flex;
+    justify-content:center;
+    gap:28px;
+  }
+  .action-col{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+  }
+  .action-label{
+    font-size:12px;
+    line-height:1;
+    letter-spacing:1.4px;
+    text-transform:uppercase;
+    font-weight:1000;
+    color:#dbe7ff;
+    opacity:.92;
+  }
+  .play-label{
+    color:#fff3ca;
+  }
+  .action{
+    width:76px;
+    height:76px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    border:2px solid transparent;
+    cursor:pointer;
+    user-select:none;
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease, filter .15s ease, background .15s ease;
+  }
+  .action .icon{
+    font-size:34px;
+    line-height:1;
+    display:grid;
+    place-items:center;
+  }
+  .action.pass{
+    color:#f4f8ff;
+    background:linear-gradient(180deg, rgba(21,41,88,.98), rgba(8,18,48,.98));
+    border-color:rgba(191,213,255,.34);
+    box-shadow:0 10px 22px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  .action.pass .icon{
+    filter:grayscale(.05);
+  }
+  .action.play{
+    color:#5b3900;
+    background:linear-gradient(180deg, #ffe28e, #ffbe35);
+    border-color:rgba(255,249,226,.82);
+    box-shadow:0 10px 22px rgba(0,0,0,.22), 0 0 24px rgba(255,194,67,.24), inset 0 1px 0 rgba(255,255,255,.52);
+  }
+  .action.play .icon{
+    color:#6a4700;
+    font-size:38px;
+  }
+  .action.active-pass{
+    transform:translateY(-2px) scale(1.07);
+    box-shadow:0 0 22px rgba(188,210,251,.28), 0 12px 24px rgba(0,0,0,.2);
+    border-color:#eef4ff;
+  }
+  .action.active-play{
+    transform:translateY(-2px) scale(1.07);
+    box-shadow:0 0 28px rgba(255,194,67,.46), 0 12px 24px rgba(0,0,0,.2);
+    border-color:#fff6d1;
+  }
+
+  .hint{
+    position:relative;
+    z-index:2;
+    width:88%;
+    margin:12px auto 0;
+    text-align:center;
+    font-size:12px;
+    font-weight:900;
+    color:#d7e4ff;
+    line-height:1.45;
+    opacity:.95;
+  }
+  .hint.minimized{ opacity:.4; transform:translateY(-2px); transition:all .25s ease; }
+
+  .result{
+    position:absolute; inset:0;
+    display:none;
+    place-items:center;
+    background:rgba(2,8,29,.84);
+    backdrop-filter:blur(4px);
+    z-index:20;
+    text-align:center;
+    padding:26px;
+  }
+  .result.show{ display:grid; }
+  .result-card{
+    width:88%;
+    padding:28px 22px 24px;
+    border-radius:24px;
+    background:linear-gradient(180deg, #1138a8, #0a216c);
+    border:2px solid rgba(255,255,255,.18);
+    box-shadow: var(--shadow), 0 0 30px rgba(46,102,255,.18);
+  }
+  .result h2{
+    margin:0 0 8px;
+    font-size:38px;
+    font-weight:1000;
+    letter-spacing:-1px;
+  }
+  .result p{
+    margin:0 0 18px;
+    font-size:17px;
+    line-height:1.35;
+    color:#e8f0ff;
+  }
+  .btn{
+    border:0;
+    border-radius:18px;
+    padding:14px 24px;
+    font-size:18px;
+    font-weight:1000;
+    color:#402600;
+    background:linear-gradient(180deg, #ffe085, #ffbe35);
+    box-shadow:0 10px 20px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.56);
+    cursor:pointer;
+  }
+
+  .intro-card{
+    animation:introPulse 1.5s ease-in-out infinite;
+  }
+  @keyframes introPulse{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-6px)}
+  }
+
+  .card.next .answer{
+    opacity:0;
+    transition:opacity .16s ease;
+    color:#24437f;
+    font-size:27px;
+  }
+  .card.next.preview-visible .answer{
+    opacity:.34;
+  }
+
+
+  .board-wrap.play-target{
+    box-shadow:
+      0 18px 40px rgba(0,0,0,.34),
+      0 0 calc(20px + 28px * var(--playGlow, 0)) rgba(255,194,67,calc(.12 + .48 * var(--playGlow, 0))),
+      0 0 calc(8px + 18px * var(--playGlow, 0)) rgba(255,235,170,calc(.08 + .32 * var(--playGlow, 0)));
+    filter:brightness(calc(1 + .12 * var(--playGlow, 0)));
+  }
+  .board-wrap.play-target::after{
+    content:"";
+    position:absolute;
+    inset:-5px;
+    border-radius:22px;
+    border:2px solid rgba(255,235,170,var(--playGlow, 0));
+    pointer-events:none;
+    box-shadow:
+      0 0 12px rgba(255,221,112,var(--playGlow, 0)),
+      inset 0 0 8px rgba(255,245,204,calc(.45 * var(--playGlow, 0)));
+  }
+
+
+  .action{
+    transform-origin:center;
+  }
+  .action-col{
+    transition:transform .14s ease, opacity .14s ease;
+  }
+  .action-label{
+    transition:opacity .14s ease, transform .14s ease;
+  }
+
+
+  .card-counter{
+    position:absolute;
+    top:14px;
+    right:14px;
+    min-width:48px;
+    height:30px;
+    padding:0 10px;
+    border-radius:999px;
+    display:grid;
+    place-items:center;
+    background:rgba(10,30,77,.9);
+    border:1px solid rgba(173,204,255,.5);
+    color:#f5f8ff;
+    font-size:13px;
+    font-weight:1000;
+    letter-spacing:.4px;
+    box-shadow:0 4px 12px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  .actions{
+    margin-top:-4px !important;
+  }
+  .hint{
+    margin-top:8px !important;
+  }
+
+
+  .card.button-commit{
+    transition:
+      transform .58s cubic-bezier(.18,.82,.2,1),
+      opacity .42s ease,
+      left .34s cubic-bezier(.2,.85,.2,1),
+      top .34s cubic-bezier(.2,.85,.2,1),
+      filter .2s ease,
+      box-shadow .2s ease,
+      background .2s ease !important;
+  }
+
+
+  .card.button-preview-play{
+    transition:
+      transform .24s cubic-bezier(.2,.8,.2,1),
+      background .18s ease,
+      box-shadow .18s ease !important;
+    transform:translateY(-52px) rotate(1.5deg) !important;
+    background:linear-gradient(160deg, #fffef2, #f9e8bf) !important;
+    box-shadow:
+      0 14px 0 #654200,
+      0 24px 40px rgba(0,0,0,.32),
+      0 0 22px rgba(255,208,102,.34),
+      inset 0 1px 0 rgba(255,255,255,.9) !important;
+  }
+  .card.button-preview-pass{
+    transition:
+      transform .24s cubic-bezier(.2,.8,.2,1),
+      background .18s ease,
+      box-shadow .18s ease !important;
+    transform:translateY(52px) rotate(-1.5deg) !important;
+    background:linear-gradient(160deg, #f6f9ff, #dce6fa) !important;
+    box-shadow:
+      0 14px 0 #071c57,
+      0 20px 34px rgba(0,0,0,.32),
+      0 0 14px rgba(159,185,239,.18),
+      inset 0 1px 0 rgba(255,255,255,.84) !important;
+  }
+  .card.button-preview-play .overlay.play,
+  .card.button-preview-pass .overlay.pass{
+    opacity:1 !important;
+    transform:translateX(-50%) scale(1.06) !important;
+  }
+
+</style>
+
+<style>
+/* v20.1 — PASS color feedback */
+.card.pass-preview{
+  background:linear-gradient(160deg,#edf4ff,#c8d8ee) !important;
+  border-color:#dce9fb !important;
+  box-shadow:
+    0 14px 0 #25436f,
+    0 24px 38px rgba(0,0,0,.30),
+    0 0 22px rgba(175,201,243,.26),
+    inset 0 1px 0 rgba(255,255,255,.88) !important;
+  filter:saturate(.92) !important;
+}
+.action.active-pass{
+  background:linear-gradient(180deg,#789bd0,#44699f) !important;
+  border-color:#e8f1ff !important;
+  box-shadow:
+    0 12px 28px rgba(0,0,0,.22),
+    0 0 30px rgba(175,201,243,.46),
+    inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+.pass-word{
+  color:#c9dcf8 !important;
+  -webkit-text-stroke:1.5px #35558a !important;
+  text-shadow:
+    0 5px 0 rgba(31,55,94,.28),
+    0 8px 18px rgba(0,0,0,.16) !important;
+}
+</style>
+
+
+<style>
+/* v20.2 — darker PASS treatment */
+.card.pass-preview{
+  background:linear-gradient(160deg,#d9e6f7,#aabed9) !important;
+  border-color:#c9d8ec !important;
+  box-shadow:
+    0 14px 0 #1f365c,
+    0 24px 38px rgba(0,0,0,.32),
+    0 0 20px rgba(120,153,198,.22),
+    inset 0 1px 0 rgba(255,255,255,.76) !important;
+  filter:saturate(.88) brightness(.96) !important;
+}
+.action.active-pass{
+  background:linear-gradient(180deg,#5d7fb3,#355887) !important;
+  border-color:#dbe7f8 !important;
+  box-shadow:
+    0 12px 28px rgba(0,0,0,.24),
+    0 0 28px rgba(120,153,198,.38),
+    inset 0 1px 0 rgba(255,255,255,.14) !important;
+}
+.pass-word{
+  color:#b7cbea !important;
+  -webkit-text-stroke:1.5px #2c4a78 !important;
+}
+</style>
+
+
+<style>
+/* v20.3 — lower card stack between thumbs */
+.decision-zone{
+  margin-top: 8px !important;
+}
+.decision-top{
+  margin-bottom: 12px !important;
+}
+.deck-stage{
+  margin-top: 12px !important;
+  margin-bottom: 18px !important;
+}
+.decision-bottom{
+  margin-top: 8px !important;
+}
+</style>
+
+
+<style>
+/* v20.4 — visually center the card stack between the thumbs */
+.deck-stage{
+  transform: translateY(28px) !important;
+}
+</style>
+
+
+<style>
+/* v20.5 — staged game load-in */
+.board-wrap,
+.strikes,
+.question-wrap,
+.deck-stage,
+.decision-top,
+.decision-bottom{
+  will-change: transform, opacity;
+}
+
+/* Initial hidden states */
+.phone.loading .board-wrap,
+.phone.loading .strikes{
+  opacity:0;
+  transform:translateY(-16px) scale(.97);
+}
+.phone.loading .question-wrap{
+  opacity:0;
+  transform:translateY(14px);
+}
+.phone.loading .deck-stage{
+  opacity:1;
+}
+.phone.loading .decision-top,
+.phone.loading .decision-bottom{
+  opacity:0;
+  transform:scale(.72);
+}
+
+/* Board entrance */
+.phone.load-board .board-wrap,
+.phone.load-board .strikes{
+  opacity:1;
+  transform:translateY(0) scale(1);
+  transition:
+    opacity .32s ease,
+    transform .42s cubic-bezier(.2,.85,.2,1);
+}
+
+/* Question entrance */
+.phone.load-question .question-wrap{
+  opacity:1;
+  transform:translateY(0);
+  transition:
+    opacity .26s ease,
+    transform .34s cubic-bezier(.2,.85,.2,1);
+}
+
+/* Cards are created in their normal stack positions, then individually dropped in. */
+.card.load-drop{
+  opacity:0 !important;
+  transform:translateY(-150px) scale(.94) !important;
+  transition:none !important;
+}
+.card.load-drop.drop-in{
+  opacity:1 !important;
+  transition:
+    transform .30s cubic-bezier(.16,.88,.25,1.08),
+    opacity .18s ease !important;
+}
+.card.load-drop.active.drop-in{
+  transform:translateY(0) scale(1) !important;
+}
+.card.load-drop.next.drop-in{
+  transform:translateY(0) scale(.96) !important;
+}
+.card.load-drop.back.drop-in{
+  transform:translateY(0) scale(.92) !important;
+}
+
+/* Thumb controls arrive last. */
+.phone.load-controls .decision-top,
+.phone.load-controls .decision-bottom{
+  opacity:1;
+  transform:scale(1);
+  transition:
+    opacity .22s ease,
+    transform .34s cubic-bezier(.2,.9,.2,1.08);
+}
+</style>
+
+
+<style>
+/* v20.8 — pass destination glow + visible load-in answers */
+.bottom-glow{
+  --passGlow: 0;
+  position:absolute;
+  left:-6%;
+  right:-6%;
+  bottom:-4%;
+  height:34%;
+  pointer-events:none;
+  opacity:0;
+  background:
+    radial-gradient(ellipse at 50% 100%,
+      rgba(108,145,198, calc(.58 * var(--passGlow))) 0%,
+      rgba(82,118,174, calc(.40 * var(--passGlow))) 26%,
+      rgba(37,66,111, calc(.26 * var(--passGlow))) 46%,
+      rgba(9,18,48, calc(.10 * var(--passGlow))) 62%,
+      transparent 76%);
+  filter: blur(12px);
+  transition: opacity .14s ease;
+}
+
+.card.back .answer{
+  opacity:0;
+  transition:opacity .16s ease;
+  color:#24437f;
+  font-size:24px;
+}
+
+.phone.loading .card.next .answer{
+  opacity:.44 !important;
+}
+.phone.loading .card.back .answer{
+  opacity:.30 !important;
+}
+</style>
+
+
+<style>
+/* v20.9 — centered thumbs with side labels */
+.decision-zone{
+  position:relative !important;
+  z-index:3 !important;
+  width:88% !important;
+  margin:8px auto 0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+}
+.decision-top,
+.decision-bottom{
+  position:relative !important;
+  width:100% !important;
+  min-height:86px !important;
+  display:block !important;
+}
+.decision-top{
+  margin-bottom:8px !important;
+}
+.decision-bottom{
+  margin-top:8px !important;
+}
+
+.decision-top .action,
+.decision-bottom .action{
+  position:absolute !important;
+  left:50% !important;
+  top:50% !important;
+  margin:0 !important;
+  transform:translate(-50%, -50%) !important;
+}
+
+.gesture-word{
+  position:absolute !important;
+  top:50% !important;
+  left:calc(50% + 56px) !important;
+  margin:0 !important;
+  transform:translateY(-50%) scale(.92) !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+  white-space:nowrap !important;
+}
+#playBtn.active-play + .gesture-word,
+#passBtn.active-pass + .gesture-word{
+  opacity:1 !important;
+  transform:translateY(-50%) scale(1) !important;
+}
+#playBtn.idle-hint-play + .gesture-word,
+#passBtn.idle-hint-pass + .gesture-word{
+  opacity:.34 !important;
+  transform:translateY(-50%) scale(.94) !important;
+}
+
+.deck-stage{
+  width:100% !important;
+}
+</style>
+
+</head>
+<body>
+<div class="phone loading" id="phone">
+  <div class="lights"></div>
+  <div class="spot"></div>
+  <div class="bottom-glow" id="bottomGlow"></div>
+
+  <div class="topbar">
+    <div class="pill">★ <span id="score">0</span></div>
+    <div class="pill">ROUND 1</div>
+  </div>
+
+  <div class="title">PLAY OR PASS</div>
+  <div class="sub" id="modeInstruction">SWIPE UP TO PLAY · DOWN TO PASS</div>
+
+  <div class="board-wrap" id="boardWrap">
+    <div class="board" id="board"></div>
+    <div class="board-x" id="boardX">✕</div>
+  </div>
+
+  <div class="strikes">
+    <div class="strike">✕</div>
+    <div class="strike">✕</div>
+    <div class="strike">✕</div>
+  </div>
+
+  <div class="question-wrap">
+    <div class="question">Name something people do when their water overflows.</div>
+  </div>
+
+  
+  
+  <div class="decision-zone">
+    <div class="decision-top">
+      <div class="action play" id="playBtn" aria-label="Play">
+        <div class="icon playicon">👍</div>
+      </div>
+      <div class="gesture-word play-word">PLAY</div>
+    </div>
+
+    <div class="deck-stage">
+      <div class="stack" id="stack"></div>
+    </div>
+
+    <div class="decision-bottom">
+      <div class="action pass" id="passBtn" aria-label="Pass">
+        <div class="icon passicon">👎</div>
+      </div>
+      <div class="gesture-word pass-word">PASS</div>
+    </div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="result-card">
+      <h2 id="resultTitle">BOARD CLEARED!</h2>
+      <p id="resultCopy">You found every answer.</p>
+      <button class="btn" onclick="resetGame()">PLAY AGAIN</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const boardAnswers = [
+  {text:"TURN OFF WATER", points:39},
+  {text:"GRAB TOWELS", points:24},
+  {text:"CALL PLUMBER", points:16},
+  {text:"MOVE FURNITURE", points:11},
+  {text:"GET A MOP", points:7}
+];
+const decoys = [
+  "TAKE PHOTO",
+  "OPEN WINDOW",
+  "CALL FRIEND",
+  "CHECK WEATHER",
+  "MAKE COFFEE",
+  "WATCH TV",
+  "ORDER FOOD",
+  "PLAY MUSIC"
+];
+
+let stream = [];
+let currentIndex = 0;
+let revealed = [];
+let strikes = 0;
+let score = 0;
+let locked = false;
+let tutorialDone = false;
+let activeCardEl = null;
+let drag = {startY:0, deltaY:0, pointerId:null};
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function buildStream(){
+  const real = boardAnswers.map(a => ({text:a.text, correct:true, answer:a}));
+  const fake = shuffle(decoys).slice(0,5).map(text => ({text, correct:false}));
+  stream = shuffle([...real, ...fake]);
+}
+function cardsLeft(){
+  return Math.max(0, stream.length - currentIndex);
+}
+function updateTop(){
+  document.getElementById('score').textContent = score;
+}
+function renderBoard(){
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  const totalSlots = 8;
+  for(let i=0;i<totalSlots;i++){
+    const el = document.createElement('div');
+    if(i < boardAnswers.length){
+      const found = revealed.find(a => a.text === boardAnswers[i].text);
+      el.className = 'slot ' + (found ? 'reveal' : 'hidden');
+      el.innerHTML = found
+        ? `<span>${i+1}. ${found.text}</span><span>${found.points}</span>`
+        : `<span>${i+1}</span>`;
+    } else {
+      el.className = 'slot empty';
+      el.innerHTML = '';
+    }
+    board.appendChild(el);
+  }
+}
+function updateStrikes(){
+  document.querySelectorAll('.strike').forEach((el,i)=>{
+    el.classList.toggle('on', i < strikes);
+  });
+}
+function makeCard(item, state){
+  const card = document.createElement('div');
+  card.className = 'card ' + state;
+  card.dataset.state = state;
+  // idle float is enabled only after the staged load-in completes
+  card._item = item;
+  const pos = currentIndex + (state==='active' ? 1 : state==='next' ? 2 : 3);
+  card.innerHTML = `
+    <div class="card-counter">${Math.min(pos, stream.length)}/${stream.length}</div>
+    <div class="overlay play">👍</div>
+    <div class="answer">${item.text}</div>
+    <div class="overlay pass">👎</div>
+  `;
+  if(state === 'active') bindCard(card);
+  return card;
+}
+function renderStack(){
+  const stack = document.getElementById('stack');
+  stack.innerHTML = '';
+  activeCardEl = null;
+
+  const states=['active','next','back'];
+  for(let i=0;i<3;i++){
+    const item = stream[currentIndex+i];
+    if(!item) continue;
+
+    const card = makeCard(item, states[i]);
+
+    // Critical: keep the global active-card reference in sync.
+    // resolveActive() uses this reference when a swipe/button commits.
+    if(states[i] === 'active') activeCardEl = card;
+
+    stack.appendChild(card);
+  }
+
+  // Every card gets the same calm idle float once it becomes the active card.
+  // During the initial staged load-in we wait until the intro sequence finishes.
+  const phone = document.getElementById('phone');
+  const active = stack.querySelector('.card.active');
+  if(active && phone && !phone.classList.contains('loading')){
+    active.classList.add('intro-card');
+  }
+}
+function revealPromotedText(card){
+  if(!card) return;
+  const answer = card.querySelector('.answer');
+  if(answer) answer.textContent = card._item.text;
+}
+function bindCard(card){
+  const answer = card.querySelector('.answer');
+  const playOverlay = card.querySelector('.overlay.play');
+  const passOverlay = card.querySelector('.overlay.pass');
+  const playBtn = document.getElementById('playBtn');
+  const passBtn = document.getElementById('passBtn');
+
+  function setPreview(deltaY){
+    const threshold = 78;
+    const pull = Math.max(-110, Math.min(110, deltaY));
+    const rotation = pull * 0.035;
+    card.style.transform = `translateY(${pull}px) rotate(${rotation}deg)`;
+    card.classList.remove('play-preview','pass-preview');
+    playBtn.classList.remove('active-play');
+    passBtn.classList.remove('active-pass');
+    playOverlay.style.opacity = '0';
+    passOverlay.style.opacity = '0';
+    playOverlay.style.transform = 'translateX(-50%) scale(.88)';
+    passOverlay.style.transform = 'translateX(-50%) scale(.88)';
+
+    const passCol = passBtn.parentElement;
+    const playCol = playBtn.parentElement;
+    const passLabel = passCol.querySelector('.action-label');
+    const playLabel = playCol.querySelector('.action-label');
+
+    // Reset dynamic emphasis
+    passBtn.style.transform = '';
+    playBtn.style.transform = '';
+    passCol.style.opacity = '';
+    playCol.style.opacity = '';
+    if(passLabel) passLabel.style.opacity = '';
+    if(playLabel) playLabel.style.opacity = '';
+    if(passLabel) passLabel.style.transform = '';
+    if(playLabel) playLabel.style.transform = '';
+
+    const nextCard = document.querySelector('.card.next');
+    if(nextCard){
+      if(Math.abs(deltaY) > 8) nextCard.classList.add('preview-visible');
+      else nextCard.classList.remove('preview-visible');
+    }
+
+    const boardWrap = document.getElementById('boardWrap');
+    if(boardWrap){
+      if(deltaY < -8){
+        const glow = Math.min(1, Math.abs(deltaY)/threshold);
+        boardWrap.classList.add('play-target');
+        boardWrap.style.setProperty('--playGlow', glow.toFixed(2));
+      }else{
+        boardWrap.classList.remove('play-target');
+        boardWrap.style.setProperty('--playGlow','0');
+      }
+    }
+
+    const bottomGlow = document.getElementById('bottomGlow');
+    if(bottomGlow){
+      if(deltaY > 8){
+        const glow = Math.min(1, Math.abs(deltaY)/threshold);
+        bottomGlow.style.setProperty('--passGlow', glow.toFixed(2));
+        bottomGlow.style.opacity = String(.12 + .48*glow);
+      }else{
+        bottomGlow.style.setProperty('--passGlow','0');
+        bottomGlow.style.opacity = '0';
+      }
+    }
+
+    if(deltaY < -8){
+      const t = Math.min(1, Math.abs(deltaY)/threshold);
+      playOverlay.style.opacity = String(.15 + .85*t);
+      playOverlay.style.transform = `translateX(-50%) scale(${.88 + .18*t})`;
+      playBtn.classList.add('active-play');
+      card.classList.add('play-preview');
+      answer.style.transform = `translateY(${-6*t}px)`;
+
+      // Dramatic contrast: play grows, pass shrinks/fades
+      playBtn.style.transform = `scale(${1.0 + .42*t})`;
+      playCol.style.opacity = String(.9 + .1*t);
+      if(playLabel) playLabel.style.opacity = String(.82 + .18*t);
+      if(playLabel) playLabel.style.transform = `scale(${1.0 + .12*t}) translateY(${-2*t}px)`;
+
+      passBtn.style.transform = `scale(${1.0 - .30*t})`;
+      passCol.style.opacity = String(1.0 - .65*t);
+      if(passLabel) passLabel.style.opacity = String(1.0 - .55*t);
+      if(passLabel) passLabel.style.transform = `scale(${1.0 - .1*t})`;
+    } else if(deltaY > 8){
+      const t = Math.min(1, Math.abs(deltaY)/threshold);
+      passOverlay.style.opacity = String(.15 + .85*t);
+      passOverlay.style.transform = `translateX(-50%) scale(${.88 + .18*t})`;
+      passBtn.classList.add('active-pass');
+      card.classList.add('pass-preview');
+      answer.style.transform = `translateY(${6*t}px)`;
+
+      // Dramatic contrast: pass grows, play shrinks/fades
+      passBtn.style.transform = `scale(${1.0 + .42*t})`;
+      passCol.style.opacity = String(.9 + .1*t);
+      if(passLabel) passLabel.style.opacity = String(.82 + .18*t);
+      if(passLabel) passLabel.style.transform = `scale(${1.0 + .12*t}) translateY(${-2*t}px)`;
+
+      playBtn.style.transform = `scale(${1.0 - .30*t})`;
+      playCol.style.opacity = String(1.0 - .65*t);
+      if(playLabel) playLabel.style.opacity = String(1.0 - .55*t);
+      if(playLabel) playLabel.style.transform = `scale(${1.0 - .1*t})`;
+    } else {
+      answer.style.transform = 'translateY(0)';
+    }
+  }
+
+  function clearPreview(){
+    card.classList.remove('play-preview','pass-preview');
+    playBtn.classList.remove('active-play');
+    passBtn.classList.remove('active-pass');
+    playOverlay.style.opacity = '0';
+    passOverlay.style.opacity = '0';
+    answer.style.transform = 'translateY(0)';
+    card.style.transform = '';
+
+    const passCol = passBtn.parentElement;
+    const playCol = playBtn.parentElement;
+    const passLabel = passCol.querySelector('.action-label');
+    const playLabel = playCol.querySelector('.action-label');
+
+    playBtn.style.transform = '';
+    passBtn.style.transform = '';
+    playCol.style.opacity = '';
+    passCol.style.opacity = '';
+    if(playLabel) playLabel.style.opacity = '';
+    if(passLabel) passLabel.style.opacity = '';
+    if(playLabel) playLabel.style.transform = '';
+    if(passLabel) passLabel.style.transform = '';
+
+    const nextCard = document.querySelector('.card.next');
+    if(nextCard) nextCard.classList.remove('preview-visible');
+    const boardWrap = document.getElementById('boardWrap');
+    if(boardWrap){
+      boardWrap.classList.remove('play-target');
+      boardWrap.style.setProperty('--playGlow','0');
+    }
+    const bottomGlow = document.getElementById('bottomGlow');
+    if(bottomGlow){
+      bottomGlow.style.setProperty('--passGlow','0');
+      bottomGlow.style.opacity = '0';
+    }
+  }
+
+  card.onpointerdown = (e)=>{
+    if(locked) return;
+    tutorialDone = true;
+    
+    card.classList.remove('intro-card');
+    drag.pointerId = e.pointerId;
+    drag.startY = e.clientY;
+    drag.deltaY = 0;
+    card.setPointerCapture(e.pointerId);
+    card.style.transition = 'none';
+  };
+  card.onpointermove = (e)=>{
+    if(drag.pointerId !== e.pointerId) return;
+    drag.deltaY = e.clientY - drag.startY;
+    setPreview(drag.deltaY);
+  };
+  card.onpointerup = (e)=>{
+    if(drag.pointerId !== e.pointerId) return;
+    card.releasePointerCapture(e.pointerId);
+    card.style.transition = '';
+    const threshold = 78;
+    const delta = drag.deltaY;
+    drag.pointerId = null;
+    drag.deltaY = 0;
+
+    if(delta <= -threshold) resolveActive(true);
+    else if(delta >= threshold) resolveActive(false);
+    else {
+      clearPreview();
+    }
+  };
+  card.onpointercancel = ()=>{
+    drag.pointerId = null;
+    drag.deltaY = 0;
+    card.style.transition = '';
+    clearPreview();
+  };
+}
+function showBoardX(){
+  const x = document.getElementById('boardX');
+  x.classList.remove('show');
+  void x.offsetWidth;
+  x.classList.add('show');
+}
+function animateAdvance(action){
+  const stack = document.getElementById('stack');
+  const active = stack.querySelector('.card.active');
+  const next = stack.querySelector('.card.next');
+  const back = stack.querySelector('.card.back');
+
+  if(active){
+    active.classList.remove('play-preview','pass-preview','intro-card');
+    active.classList.add(action === 'play' ? 'exiting-up' : 'exiting-down');
+  }
+  if(next){
+    next.classList.remove('next','preview-visible');
+    next.classList.add('active');
+    activeCardEl = next;
+    revealPromotedText(next);
+    bindCard(next);
+    setTimeout(()=>{
+      if(next.isConnected && next.classList.contains('active') && !locked){
+        next.classList.add('intro-card');
+      }
+    }, 360);
+  }
+  if(back){
+    back.classList.remove('back');
+    back.classList.add('next');
+    const answer = back.querySelector('.answer');
+    if(answer) answer.textContent = back._item.text;
+  }
+
+  setTimeout(()=>{
+    renderStack();
+    resetActionControls();
+    locked = false;
+    updateTop();
+    checkEnd();
+  }, 420);
+}
+
+
+function promoteAfterButton(){
+  const stack = document.getElementById('stack');
+  const active = stack.querySelector('.card.active');
+  const next = stack.querySelector('.card.next');
+  const back = stack.querySelector('.card.back');
+
+  if(active) active.remove();
+
+  if(next){
+    next.classList.remove('next','preview-visible');
+    next.classList.add('active');
+    activeCardEl = next;
+    revealPromotedText(next);
+    bindCard(next);
+  }
+
+  if(back){
+    back.classList.remove('back');
+    back.classList.add('next');
+    const answer = back.querySelector('.answer');
+    if(answer) answer.textContent = back._item.text;
+  }
+
+  setTimeout(()=>{
+    renderStack();
+    resetActionControls();
+    locked = false;
+    updateTop();
+    checkEnd();
+  }, 420);
+}
+
+function resetActionControls(){
+  const playBtn = document.getElementById('playBtn');
+  const passBtn = document.getElementById('passBtn');
+  if(!playBtn || !passBtn) return;
+
+  const playCol = playBtn.parentElement;
+  const passCol = passBtn.parentElement;
+  const playLabel = playCol ? playCol.querySelector('.action-label') : null;
+  const passLabel = passCol ? passCol.querySelector('.action-label') : null;
+
+  playBtn.classList.remove('active-play');
+  passBtn.classList.remove('active-pass');
+
+  playBtn.style.transform = '';
+  passBtn.style.transform = '';
+  playBtn.style.filter = '';
+  passBtn.style.filter = '';
+
+  if(playCol){
+    playCol.style.opacity = '';
+    playCol.style.transform = '';
+  }
+  if(passCol){
+    passCol.style.opacity = '';
+    passCol.style.transform = '';
+  }
+  if(playLabel){
+    if(playLabel) playLabel.style.opacity = '';
+    if(playLabel) playLabel.style.transform = '';
+  }
+  if(passLabel){
+    if(passLabel) passLabel.style.opacity = '';
+    if(passLabel) passLabel.style.transform = '';
+  }
+}
+
+function resolveActive(play, source='gesture'){
+  if(locked || !activeCardEl) return;
+  locked = true;
+
+  resetActionControls();
+
+  const boardWrap = document.getElementById('boardWrap');
+  if(boardWrap){
+    boardWrap.classList.remove('play-target');
+    boardWrap.style.setProperty('--playGlow','0');
+  }
+  const bottomGlow = document.getElementById('bottomGlow');
+  if(bottomGlow){
+    bottomGlow.style.setProperty('--passGlow','0');
+    bottomGlow.style.opacity = '0';
+  }
+
+  tutorialDone = true;
+  const instruction = document.getElementById('modeInstruction');
+  if(instruction) instruction.textContent = 'PLAY IT OR PASS IT';
+
+  const item = activeCardEl._item;
+  const fromButton = source === 'button';
+
+  // BUTTON PATH: use one continuous animation so the card never "snaps"
+  // between preview and commit states.
+  if(fromButton){
+    const playBtn = document.getElementById('playBtn');
+    const passBtn = document.getElementById('passBtn');
+    const nextCard = document.querySelector('.card.next');
+    const playOverlay = activeCardEl.querySelector('.overlay.play');
+    const passOverlay = activeCardEl.querySelector('.overlay.pass');
+
+    activeCardEl.classList.remove('intro-card','button-preview-play','button-preview-pass','button-commit');
+    activeCardEl.style.transition = 'none';
+
+    if(nextCard) nextCard.classList.add('preview-visible');
+
+    if(play){
+      playBtn.classList.add('active-play');
+      playBtn.style.transform = 'scale(1.42)';
+      passBtn.style.transform = 'scale(.68)';
+      passBtn.parentElement.style.opacity = '.35';
+
+      if(playOverlay){
+        playOverlay.style.opacity = '1';
+        playOverlay.style.transform = 'translateX(-50%) scale(1.06)';
+      }
+      if(boardWrap){
+        boardWrap.classList.add('play-target');
+        boardWrap.style.setProperty('--playGlow','0.82');
+      }
+      if(bottomGlow){
+        bottomGlow.style.setProperty('--passGlow','0');
+        bottomGlow.style.opacity = '0';
+      }
+
+      activeCardEl.animate([
+        { transform:'translateY(0px) rotate(0deg)', opacity:1, offset:0 },
+        { transform:'translateY(-54px) rotate(1.5deg)', opacity:1, offset:.24 },
+        { transform:'translateY(-54px) rotate(1.5deg)', opacity:1, offset:.38 },
+        { transform:'translateY(-145px) rotate(3deg)', opacity:1, offset:.66 },
+        { transform:'translateY(-360px) rotate(6deg)', opacity:0, offset:1 }
+      ],{
+        duration:980,
+        easing:'cubic-bezier(.20,.78,.20,1)',
+        fill:'forwards'
+      });
+
+      // The board remains connected during the preview, then owns the result.
+      setTimeout(()=>{
+        resetActionControls();
+        if(boardWrap){
+          boardWrap.classList.remove('play-target');
+          boardWrap.style.setProperty('--playGlow','0');
+        }
+      }, 500);
+
+      setTimeout(()=>{
+        if(item.correct){
+          if(!revealed.find(a=>a.text===item.answer.text)){
+            revealed.push(item.answer);
+            score += item.answer.points;
+            renderBoard();
+          }
+        }else{
+          strikes++;
+          updateStrikes();
+          showBoardX();
+        }
+        document.getElementById('score').textContent = score;
+      }, 640);
+
+      setTimeout(()=>{
+        currentIndex++;
+        promoteAfterButton();
+      }, 940);
+
+    }else{
+      passBtn.classList.add('active-pass');
+      passBtn.style.transform = 'scale(1.42)';
+      playBtn.style.transform = 'scale(.68)';
+      playBtn.parentElement.style.opacity = '.35';
+
+      if(passOverlay){
+        passOverlay.style.opacity = '1';
+        passOverlay.style.transform = 'translateX(-50%) scale(1.06)';
+      }
+      if(bottomGlow){
+        bottomGlow.style.setProperty('--passGlow','0.82');
+        bottomGlow.style.opacity = '.52';
+      }
+
+      activeCardEl.animate([
+        { transform:'translateY(0px) rotate(0deg)', opacity:1, offset:0 },
+        { transform:'translateY(54px) rotate(-1.5deg)', opacity:1, offset:.26 },
+        { transform:'translateY(54px) rotate(-1.5deg)', opacity:1, offset:.40 },
+        { transform:'translateY(150px) rotate(-3deg)', opacity:1, offset:.70 },
+        { transform:'translateY(360px) rotate(-6deg)', opacity:0, offset:1 }
+      ],{
+        duration:860,
+        easing:'cubic-bezier(.20,.78,.20,1)',
+        fill:'forwards'
+      });
+
+      setTimeout(()=> resetActionControls(), 460);
+
+      setTimeout(()=>{
+        currentIndex++;
+        promoteAfterButton();
+      }, 820);
+    }
+
+    return;
+  }
+
+  // SWIPE PATH: player already previewed the choice through the gesture,
+  // so commitment should remain fast and responsive.
+  if(play){
+    const stack = document.getElementById('stack');
+    const active = stack.querySelector('.card.active');
+    if(active){
+      active.classList.remove('play-preview','pass-preview','intro-card');
+      active.classList.add('exiting-up');
+    }
+
+    setTimeout(()=>{
+      if(item.correct){
+        if(!revealed.find(a=>a.text===item.answer.text)){
+          revealed.push(item.answer);
+          score += item.answer.points;
+          renderBoard();
+        }
+      }else{
+        strikes++;
+        updateStrikes();
+        showBoardX();
+      }
+      document.getElementById('score').textContent = score;
+    }, 190);
+
+    setTimeout(()=>{
+      currentIndex++;
+      animateAdvance('play');
+    }, 320);
+
+  }else{
+    setTimeout(()=>{
+      currentIndex++;
+      animateAdvance('pass');
+    }, 80);
+  }
+}
+function checkEnd(){
+  const result = document.getElementById('result');
+  const title = document.getElementById('resultTitle');
+  const copy = document.getElementById('resultCopy');
+  const found = revealed.length;
+  const total = boardAnswers.length;
+
+  if(found === total){
+    title.textContent = 'BOARD CLEARED!';
+    copy.textContent = `You found all ${total} answers for ${score} points.`;
+    result.classList.add('show');
+    return;
+  }
+  if(strikes >= 3){
+    title.textContent = '3 STRIKES!';
+    copy.textContent = `You found ${found} of ${total} answers before striking out.`;
+    result.classList.add('show');
+    return;
+  }
+  if(currentIndex >= stream.length){
+    title.textContent = 'ROUND OVER';
+    copy.textContent = `You found ${found} of ${total} answers before the answer stream ran out.`;
+    result.classList.add('show');
+  }
+}
+
+function playLoadInSequence(){
+  const phone = document.getElementById('phone');
+  if(!phone) return;
+
+  phone.classList.add('loading');
+  phone.classList.remove('load-board','load-question','load-controls');
+
+  // Hide all freshly-rendered cards above the stack before dropping them in.
+  const cards = [...document.querySelectorAll('.stack .card')];
+  cards.forEach(card=>{
+    card.classList.add('load-drop');
+    card.classList.remove('drop-in','intro-card');
+  });
+
+  // Beat 1: establish the answer board + strikes.
+  setTimeout(()=>{
+    phone.classList.add('load-board');
+  }, 120);
+
+  // Beat 2: reveal the persistent survey question.
+  setTimeout(()=>{
+    phone.classList.add('load-question');
+  }, 560);
+
+  // Beat 3: drop the cards into the stack one at a time, back-to-front,
+  // so the stack visibly builds rather than appearing all at once.
+  const ordered = [...cards].reverse();
+  const cardStart = 900;
+  const cardGap = 145;
+  ordered.forEach((card,i)=>{
+    setTimeout(()=>{
+      card.classList.add('drop-in');
+    }, cardStart + i*cardGap);
+  });
+
+  // Beat 4: once the stack has landed, bring in both directional controls.
+  const controlsAt = cardStart + Math.max(0, ordered.length-1)*cardGap + 380;
+  setTimeout(()=>{
+    phone.classList.add('load-controls');
+  }, controlsAt);
+
+  // Gameplay becomes live only after the complete visual introduction.
+  setTimeout(()=>{
+    phone.classList.remove('loading');
+    cards.forEach(card=>card.classList.remove('load-drop','drop-in'));
+    const active = document.querySelector('.card.active');
+    if(active) active.classList.add('intro-card');
+    locked = false;
+  }, controlsAt + 360);
+}
+
+function resetGame(){
+  currentIndex = 0;
+  revealed = [];
+  strikes = 0;
+  score = 0;
+  locked = true;
+  tutorialDone = false;
+  document.getElementById('result').classList.remove('show');
+  buildStream();
+  resetActionControls();
+  updateTop();
+  renderBoard();
+  updateStrikes();
+  renderStack();
+  playLoadInSequence();
+}
+document.getElementById('playBtn').onclick = ()=> resolveActive(true, 'button');
+document.getElementById('passBtn').onclick = ()=> resolveActive(false, 'button');
+resetGame();
+</script>
+</body>
+</html>
+
+<style>
+.deck-stage{ margin-top:8px !important; }
+
+  .action{
+    transform-origin:center;
+  }
+  .action-col{
+    transition:transform .14s ease, opacity .14s ease;
+  }
+  .action-label{
+    transition:opacity .14s ease, transform .14s ease;
+  }
+
+
+  .card-counter{
+    position:absolute;
+    top:14px;
+    right:14px;
+    min-width:48px;
+    height:30px;
+    padding:0 10px;
+    border-radius:999px;
+    display:grid;
+    place-items:center;
+    background:rgba(10,30,77,.9);
+    border:1px solid rgba(173,204,255,.5);
+    color:#f5f8ff;
+    font-size:13px;
+    font-weight:1000;
+    letter-spacing:.4px;
+    box-shadow:0 4px 12px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  .actions{
+    margin-top:-4px !important;
+  }
+  .hint{
+    margin-top:8px !important;
+  }
+
+
+  .card.button-commit{
+    transition:
+      transform .58s cubic-bezier(.18,.82,.2,1),
+      opacity .42s ease,
+      left .34s cubic-bezier(.2,.85,.2,1),
+      top .34s cubic-bezier(.2,.85,.2,1),
+      filter .2s ease,
+      box-shadow .2s ease,
+      background .2s ease !important;
+  }
+
+
+  .card.button-preview-play{
+    transition:
+      transform .24s cubic-bezier(.2,.8,.2,1),
+      background .18s ease,
+      box-shadow .18s ease !important;
+    transform:translateY(-52px) rotate(1.5deg) !important;
+    background:linear-gradient(160deg, #fffef2, #f9e8bf) !important;
+    box-shadow:
+      0 14px 0 #654200,
+      0 24px 40px rgba(0,0,0,.32),
+      0 0 22px rgba(255,208,102,.34),
+      inset 0 1px 0 rgba(255,255,255,.9) !important;
+  }
+  .card.button-preview-pass{
+    transition:
+      transform .24s cubic-bezier(.2,.8,.2,1),
+      background .18s ease,
+      box-shadow .18s ease !important;
+    transform:translateY(52px) rotate(-1.5deg) !important;
+    background:linear-gradient(160deg, #f6f9ff, #dce6fa) !important;
+    box-shadow:
+      0 14px 0 #071c57,
+      0 20px 34px rgba(0,0,0,.32),
+      0 0 14px rgba(159,185,239,.18),
+      inset 0 1px 0 rgba(255,255,255,.84) !important;
+  }
+  .card.button-preview-play .overlay.play,
+  .card.button-preview-pass .overlay.pass{
+    opacity:1 !important;
+    transform:translateX(-50%) scale(1.06) !important;
+  }
+
+</style>
+
+<style>
+.title{ margin-top:2px !important; }
+.sub{ margin-top:6px !important; margin-bottom:8px !important; }
+.board-wrap{ margin-top:8px !important; margin-bottom:10px !important; }
+.strikes{ margin-top:4px !important; margin-bottom:8px !important; }
+.question-wrap{ margin-top:0 !important; margin-bottom:10px !important; }
+.deck-stage{ margin-top:0 !important; }
+
+  .card-counter{
+    position:absolute;
+    top:14px;
+    right:14px;
+    min-width:48px;
+    height:30px;
+    padding:0 10px;
+    border-radius:999px;
+    display:grid;
+    place-items:center;
+    background:rgba(10,30,77,.9);
+    border:1px solid rgba(173,204,255,.5);
+    color:#f5f8ff;
+    font-size:13px;
+    font-weight:1000;
+    letter-spacing:.4px;
+    box-shadow:0 4px 12px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  .actions{
+    margin-top:-4px !important;
+  }
+  .hint{
+    margin-top:8px !important;
+  }
+
+
+  .card.button-commit{
+    transition:
+      transform .58s cubic-bezier(.18,.82,.2,1),
+      opacity .42s ease,
+      left .34s cubic-bezier(.2,.85,.2,1),
+      top .34s cubic-bezier(.2,.85,.2,1),
+      filter .2s ease,
+      box-shadow .2s ease,
+      background .2s ease !important;
+  }
+
+
+  .card.button-preview-play{
+    transition:
+      transform .24s cubic-bezier(.2,.8,.2,1),
+      background .18s ease,
+      box-shadow .18s ease !important;
+    transform:translateY(-52px) rotate(1.5deg) !important;
+    background:linear-gradient(160deg, #fffef2, #f9e8bf) !important;
+    box-shadow:
+      0 14px 0 #654200,
+      0 24px 40px rgba(0,0,0,.32),
+      0 0 22px rgba(255,208,102,.34),
+      inset 0 1px 0 rgba(255,255,255,.9) !important;
+  }
+  .card.button-preview-pass{
+    transition:
+      transform .24s cubic-bezier(.2,.8,.2,1),
+      background .18s ease,
+      box-shadow .18s ease !important;
+    transform:translateY(52px) rotate(-1.5deg) !important;
+    background:linear-gradient(160deg, #f6f9ff, #dce6fa) !important;
+    box-shadow:
+      0 14px 0 #071c57,
+      0 20px 34px rgba(0,0,0,.32),
+      0 0 14px rgba(159,185,239,.18),
+      inset 0 1px 0 rgba(255,255,255,.84) !important;
+  }
+  .card.button-preview-play .overlay.play,
+  .card.button-preview-pass .overlay.pass{
+    opacity:1 !important;
+    transform:translateX(-50%) scale(1.06) !important;
+  }
+
+</style>
+
+<style>
+/* v10 neutral action-state correction */
+.action.pass,
+.action.play{
+  width:76px !important;
+  height:76px !important;
+  color:#f4f8ff !important;
+  background:linear-gradient(180deg, rgba(21,41,88,.98), rgba(8,18,48,.98)) !important;
+  border-color:rgba(191,213,255,.42) !important;
+  box-shadow:
+    0 10px 22px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+.action.pass .icon,
+.action.play .icon{
+  color:#f4f8ff !important;
+  font-size:34px !important;
+  transform:none !important;
+}
+.action-label,
+.play-label{
+  color:#dbe7ff !important;
+  opacity:.92 !important;
+}
+
+/* Drag-selected states override the neutral treatment */
+.action.active-play{
+  background:linear-gradient(180deg, #ffe28e, #ffbe35) !important;
+  border-color:#fff6d1 !important;
+  color:#5b3900 !important;
+  box-shadow:
+    0 0 30px rgba(255,194,67,.55),
+    0 12px 24px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.5) !important;
+}
+.action.active-play .icon{
+  color:#6a4700 !important;
+}
+.action.active-pass{
+  background:linear-gradient(180deg, #2a4f9f, #172b66) !important;
+  border-color:#eef4ff !important;
+  color:#fff !important;
+  box-shadow:
+    0 0 28px rgba(188,210,251,.42),
+    0 12px 24px rgba(0,0,0,.22) !important;
+}
+
+  .card-counter{
+    position:absolute;
+    top:14px;
+    right:14px;
+    min-width:48px;
+    height:30px;
+    padding:0 10px;
+    border-radius:999px;
+    display:grid;
+    place-items:center;
+    background:rgba(10,30,77,.9);
+    border:1px solid rgba(173,204,255,.5);
+    color:#f5f8ff;
+    font-size:13px;
+    font-weight:1000;
+    letter-spacing:.4px;
+    box-shadow:0 4px 12px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  .actions{
+    margin-top:-4px !important;
+  }
+  .hint{
+    margin-top:8px !important;
+  }
+
+
+  .card.button-commit{
+    transition:
+      transform .58s cubic-bezier(.18,.82,.2,1),
+      opacity .42s ease,
+      left .34s cubic-bezier(.2,.85,.2,1),
+      top .34s cubic-bezier(.2,.85,.2,1),
+      filter .2s ease,
+      box-shadow .2s ease,
+      background .2s ease !important;
+  }
+
+
+  .card.button-preview-play{
+    transition:
+      transform .24s cubic-bezier(.2,.8,.2,1),
+      background .18s ease,
+      box-shadow .18s ease !important;
+    transform:translateY(-52px) rotate(1.5deg) !important;
+    background:linear-gradient(160deg, #fffef2, #f9e8bf) !important;
+    box-shadow:
+      0 14px 0 #654200,
+      0 24px 40px rgba(0,0,0,.32),
+      0 0 22px rgba(255,208,102,.34),
+      inset 0 1px 0 rgba(255,255,255,.9) !important;
+  }
+  .card.button-preview-pass{
+    transition:
+      transform .24s cubic-bezier(.2,.8,.2,1),
+      background .18s ease,
+      box-shadow .18s ease !important;
+    transform:translateY(52px) rotate(-1.5deg) !important;
+    background:linear-gradient(160deg, #f6f9ff, #dce6fa) !important;
+    box-shadow:
+      0 14px 0 #071c57,
+      0 20px 34px rgba(0,0,0,.32),
+      0 0 14px rgba(159,185,239,.18),
+      inset 0 1px 0 rgba(255,255,255,.84) !important;
+  }
+  .card.button-preview-play .overlay.play,
+  .card.button-preview-pass .overlay.pass{
+    opacity:1 !important;
+    transform:translateX(-50%) scale(1.06) !important;
+  }
+
+</style>
+
+<style>
+.action-col{ gap:0 !important; }
+.actions{ margin-top:-2px !important; }
+
+  .card.button-preview-play{
+    transition:
+      transform .24s cubic-bezier(.2,.8,.2,1),
+      background .18s ease,
+      box-shadow .18s ease !important;
+    transform:translateY(-52px) rotate(1.5deg) !important;
+    background:linear-gradient(160deg, #fffef2, #f9e8bf) !important;
+    box-shadow:
+      0 14px 0 #654200,
+      0 24px 40px rgba(0,0,0,.32),
+      0 0 22px rgba(255,208,102,.34),
+      inset 0 1px 0 rgba(255,255,255,.9) !important;
+  }
+  .card.button-preview-pass{
+    transition:
+      transform .24s cubic-bezier(.2,.8,.2,1),
+      background .18s ease,
+      box-shadow .18s ease !important;
+    transform:translateY(52px) rotate(-1.5deg) !important;
+    background:linear-gradient(160deg, #f6f9ff, #dce6fa) !important;
+    box-shadow:
+      0 14px 0 #071c57,
+      0 20px 34px rgba(0,0,0,.32),
+      0 0 14px rgba(159,185,239,.18),
+      inset 0 1px 0 rgba(255,255,255,.84) !important;
+  }
+  .card.button-preview-play .overlay.play,
+  .card.button-preview-pass .overlay.pass{
+    opacity:1 !important;
+    transform:translateX(-50%) scale(1.06) !important;
+  }
+
+</style>
+
+
+<style>
+/* v18: vertical thumb controls aligned to swipe direction */
+.decision-zone{
+  position:relative;
+  z-index:3;
+  width:88%;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.decision-top,
+.decision-bottom{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  position:relative;
+  z-index:5;
+}
+.decision-top{ margin-bottom:-8px; }
+.decision-bottom{ margin-top:-8px; }
+
+.deck-stage{
+  width:100% !important;
+  margin:0 auto !important;
+  height:286px !important;
+}
+
+.action{
+  width:88px !important;
+  height:88px !important;
+  border-radius:50% !important;
+  display:grid !important;
+  place-items:center !important;
+  transform-origin:center !important;
+  border:3px solid rgba(255,214,105,.65) !important;
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    0 0 18px rgba(57,125,255,.18) !important;
+  background:linear-gradient(180deg,#1e73ff,#0a47c3) !important;
+  color:white !important;
+}
+.action .icon{
+  font-size:42px !important;
+  line-height:1 !important;
+}
+.action.play,
+.action.pass{
+  opacity:1;
+}
+.action.active-play{
+  background:linear-gradient(180deg,#ffd85e,#ffb927) !important;
+  border-color:#fff3c5 !important;
+  box-shadow:
+    0 12px 28px rgba(0,0,0,.22),
+    0 0 30px rgba(255,194,67,.48),
+    inset 0 1px 0 rgba(255,255,255,.4) !important;
+}
+.action.active-pass{
+  background:linear-gradient(180deg,#2a4f9f,#172b66) !important;
+  border-color:#eef4ff !important;
+  box-shadow:
+    0 12px 28px rgba(0,0,0,.22),
+    0 0 26px rgba(188,210,251,.42),
+    inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+
+.sub{ margin-bottom:10px !important; }
+.board-wrap{ margin-bottom:8px !important; }
+.question-wrap{ margin-bottom:10px !important; }
+</style>
+
+
+<style>
+/* v19: thumb callout words live beside the enlarged thumb, not on the card */
+.actions{display:none !important;}
+
+.gesture-word{
+  opacity:0;
+  transform:translateX(-10px) scale(.9);
+  transition:opacity .16s ease, transform .16s ease;
+  font-size:54px;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:-1px;
+  text-transform:uppercase;
+  text-shadow:0 6px 0 rgba(134,70,0,.22), 0 8px 18px rgba(0,0,0,.18);
+  pointer-events:none;
+  margin-left:14px;
+}
+.play-word{
+  color:#ffb228;
+  -webkit-text-stroke: 2px #ffefc8;
+}
+.pass-word{
+  color:#e5eefc;
+  -webkit-text-stroke: 2px #274789;
+  text-shadow:0 6px 0 rgba(20,40,88,.28), 0 8px 18px rgba(0,0,0,.18);
+}
+
+#playBtn.active-play + .gesture-word{
+  opacity:1;
+  transform:translateX(0) scale(1);
+}
+#passBtn.active-pass + .gesture-word{
+  opacity:1;
+  transform:translateX(0) scale(1);
+}
+
+.decision-top,
+.decision-bottom{
+  gap:14px;
+}
+
+.decision-top{ margin-bottom:-6px; }
+.decision-bottom{ margin-top:-6px; }
+
+.action{
+  width:96px !important;
+  height:96px !important;
+}
+.action .icon{
+  font-size:46px !important;
+}
+
+.overlay.play,
+.overlay.pass{
+  min-width: auto !important;
+  padding: 8px 12px !important;
+  border-radius: 999px !important;
+  font-size: 36px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.overlay.play{
+  color:#ffbf3d !important;
+  top:22px !important;
+}
+.overlay.pass{
+  color:#d6e6ff !important;
+  bottom:22px !important;
+}
+
+.card.play-preview .overlay.play,
+.card.pass-preview .overlay.pass{
+  opacity:.95 !important;
+}
+
+</style>
+
+
+<style>
+/* v20 share-ready cleanup */
+
+/* Keep the answer card clean during the gesture:
+   directional feedback now lives entirely in the external thumb controls. */
+.card .overlay.play,
+.card .overlay.pass{
+  display:none !important;
+}
+
+/* Neutral controls should be present but subordinate to the answer card. */
+.action{
+  width:80px !important;
+  height:80px !important;
+  opacity:.74 !important;
+  background:linear-gradient(180deg,#1b59c9,#103a91) !important;
+  border-color:rgba(255,216,113,.42) !important;
+  box-shadow:
+    0 8px 18px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 0 10px rgba(57,125,255,.10) !important;
+}
+.action .icon{
+  font-size:39px !important;
+  filter:saturate(.88) brightness(.94);
+}
+
+/* During intent preview, the chosen direction becomes dramatically dominant. */
+.action.active-play,
+.action.active-pass{
+  opacity:1 !important;
+}
+.action.active-play{
+  background:linear-gradient(180deg,#ffd85e,#ffb927) !important;
+  border-color:#fff3c5 !important;
+  box-shadow:
+    0 12px 28px rgba(0,0,0,.22),
+    0 0 34px rgba(255,194,67,.58),
+    inset 0 1px 0 rgba(255,255,255,.42) !important;
+}
+.action.active-pass{
+  background:linear-gradient(180deg,#3967ba,#1b376f) !important;
+  border-color:#eef4ff !important;
+  box-shadow:
+    0 12px 28px rgba(0,0,0,.22),
+    0 0 30px rgba(188,210,251,.48),
+    inset 0 1px 0 rgba(255,255,255,.14) !important;
+}
+.action.active-play .icon,
+.action.active-pass .icon{
+  filter:none;
+}
+
+/* PLAY / PASS only appears when that direction is active. */
+.gesture-word{
+  opacity:0;
+}
+#playBtn.active-play + .gesture-word,
+#passBtn.active-pass + .gesture-word{
+  opacity:1;
+}
+
+/* Tighter relationship between direction control and card stack. */
+.decision-top{ margin-bottom:-10px !important; }
+.decision-bottom{ margin-top:-10px !important; }
+</style>
