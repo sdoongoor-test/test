@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Podium Shuffle — UX Prototype v6</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#01071d;color:#fff;font-family:Arial,Helvetica,sans-serif;display:flex;justify-content:center}
+#game{width:min(100vw,430px);height:100vh;min-height:760px;position:relative;overflow:hidden;
+background:radial-gradient(circle at 50% 15%,#2764e6,#09236f 40%,#020925 76%)}
+.lights{height:76px;background-image:radial-gradient(circle,#7dd0ff 2px,transparent 2.6px);background-size:13px 13px;opacity:.58}
+.tag{display:none}
+.topMessage{margin:8px auto 12px;text-align:center;color:#ffffff;font-weight:900;font-size:14px;line-height:1.2;max-width:92%}
+.topMessage b{color:#ffd451}
+.bankTop{margin:0 auto 10px;width:82%}
+.underBoardInventory{display:flex;justify-content:center;padding-left:0;margin-top:12px}
+.pickInventory{display:flex;align-items:center;gap:10px;background:#061f63;border:2px solid #51cfff;border-radius:22px;padding:7px 16px 7px 12px;box-shadow:0 0 12px #149cff66}
+.pickKey{width:34px;height:24px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(155deg,#ffc850,#e88911);border:2px solid #ffe29b;border-radius:4px;position:relative;color:#2589e8;font-weight:1000;font-style:italic;font-size:14px;box-shadow:0 3px #934806}
+.pickKey:before{content:"";position:absolute;left:3px;right:3px;top:3px;border-top:1px solid rgba(120,70,0,.35);transform:skewY(-18deg)}
+.pickCount{font-size:28px;font-weight:1000;color:#fff;line-height:1}
+.bankValue{font-size:36px;line-height:39px;font-weight:1000;color:#ffd451;text-shadow:0 3px #784000;display:flex;align-items:center;justify-content:center;gap:12px}
+.coinBadge{width:48px;height:48px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 35%,#fff1a0 0,#ffd24f 22%,#f0a71a 65%,#bf6b00 100%);border:3px solid #ffe08a;box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 3px 0 #8a4800;color:#f28f00;font-weight:1000;font-style:italic;font-size:20px;text-shadow:none}
+.bankNumber{display:inline-block;min-width:70px;text-align:left}
+h1{text-align:center;margin:18px 0 10px;font-size:28px;text-shadow:0 3px #061b63;letter-spacing:.5px}
+#sub{display:none}
+.clearRule{display:none}
+.hud{display:flex;gap:10px;justify-content:center;margin:9px 0 5px}
+.hudBox{min-width:135px;padding:8px 12px;border:2px solid #4cc9ff;border-radius:16px;background:#061f63;box-shadow:0 0 12px #149cff66;text-align:center;transition:.2s}
+.hudBox.hero{border-color:#ffd54a;box-shadow:0 0 25px #ffb000;background:#573100}
+.hudLabel{display:none}
+.hudValue{font-size:26px;font-weight:1000;color:#ffd451;line-height:28px}
+.resource{display:flex;align-items:center;justify-content:center;gap:7px}
+.envIcon{font-size:29px;color:#ffd451;filter:drop-shadow(0 2px #784000)}
+.gridIcon{font-size:29px;color:#9bddff}
+.times{font-size:15px;color:#b9e8ff}
+.miniEnv{font-size:18px;color:#ffd451}
+.arrow{opacity:.55;margin:0 4px}
+.board{width:92%;height:356px;margin:8px auto 0;border:4px solid #51cfff;border-radius:18px;padding:14px 13px;background:linear-gradient(#154abd,#061d68);box-shadow:0 0 25px #199cff,inset 0 0 32px #001342;overflow:hidden}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 11px;margin-top:3px;position:relative}
+.cards.shuffling{display:block;height:318px}
+.cards.shuffling .card{position:absolute;margin:0;transition:left .38s cubic-bezier(.22,.75,.25,1),top .38s cubic-bezier(.22,.75,.25,1),transform .18s}
+.card{height:98px;perspective:700px;cursor:pointer;transition:.13s;will-change:transform}
+.card:active{transform:scale(.95)}
+.card.dead{pointer-events:none}
+.inner{height:100%;position:relative;transform-style:preserve-3d;transition:transform .42s}
+.card.hidden .inner{transform:rotateY(180deg)}
+.card.open .inner{transform:rotateY(0deg)}
+/* Unselected cards flip to their real contents after the last pick, but are visually forfeited. */
+.card.unclaimed .content{filter:grayscale(1) brightness(.78);opacity:.66;transition:filter .3s ease,opacity .3s ease}
+.card.unclaimed .content::after{content:"";position:absolute;inset:0;border-radius:7px;background:rgba(13,20,45,.17);pointer-events:none}
+.card.unclaimed .content .rewardCoin,.card.unclaimed .content .bonusEnv{filter:grayscale(1)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:9px;display:flex;align-items:center;justify-content:center;text-align:center}
+.content{background:linear-gradient(#fff,#e8f6ff);border:3px solid #84d9ff;color:#15175d;font-weight:1000;padding:5px;box-shadow:0 0 10px #59cfff}
+.envelope{transform:rotateY(180deg);background:linear-gradient(155deg,#ffc850,#e88911);border:2px solid #ffe29b;box-shadow:0 5px #934806}
+.envelope:after{content:"FF";font-weight:1000;font-style:italic;background:#2589e8;border-radius:50%;padding:11px 7px}
+.reward{font-size:22px;color:#f0a71a;font-weight:1000;text-shadow:0 2px 0 #fff3b1}.rewardCoin{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;margin-right:6px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff1a0 0,#ffd24f 22%,#f0a71a 65%,#bf6b00 100%);border:2px solid #ffe08a;color:#f28f00;font-size:12px;font-style:italic;vertical-align:middle}.rewardText{vertical-align:middle}
+.pick{font-size:17px;color:#0a58a7;display:flex;align-items:center;justify-content:center;gap:4px}
+.bonusEnv{width:40px;height:28px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(155deg,#ffc850,#e88911);border:2px solid #ffe29b;border-radius:5px;position:relative;color:#2589e8;font-weight:1000;font-style:italic;font-size:15px;box-shadow:0 3px #934806}.bonusEnv:before{content:"";position:absolute;left:4px;right:4px;top:4px;border-top:1px solid rgba(120,70,0,.35);transform:skewY(-18deg)}
+.bonusNum{font-size:24px;color:#0a58a7}
+.strike{font-size:50px;line-height:1;color:#e3193c;text-shadow:0 3px #7b0019}
+.bankWrap{width:82%;height:106px;margin:11px auto 0;text-align:center;border:4px solid #58d3ff;border-radius:18px;background:linear-gradient(#123c9d,#061c61);box-shadow:0 0 20px #189cff,inset 0 0 20px #001341;overflow:hidden;transition:.2s}
+.bankWrap.hot{border-color:#ffd55c;box-shadow:0 0 28px #ffb11f,inset 0 0 22px #7b3700;background:linear-gradient(#8d4a08,#3e1800)}
+.bankBulbs{height:13px;background-image:radial-gradient(circle,#fff2a2 2px,transparent 2.7px);background-size:14px 12px;opacity:.8}
+.bankLabel{font-size:12px;font-weight:1000;color:#bfeaff;letter-spacing:1.6px;margin-top:5px}
+.bankValue{font-size:36px;line-height:39px;font-weight:1000;color:#ffd451;text-shadow:0 3px #784000}
+.bankSub{font-size:10px;color:#bde9ff;font-weight:bold}
+#cta{text-align:center;margin-top:13px;font-size:14px;font-weight:1000;color:#ffd963;min-height:18px}
+.heroToast{position:absolute;left:50%;top:390px;transform:translate(-50%,-50%) scale(.85);z-index:15;padding:10px 16px;border-radius:18px;background:#ffbf1be8;color:#11245d;font-weight:1000;font-size:24px;opacity:0;pointer-events:none;box-shadow:0 0 24px #ffbe23;transition:.2s}
+.heroToast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+/* Results are staged: bank total, then x2, then the counted-up award. */
+.overlay{position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,rgba(14,61,151,.94),rgba(1,6,30,.97));display:none;align-items:center;justify-content:center;text-align:center;padding:19px;z-index:20;overflow:hidden}
+.overlay.show{display:flex}
+.resultPanel{width:100%;max-width:367px;position:relative;z-index:2;padding:30px 18px 26px;border-radius:24px;border:3px solid #58cdff;background:linear-gradient(165deg,rgba(17,66,160,.98),rgba(4,22,77,.98));box-shadow:0 0 40px rgba(30,155,255,.65),inset 0 0 30px rgba(0,25,85,.9)}
+.resultPanel.perfect{border-color:#ffda5d;box-shadow:0 0 54px rgba(255,180,34,.8),inset 0 0 42px rgba(132,68,2,.47)}
+.resultKicker{color:#a9dfff;letter-spacing:2px;font-weight:1000;font-size:13px;margin-bottom:5px}
+.resultAmount{display:flex;justify-content:center;align-items:center;gap:9px;min-height:65px;color:#ffd451;font-weight:1000;font-size:clamp(32px,9vw,43px);font-variant-numeric:tabular-nums;text-shadow:0 3px 0 #7f4600}
+.resultCoin{width:37px;height:37px;font-size:15px;flex-shrink:0}
+.resultMultiplier{height:78px;display:flex;align-items:center;justify-content:center;color:#ffe48b;font-size:72px;line-height:1;font-weight:1000;opacity:0;transform:scale(.28) rotate(-12deg);transition:opacity .25s,transform .5s cubic-bezier(.11,1.7,.31,1);text-shadow:0 3px 0 #9d5600,0 0 22px #ffbd45}
+.resultMultiplier.reveal{opacity:1;transform:scale(1) rotate(0deg)}
+.endTitle{font-size:clamp(26px,8vw,35px);font-weight:1000;color:#fff;text-shadow:0 3px #00154e,0 0 14px #259dff;min-height:44px;margin:6px 0 2px}
+.resultPanel.perfect .endTitle{color:#ffe27a;text-shadow:0 3px #a25800,0 0 18px #ffb94a}
+.endSub{color:#bce7ff;font-weight:bold;font-size:13px;min-height:16px;margin-bottom:16px}
+.play{border:0;border-radius:27px;padding:15px 36px;font-size:17px;font-weight:1000;background:linear-gradient(#ffd55e,#ed9210);color:#10215b;box-shadow:0 5px #914706;cursor:pointer;visibility:hidden}
+.play.visible{visibility:visible}
+.flashStage{animation:flashStage .65s ease-in-out 2}
+@keyframes flashStage{50%{filter:brightness(1.7)}}
+.confettiLayer{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
+.confettiPiece{position:absolute;top:-16px;width:9px;height:17px;border-radius:2px;opacity:0;animation:confettiFall var(--duration) linear var(--delay) forwards;transform:rotate(var(--rotation))}
+@keyframes confettiFall{0%{transform:translate(0,-10px) rotate(0);opacity:0}9%{opacity:1}100%{transform:translate(var(--drift),105vh) rotate(930deg);opacity:.9}}
+.cheatToggle{position:absolute;top:17px;right:13px;z-index:60;border:1px solid #78cfff;background:#04205a;color:#bce7ff;border-radius:12px;font:800 11px Arial,sans-serif;letter-spacing:1px;padding:8px 9px;cursor:pointer;box-shadow:0 0 10px rgba(35,156,255,.45)}
+.cheatPanel{position:absolute;top:55px;right:12px;width:198px;z-index:60;border:2px solid #60cbff;border-radius:14px;background:#041945;box-shadow:0 10px 40px rgba(0,0,0,.6);padding:10px;display:none;gap:7px}
+.cheatPanel.open{display:flex;flex-direction:column}
+.cheatPanel strong{font-size:12px;color:#bfe9ff;text-align:center;letter-spacing:1px;margin:1px 0 4px}
+.cheatPanel button{font-weight:800;background:#123f8d;border:1px solid #4fbaf8;border-radius:8px;padding:11px 6px;color:#fff;cursor:pointer;text-align:left;font-size:12px}
+.cheatPanel button:active{background:#245eb6}
+.cheatPanel .cheatRestart{background:#322b54;border-color:#a2a4c8}
+/* Flight sprites use fixed viewport coordinates, so the board cannot clip them. */
+.rewardFlight{position:fixed;left:0;top:0;pointer-events:none;z-index:40;display:flex;align-items:center;justify-content:center;will-change:transform,opacity;filter:drop-shadow(0 0 9px rgba(255,197,50,.9))}
+.coinFlight{width:28px;height:28px;border:3px solid #ffe48b;border-radius:50%;background:radial-gradient(circle at 32% 27%,#fff8c9 0%,#ffdd67 25%,#edac20 60%,#bb6100 100%);color:#d27a00;font-size:11px;font-weight:1000;font-style:italic;box-shadow:0 2px 0 #8a4700}
+.envelopeFlight{width:39px;height:29px;border:2px solid #ffde85;border-radius:5px;background:linear-gradient(155deg,#ffcb53,#ec8d12);color:#0875c7;font-size:14px;font-style:italic;font-weight:1000;box-shadow:0 3px 0 #8c4d0e}
+.envelopeFlight:before{content:"";position:absolute;left:3px;right:3px;top:4px;border-top:1px solid rgba(120,70,0,.55);transform:skewY(-19deg)}
+.resourceBurst{animation:resourceBurst .4s cubic-bezier(.13,1.6,.5,1)}
+@keyframes resourceBurst{0%{transform:scale(1)}45%{transform:scale(1.13)}100%{transform:scale(1)}}
+
+@keyframes bankPop{0%{transform:scale(1)}45%{transform:scale(1.09)}100%{transform:scale(1)}}
+.bankPop{animation:bankPop .35s}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.13)}}
+.pulse{animation:pulse .45s}
+/* Fast entrance: concealed envelopes fall into the board in a cascading wave. */
+.card.dropping{opacity:0;pointer-events:none;animation:envelopeDrop .62s cubic-bezier(.18,.82,.3,1.12) var(--drop-delay) both}
+@keyframes envelopeDrop{0%{opacity:0;transform:translateY(-460px) rotate(-9deg) scale(.85)}62%{opacity:1}78%{transform:translateY(8px) rotate(2deg) scale(1.035)}100%{opacity:1;transform:translateY(0) rotate(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.card.dropping{animation:none;opacity:1}}
+</style>
+</head>
+<body>
+<div id="game">
+  <div class="lights"></div>
+  <h1 id="title">PODIUM SHUFFLE</h1>
+  <div class="bankWrap bankTop" id="bankWrap">
+    <div class="bankBulbs"></div>
+    <div class="bankLabel">BANK</div>
+    <div class="bankValue" id="bank"><span class="coinBadge">FF</span><span class="bankNumber">0</span></div>
+    <div class="bankSub" id="bankSub"></div>
+  </div>
+  <div class="topMessage">Unlock all envelopes for <b>×2</b> rewards</div>
+
+  <div class="board" id="board">
+    <div class="cards" id="cards"></div>
+  </div>
+
+  <div class="underBoardInventory">
+    <div class="pickInventory" id="picksBox">
+      <span class="pickKey">FF</span>
+      <span class="pickCount" id="picks">3</span>
+    </div>
+  </div>
+
+  <div id="cta"></div>
+  <div class="heroToast" id="heroToast">RUN EXTENDED!</div>
+
+  <button type="button" class="cheatToggle" id="cheatToggle" onclick="toggleCheats()" aria-expanded="false">⚙ DEV</button>
+  <div class="cheatPanel" id="cheatPanel">
+    <strong>FLOW TESTS</strong>
+    <button type="button" onclick="cheatFlow('perfect')">★ Perfect Board ×2</button>
+    <button type="button" onclick="cheatFlow('failed')">✕ Failed Board (0)</button>
+    <button type="button" onclick="cheatFlow('regular')">● Regular Payout</button>
+    <button type="button" class="cheatRestart" onclick="start()">↻ Restart Game</button>
+  </div>
+  <div class="overlay" id="over" role="status" aria-live="polite">
+    <div class="confettiLayer" id="confettiLayer"></div>
+    <div class="resultPanel" id="resultPanel">
+      <div class="resultKicker">PODIUM BANK</div>
+      <div class="resultAmount"><span class="coinBadge resultCoin">FF</span><span id="endAmount">0</span></div>
+      <div class="resultMultiplier" id="resultMultiplier">×2</div>
+      <div class="endTitle" id="endTitle"></div>
+      <div class="endSub" id="endSub"></div>
+      <button class="play" id="playAgain" onclick="start()">PLAY AGAIN</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let picks=3, bank=0, opened=0, busy=false, active=false;
+let sessionId=0;
+
+const basePool = [
+  {t:"coin",v:25000,label:"25K"},
+  {t:"coin",v:75000,label:"75K"},
+  {t:"coin",v:150000,label:"150K"},
+  {t:"pick",v:1,label:"+1"},
+  {t:"pick",v:2,label:"+2"},
+  {t:"pick",v:3,label:"+3"},
+  {t:"strike",v:0,label:"✕"},
+  {t:"strike",v:0,label:"✕"},
+  {t:"strike",v:0,label:"✕"}
+];
+
+function fmt(n){return n.toLocaleString()}
+function renderBank(n){document.getElementById("bank").innerHTML=`<span class="coinBadge">FF</span><span class="bankNumber">${fmt(n)}</span>`}
+function shuffled(a){
+  a=a.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function cardContent(o){
+  if(o.t==="coin") return `<div class="reward"><span class="rewardCoin">FF</span><span class="rewardText">${o.label.replace("🪙 ","")}</span></div>`;
+  if(o.t==="pick") return `<div class="pick"><span class="bonusEnv">FF</span><span class="bonusNum">${o.label}</span></div>`;
+  return `<div class="strike">${o.label}</div>`;
+}
+
+function start(){
+  const session=++sessionId;
+  closeCheats();
+  document.getElementById("heroToast").classList.remove("show");
+  document.getElementById("confettiLayer").innerHTML="";
+  document.querySelectorAll(".rewardFlight").forEach(e=>e.remove());
+  picks=3; bank=0; opened=0; busy=true; active=false;
+  document.getElementById("over").classList.remove("show");
+  document.getElementById("title").textContent="PODIUM SHUFFLE";
+  document.getElementById("picks").textContent=3;
+  renderBank(0);
+  document.getElementById("bankSub").textContent="";
+  document.getElementById("bankWrap").classList.remove("hot");
+  document.getElementById("picksBox").classList.remove("hero");
+  document.getElementById("cta").textContent="";
+
+  const wrap=document.getElementById("cards");
+  wrap.innerHTML="";
+  // Outcomes are randomized privately; the player never sees them before choosing.
+  shuffled(basePool).forEach((o,i)=>{
+    const c=document.createElement("div");
+    c.className="card hidden dead dropping";
+    c.style.setProperty("--drop-delay",`${i*0.075}s`);
+    c.dataset.type=o.t;
+    c.dataset.value=o.v;
+    c.innerHTML=`<div class="inner"><div class="face content">${cardContent(o)}</div><div class="face envelope"></div></div>`;
+    c.onclick=()=>pickCard(c);
+    wrap.appendChild(c);
+  });
+  // Last envelope lands at ~1.22 seconds. Enable all picks shortly afterward.
+  setTimeout(()=>{
+    if(session!==sessionId)return;
+    wrap.querySelectorAll(".card").forEach(c=>c.classList.remove("dropping"));
+    busy=false;
+    beginPick(session);
+  },1320);
+}
+
+function beginPick(session=sessionId){
+  if(session!==sessionId)return;
+  active=true;
+  document.getElementById("title").textContent="PODIUM SHUFFLE";
+  document.getElementById("cta").textContent="";
+  document.querySelectorAll(".card").forEach(c=>c.classList.remove("dead"));
+}
+
+function setCardsEnabled(on){
+  document.querySelectorAll(".card:not(.open)").forEach(c=>c.classList.toggle("dead",!on));
+}
+
+function showHero(text){
+  const toast=document.getElementById("heroToast");
+  toast.textContent=text;
+  toast.classList.add("show");
+  const token=sessionId;
+  setTimeout(()=>{if(sessionId===token)toast.classList.remove("show")},800);
+}
+
+function wait(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
+
+function bump(element){
+  element.classList.remove("resourceBurst");
+  void element.offsetWidth;
+  element.classList.add("resourceBurst");
+}
+
+// One sprite physically flies from the revealed card to the relevant inventory icon.
+async function flyResource(kind, from, target, index=0){
+  const source=from.getBoundingClientRect();
+  const dest=target.getBoundingClientRect();
+  const chip=document.createElement("div");
+  chip.className="rewardFlight "+(kind==="coin"?"coinFlight":"envelopeFlight");
+  chip.textContent="FF";
+  chip.setAttribute("aria-hidden","true");
+  const width=kind==="coin"?28:39, height=kind==="coin"?28:29;
+  const x=source.left+source.width/2-width/2+(index-2)*3;
+  const y=source.top+source.height/2-height/2+(index%3)*3;
+  const dx=dest.left+dest.width/2-width/2-x;
+  const dy=dest.top+dest.height/2-height/2-y;
+  chip.style.left=x+"px";
+  chip.style.top=y+"px";
+  document.body.appendChild(chip);
+  const delay=index*58;
+  const duration=520;
+  const curve=[
+    {transform:"translate(0px,0px) scale(1)",opacity:1,offset:0},
+    {transform:`translate(${dx*.52}px,${dy*.42-34}px) scale(1.13)`,opacity:1,offset:.48},
+    {transform:`translate(${dx}px,${dy}px) scale(.52)`,opacity:.15,offset:1}
+  ];
+  try {
+    const anim=chip.animate(curve,{duration,delay,easing:"cubic-bezier(.3,.25,.35,1)",fill:"forwards"});
+    await anim.finished;
+  } catch(e) {
+    // If animations are unavailable/interrupted, still settle resource values.
+    await wait(duration+delay);
+  } finally {
+    chip.remove();
+  }
+}
+
+function rollBankCounter(from,to,duration=390,session=sessionId){
+  const number=document.querySelector("#bank .bankNumber");
+  return new Promise(resolve=>{
+    const start=performance.now();
+    function frame(now){
+      if(session!==sessionId){resolve();return}
+      const t=Math.min(1,(now-start)/duration);
+      const ease=1-Math.pow(1-t,3);
+      number.textContent=fmt(Math.round(from+(to-from)*ease));
+      if(t<1) requestAnimationFrame(frame);
+      else {number.textContent=fmt(to);resolve()}
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+async function collectCoins(card,amount,session){
+  const oldBank=bank;
+  const target=document.querySelector("#bank .coinBadge");
+  const source=card.querySelector(".rewardCoin")||card;
+  let counterAnimation=null;
+  const flights=Array.from({length:5},(_,i)=>
+    flyResource("coin",source,target,i).then(()=>{
+      if(session!==sessionId)return;
+      if(!counterAnimation) counterAnimation=rollBankCounter(oldBank,oldBank+amount,390,session);
+    })
+  );
+  await Promise.all(flights);
+  if(counterAnimation) await counterAnimation;
+  if(session!==sessionId)return;
+  bank+=amount;
+  bump(document.getElementById("bankWrap"));
+  if(bank>=100000) document.getElementById("bankWrap").classList.add("hot");
+}
+
+async function collectEnvelopes(card,amount,session){
+  const source=card.querySelector(".bonusEnv")||card;
+  const target=document.querySelector("#picksBox .pickKey");
+  const counter=document.getElementById("picks");
+  const flights=Array.from({length:amount},(_,i)=>
+    flyResource("envelope",source,target,i).then(()=>{
+      if(session!==sessionId)return;
+      picks+=1;
+      counter.textContent=picks;
+      bump(document.getElementById("picksBox"));
+    })
+  );
+  await Promise.all(flights);
+}
+
+async function pickCard(c){
+  const session=sessionId;
+  if(!active||busy||picks<=0||c.classList.contains("open")) return;
+  busy=true;
+  setCardsEnabled(false);
+
+  // Spend one selection immediately. Any bonus envelopes are awarded only on arrival.
+  picks--;
+  document.getElementById("picks").textContent=picks;
+  bump(document.getElementById("picksBox"));
+  c.classList.remove("hidden");
+  c.classList.add("open","dead");
+  opened++;
+
+  const type=c.dataset.type;
+  const value=Number(c.dataset.value);
+  await wait(450); // Let the envelope flip fully before the reward travels.
+  if(session!==sessionId)return;
+
+  if(type==="coin"){
+    await collectCoins(c,value,session);
+  } else if(type==="pick"){
+    await collectEnvelopes(c,value,session);
+    showHero(`+${value}`);
+  } else {
+    // The red strike is the no-reward beat.
+    c.classList.add("resourceBurst");
+    await wait(330);
+  }
+
+  if(session!==sessionId)return;
+  // Resolution follows reward arrival, including when this was the last pick.
+  if(opened===9){
+    active=false;
+    await wait(350);
+    if(session===sessionId)finishPerfect(session);
+  } else if(picks<=0){
+    active=false;
+    // Show the actual, uncollected board outcomes before awarding the bank.
+    await revealRemainingEnvelopes(session);
+    if(session===sessionId)finishOut(session);
+  } else {
+    busy=false;
+    setCardsEnabled(true);
+  }
+}
+
+// At the end of a non-perfect run, expose every unopened outcome without awarding it.
+// The positions and contents are those assigned at the start of this run.
+async function revealRemainingEnvelopes(session=sessionId){
+  if(session!==sessionId)return;
+  active=false;
+  busy=true;
+  setCardsEnabled(false);
+  const unopened=[...document.querySelectorAll("#cards .card:not(.open)")];
+  if(!unopened.length)return;
+  // Simultaneous flips. Muted cards show what the player could have found.
+  unopened.forEach(c=>{
+    c.classList.remove("dropping","hidden");
+    c.classList.add("open","dead","unclaimed");
+  });
+  // ~450ms to finish flipping, plus ~1s to inspect the uncollected board.
+  await wait(1550);
+}
+
+function toggleCheats(){
+  const p=document.getElementById("cheatPanel");
+  const open=p.classList.toggle("open");
+  document.getElementById("cheatToggle").setAttribute("aria-expanded",String(open));
+}
+function closeCheats(){
+  document.getElementById("cheatPanel").classList.remove("open");
+  document.getElementById("cheatToggle").setAttribute("aria-expanded","false");
+}
+function clearFlyingUI(){
+  document.querySelectorAll(".rewardFlight").forEach(c=>{c.getAnimations().forEach(a=>a.cancel());c.remove()});
+  document.getElementById("heroToast").classList.remove("show");
+}
+// Flow testing presets use representative, coherent board outcomes.
+function cheatFlow(kind){
+  const session=++sessionId;
+  closeCheats();
+  active=false;busy=true;
+  clearFlyingUI();
+  const wrap=document.getElementById("cards");
+  wrap.classList.remove("shuffling");wrap.style.height="";
+  const cards=[...wrap.querySelectorAll(".card")];
+  cards.forEach(c=>{
+    c.style.left="";c.style.top="";c.style.width="";c.style.transform="";
+    c.classList.add("hidden","dead");c.classList.remove("open","unclaimed","dropping");
+  });
+  let reveals=[];
+  if(kind==="perfect"){
+    reveals=cards;
+    bank=250000;opened=9;
+  }else if(kind==="failed"){
+    reveals=cards.filter(c=>c.dataset.type==="strike");
+    bank=0;opened=3;
+  }else{
+    reveals=[...cards.filter(c=>c.dataset.type==="coin" && Number(c.dataset.value)!==150000),cards.find(c=>c.dataset.type==="strike")];
+    bank=100000;opened=3;
+  }
+  reveals.filter(Boolean).forEach(c=>{c.classList.remove("hidden");c.classList.add("open")});
+  picks=0;
+  document.getElementById("picks").textContent="0";
+  renderBank(bank);
+  document.getElementById("bankWrap").classList.toggle("hot",bank>=100000);
+  document.getElementById("bankSub").textContent="";
+  document.getElementById("over").classList.remove("show");
+  setTimeout(async()=>{
+    if(session!==sessionId)return;
+    if(kind==="perfect"){
+      finishPerfect(session);
+    }else{
+      await revealRemainingEnvelopes(session);
+      if(session===sessionId)finishOut(session);
+    }
+  },500);
+}
+function prepareResult(amount){
+  document.getElementById("confettiLayer").innerHTML="";
+  const panel=document.getElementById("resultPanel");
+  panel.classList.remove("perfect","flashStage");
+  document.getElementById("resultMultiplier").classList.remove("reveal");
+  document.getElementById("endTitle").textContent="";
+  document.getElementById("endSub").textContent="";
+  document.getElementById("endAmount").textContent=fmt(amount);
+  document.getElementById("playAgain").classList.remove("visible");
+  document.getElementById("over").classList.add("show");
+}
+function launchConfetti(){
+  const layer=document.getElementById("confettiLayer");
+  const colors=["#ffdb4d","#ffa822","#ffffff","#59cdff","#dc69ff"];
+  for(let i=0;i<70;i++){
+    const piece=document.createElement("span");
+    piece.className="confettiPiece";
+    piece.style.left=(Math.random()*100)+"%";
+    piece.style.background=colors[i%colors.length];
+    piece.style.setProperty("--duration",(1.7+Math.random()*1.5)+"s");
+    piece.style.setProperty("--delay",(Math.random()*.65)+"s");
+    piece.style.setProperty("--drift",(Math.random()*160-80)+"px");
+    layer.appendChild(piece);
+  }
+}
+function animateResultNumber(from,to,duration,session){
+  const output=document.getElementById("endAmount");
+  const bankValue=document.querySelector("#bank .bankNumber");
+  return new Promise(resolve=>{
+    const start=performance.now();
+    function update(now){
+      if(session!==sessionId){resolve();return}
+      const t=Math.min(1,(now-start)/duration);
+      const smooth=1-Math.pow(1-t,3);
+      const n=Math.round(from+(to-from)*smooth);
+      output.textContent=fmt(n);
+      if(bankValue)bankValue.textContent=fmt(n);
+      if(t<1)requestAnimationFrame(update);
+      else resolve();
+    }
+    requestAnimationFrame(update);
+  });
+}
+async function finishPerfect(session=sessionId){
+  if(session!==sessionId)return;
+  active=false;busy=true;
+  const original=bank;
+  prepareResult(original); // First show the undoubled bank in the summary.
+  await wait(850);
+  if(session!==sessionId)return;
+  const panel=document.getElementById("resultPanel");
+  panel.classList.add("perfect","flashStage");
+  document.getElementById("resultMultiplier").classList.add("reveal");
+  document.getElementById("endTitle").textContent="PERFECT BOARD!";
+  launchConfetti();
+  await wait(750);
+  if(session!==sessionId)return;
+  await animateResultNumber(original,original*2,1250,session);
+  if(session!==sessionId)return;
+  bank=original*2;
+  document.getElementById("bankWrap").classList.add("hot");
+  document.getElementById("bankSub").textContent="×2";
+  document.getElementById("playAgain").classList.add("visible");
+  busy=false;
+}
+function finishOut(session=sessionId){
+  if(session!==sessionId)return;
+  active=false;busy=true;
+  prepareResult(bank);
+  document.getElementById("endTitle").textContent=bank>0?"YOU WON!":"OUT OF PICKS";
+  document.getElementById("endSub").textContent=bank>0?"PODIUM PAYOUT":"NO COINS COLLECTED";
+  document.getElementById("playAgain").classList.add("visible");
+  busy=false;
+}
+
+start();
+</script>
+</body>
+</html>
